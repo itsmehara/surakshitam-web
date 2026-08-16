@@ -16,7 +16,14 @@ export type AuditType =
   | "login"
   | "logout"
   | "cart_add"
-  | "order_placed";
+  | "cart_remove"
+  | "order_placed"
+  | "order_status_changed"
+  | "payment_failed"
+  | "profile_update"
+  | "report_export"
+  | "team_update"
+  | "unauthorized_access";
 
 export interface AuditActor {
   kind: "customer" | "admin" | "guest";
@@ -96,6 +103,18 @@ export function getAuditEvents(): AuditEvent[] {
 
 export function clearAudit(): void {
   write([]);
+}
+
+/**
+ * Low-level bulk insert used only by the demo activity seeder (see
+ * `lib/demo-seed.ts`) — lets it write fully-formed events (own timestamp,
+ * visitorId, actor) to simulate multiple visitors/days, which `logEvent()`
+ * can't do since it always stamps "now" and the current browser's visitor id.
+ * Merges with existing events and re-sorts newest-first.
+ */
+export function seedEvents(events: AuditEvent[]): void {
+  const all = [...events, ...read()].sort((a, b) => (a.ts < b.ts ? 1 : -1));
+  write(all);
 }
 
 /* --------------------------- browser helper --------------------------- */

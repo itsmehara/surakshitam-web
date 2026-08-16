@@ -86,6 +86,26 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
             <span className="text-forest/50">Payment ID: {order.paymentId}</span>
           </p>
         </div>
+        {order.courier && (
+          <div className="rounded-lg border border-forest/8 bg-white/60 p-5 sm:col-span-2">
+            <h2 className="font-serif text-lg font-semibold text-forest">Shipping</h2>
+            <p className="mt-2 text-sm text-forest/75">
+              {order.courier === "Handed over to customer" ? (
+                "Handed over to you directly — no courier tracking for this order."
+              ) : (
+                <>
+                  Courier: <span className="font-medium">{order.courier}</span>
+                  {order.trackingNumber && (
+                    <>
+                      <br />
+                      Tracking number: <span className="font-medium">{order.trackingNumber}</span>
+                    </>
+                  )}
+                </>
+              )}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Items */}

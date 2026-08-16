@@ -162,11 +162,18 @@ const STATUS_COPY: Record<FulfillmentStatus, string> = {
 
 /** Sent to the customer when the admin advances the fulfillment status. */
 export function customerOrderStatus(order: Order, status: FulfillmentStatus): NotificationDraft {
+  const shippingLine =
+    status === "SHIPPED" && order.courier && order.courier !== "Handed over to customer"
+      ? [`Courier: ${order.courier}`, order.trackingNumber ? `Tracking number: ${order.trackingNumber}` : null]
+          .filter(Boolean)
+          .join("\n")
+      : null;
   const message = [
     `Hi ${order.address.fullName || "there"}, an update on your Surakshitam Naturals order 🌿`,
     ``,
     `Order: ${order.orderNumber}`,
     STATUS_COPY[status],
+    ...(shippingLine ? ["", shippingLine] : []),
     ``,
     `Track: ${site.url}/track-order`,
   ].join("\n");

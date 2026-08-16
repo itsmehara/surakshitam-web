@@ -422,6 +422,12 @@ export function Checkout() {
           onFailure={() => {
             setRazorOpen(false);
             setFailed(true);
+            const s = getSession();
+            logEvent({
+              type: "payment_failed",
+              actor: s ? { kind: "customer", id: s.id, name: s.name } : { kind: "guest" },
+              meta: { total },
+            });
           }}
         />
 

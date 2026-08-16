@@ -2,40 +2,16 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-  getOrders,
-  getOrder,
-  updateOrderStatus,
-  FULFILLMENT_FLOW,
-  type Order,
-  type FulfillmentStatus,
-} from "@/lib/orders";
-import { mockNotificationProvider, customerOrderStatus } from "@/lib/notifications";
+import { getOrders, type Order } from "@/lib/orders";
 import { formatPrice } from "@/lib/format";
-
-const label: Record<FulfillmentStatus, string> = {
-  CONFIRMED: "Confirmed",
-  PACKING: "Packing",
-  PACKED: "Packed",
-  SHIPPED: "Shipped",
-  DELIVERED: "Delivered",
-};
+import { OrderStatusControl } from "./OrderStatusControl";
 
 export function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   useEffect(() => setOrders(getOrders()), []);
 
-  function setStatus(orderNumber: string, status: FulfillmentStatus) {
-    updateOrderStatus(orderNumber, status);
-    // Notify the customer's WhatsApp number about the status change.
-    const updated = getOrder(orderNumber);
-    if (updated) void mockNotificationProvider.send(customerOrderStatus(updated, status));
-    setOrders(getOrders());
-  }
-
-  function advance(o: Order) {
-    const i = FULFILLMENT_FLOW.indexOf(o.fulfillmentStatus);
-    if (i < FULFILLMENT_FLOW.length - 1) setStatus(o.orderNumber, FULFILLMENT_FLOW[i + 1]);
+  function replaceOrder(updated: Order) {
+    setOrders((prev) => prev.map((o) => (o.orderNumber === updated.orderNumber ? updated : o)));
   }
 
   return (
@@ -77,27 +53,7 @@ export function AdminOrders() {
 
               {/* status control */}
               <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-forest/8 pt-4">
-                <span className="text-xs font-medium text-forest/50">Status</span>
-                <select
-                  value={o.fulfillmentStatus}
-                  onChange={(e) => setStatus(o.orderNumber, e.target.value as FulfillmentStatus)}
-                  className="rounded-lg border border-forest/15 bg-white px-3 py-1.5 text-sm focus:border-moss focus:outline-none"
-                >
-                  {FULFILLMENT_FLOW.map((s) => (
-                    <option key={s} value={s}>
-                      {label[s]}
-                    </option>
-                  ))}
-                </select>
-                {o.fulfillmentStatus !== "DELIVERED" && (
-                  <button
-                    type="button"
-                    onClick={() => advance(o)}
-                    className="rounded-full bg-forest px-4 py-1.5 text-sm font-medium text-cream hover:bg-ink"
-                  >
-                    Advance →
-                  </button>
-                )}
+                <OrderStatusControl order={o} onUpdated={replaceOrder} />
                 <Link
                   href={`/order/${o.orderNumber}`}
                   className="ml-auto text-sm font-medium text-moss hover:text-forest"

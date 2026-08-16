@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getProfile, saveProfile, defaultProfile, type Profile } from "@/lib/profile";
+import { updateSessionIdentity, hasCustomerPassword, setCustomerPassword, verifyCustomerPassword } from "@/lib/auth";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { getOrdersForUser, type Order } from "@/lib/orders";
 import { formatPrice } from "@/lib/format";
@@ -19,11 +20,20 @@ const statusLabel: Record<Order["fulfillmentStatus"], string> = {
 
 export function AccountView() {
   const router = useRouter();
-  const { user, ready, signOut: authSignOut } = useAuth();
+  const { user, ready, signOut: authSignOut, refresh } = useAuth();
   const [profile, setProfile] = useState<Profile>(defaultProfile);
   const [draft, setDraft] = useState<Profile>(defaultProfile);
   const [editing, setEditing] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
+
+  // Security / password
+  const [hasPw, setHasPw] = useState(false);
+  const [pwEditing, setPwEditing] = useState(false);
+  const [currentPw, setCurrentPw] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [pwError, setPwError] = useState("");
+  const [pwSaved, setPwSaved] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -31,11 +41,38 @@ export function AccountView() {
       setProfile(p);
       setDraft(p);
       setOrders(getOrdersForUser(user.id));
+      setHasPw(hasCustomerPassword());
     }
   }, [user]);
 
+  function savePassword() {
+    setPwError("");
+    setPwSaved(false);
+    if (hasPw && !verifyCustomerPassword(currentPw)) {
+      setPwError("Current password is incorrect.");
+      return;
+    }
+    if (newPw.length < 4) {
+      setPwError("New password must be at least 4 characters.");
+      return;
+    }
+    if (newPw !== confirmPw) {
+      setPwError("New password and confirmation don't match.");
+      return;
+    }
+    setCustomerPassword(newPw);
+    setHasPw(true);
+    setPwEditing(false);
+    setCurrentPw("");
+    setNewPw("");
+    setConfirmPw("");
+    setPwSaved(true);
+  }
+
   function save() {
     saveProfile(draft);
+    updateSessionIdentity({ name: draft.name, email: draft.email });
+    refresh();
     setProfile(draft);
     setEditing(false);
   }
@@ -84,6 +121,7 @@ export function AccountView() {
               <h1 className="mt-1 font-serif text-2xl font-semibold text-forest sm:text-3xl">
                 Hello, {firstName}
               </h1>
+              <p className="mt-0.5 text-xs text-forest/50">Customer ID: {profile.customerId}</p>
             </div>
           </div>
           <button
@@ -97,7 +135,8 @@ export function AccountView() {
       </section>
 
       <div className="container grid gap-8 py-10 lg:grid-cols-[1fr_1.4fr]">
-        {/* Profile */}
+        {/* Profile + Security */}
+        <div className="space-y-6">
         <section className="h-fit rounded-lg border border-forest/8 bg-white/60 p-6">
           <div className="flex items-center justify-between">
             <h2 className="font-serif text-lg font-semibold text-forest">Profile details</h2>
@@ -140,6 +179,7 @@ export function AccountView() {
             </div>
           ) : (
             <dl className="mt-5 space-y-4 text-sm">
+              <Row label="Customer ID" value={profile.customerId} />
               <Row label="Name" value={profile.name} />
               <Row label="Mobile" value={profile.mobile} />
               <Row label="Email" value={profile.email} />
@@ -147,6 +187,77 @@ export function AccountView() {
             </dl>
           )}
         </section>
+
+        {/* Security */}
+        <section className="h-fit rounded-lg border border-forest/8 bg-white/60 p-6">
+          <div className="flex items-center justify-between">
+            <h2 className="font-serif text-lg font-semibold text-forest">Security</h2>
+            {!pwEditing && (
+              <button
+                type="button"
+                onClick={() => {
+                  setPwError("");
+                  setPwSaved(false);
+                  setPwEditing(true);
+                }}
+                className="text-sm font-medium text-moss hover:text-forest"
+              >
+                {hasPw ? "Change password" : "Set a password"}
+              </button>
+            )}
+          </div>
+
+          {pwEditing ? (
+            <div className="mt-5 space-y-4">
+              {hasPw && (
+                <PField
+                  label="Current password"
+                  value={currentPw}
+                  onChange={setCurrentPw}
+                  type="password"
+                />
+              )}
+              <PField label="New password" value={newPw} onChange={setNewPw} type="password" />
+              <PField
+                label="Confirm new password"
+                value={confirmPw}
+                onChange={setConfirmPw}
+                type="password"
+              />
+              {pwError && <p className="text-sm text-clay">{pwError}</p>}
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={savePassword}
+                  className="rounded-full bg-forest px-5 py-2.5 text-sm font-medium text-cream hover:bg-ink"
+                >
+                  Save password
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPwEditing(false);
+                    setCurrentPw("");
+                    setNewPw("");
+                    setConfirmPw("");
+                    setPwError("");
+                  }}
+                  className="rounded-full border border-forest/20 px-5 py-2.5 text-sm font-medium text-forest hover:bg-forest/5"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="mt-4 text-sm text-forest/65">
+              {hasPw
+                ? "A password is set for this account — you can sign in with mobile/email + password or mobile + OTP."
+                : "You currently sign in with mobile + OTP. Set a password to also enable username/email + password sign-in."}
+              {pwSaved && <span className="mt-2 block text-moss">Password saved.</span>}
+            </p>
+          )}
+        </section>
+        </div>
 
         {/* Orders */}
         <section>
@@ -213,11 +324,13 @@ function PField({
   value,
   onChange,
   textarea,
+  type = "text",
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   textarea?: boolean;
+  type?: "text" | "password";
 }) {
   return (
     <label className="block text-sm">
@@ -231,8 +344,10 @@ function PField({
         />
       ) : (
         <input
+          type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          autoComplete={type === "password" ? "new-password" : undefined}
           className="w-full rounded-lg border border-forest/15 bg-white px-4 py-2.5 focus:border-moss focus:outline-none"
         />
       )}

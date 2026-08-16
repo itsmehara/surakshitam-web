@@ -2,23 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-  getOrder,
-  updateOrderStatus,
-  FULFILLMENT_FLOW,
-  type Order,
-  type FulfillmentStatus,
-} from "@/lib/orders";
-import { mockNotificationProvider, customerOrderStatus } from "@/lib/notifications";
+import { getOrder, FULFILLMENT_FLOW, FULFILLMENT_LABEL, type Order } from "@/lib/orders";
 import { formatPrice } from "@/lib/format";
-
-const label: Record<FulfillmentStatus, string> = {
-  CONFIRMED: "Confirmed",
-  PACKING: "Packing",
-  PACKED: "Packed",
-  SHIPPED: "Shipped",
-  DELIVERED: "Delivered",
-};
+import { OrderStatusControl } from "./OrderStatusControl";
 
 export function AdminOrderDetail({ orderNumber }: { orderNumber: string }) {
   const [order, setOrder] = useState<Order | null | undefined>(undefined);
@@ -26,13 +12,6 @@ export function AdminOrderDetail({ orderNumber }: { orderNumber: string }) {
   useEffect(() => {
     setOrder(getOrder(orderNumber) ?? null);
   }, [orderNumber]);
-
-  function setStatus(status: FulfillmentStatus) {
-    updateOrderStatus(orderNumber, status);
-    const updated = getOrder(orderNumber);
-    if (updated) void mockNotificationProvider.send(customerOrderStatus(updated, status));
-    setOrder(updated ?? null);
-  }
 
   if (order === undefined) {
     return <div className="container py-24 text-center text-forest/50">Loading…</div>;
@@ -76,32 +55,12 @@ export function AdminOrderDetail({ orderNumber }: { orderNumber: string }) {
                 i <= currentIdx ? "bg-moss text-cream" : "bg-forest/8 text-forest/50"
               }`}
             >
-              {label[s]}
+              {FULFILLMENT_LABEL[s]}
             </span>
           ))}
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-forest/8 pt-4">
-          <span className="text-xs font-medium text-forest/50">Update status</span>
-          <select
-            value={order.fulfillmentStatus}
-            onChange={(e) => setStatus(e.target.value as FulfillmentStatus)}
-            className="rounded-lg border border-forest/15 bg-white px-3 py-1.5 text-sm focus:border-moss focus:outline-none"
-          >
-            {FULFILLMENT_FLOW.map((s) => (
-              <option key={s} value={s}>
-                {label[s]}
-              </option>
-            ))}
-          </select>
-          {order.fulfillmentStatus !== "DELIVERED" && (
-            <button
-              type="button"
-              onClick={() => setStatus(FULFILLMENT_FLOW[currentIdx + 1])}
-              className="rounded-full bg-forest px-4 py-1.5 text-sm font-medium text-cream hover:bg-ink"
-            >
-              Advance →
-            </button>
-          )}
+          <OrderStatusControl order={order} onUpdated={setOrder} />
           <Link
             href={`/order/${order.orderNumber}`}
             className="ml-auto text-sm font-medium text-moss hover:text-forest"

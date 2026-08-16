@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  ADMIN_ACCOUNTS,
+  getAdminAccounts,
   ADMIN_BASE,
   getAdminSession,
   loginAdmin,
@@ -22,6 +22,7 @@ const NAV = [
   { label: "Packing", href: `${ADMIN_BASE}/packing` },
   { label: "Products", href: `${ADMIN_BASE}/products` },
   { label: "Reports", href: `${ADMIN_BASE}/reports` },
+  { label: "Team", href: `${ADMIN_BASE}/team` },
   { label: "Activity", href: `${ADMIN_BASE}/activity` },
   { label: "Notifications", href: `${ADMIN_BASE}/dev/notifications` },
 ];
@@ -29,7 +30,7 @@ const NAV = [
 export function AdminGate({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [adminName, setAdminName] = useState<string | null>(null);
-  const [username, setUsername] = useState(ADMIN_ACCOUNTS[0]?.username ?? "");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const pathname = usePathname();
@@ -38,10 +39,25 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const s = getAdminSession();
     setAdminName(s?.name ?? null);
+    setUsername(getAdminAccounts()[0]?.username ?? "");
     setReady(true);
   }, []);
 
   const authed = adminName !== null;
+
+  // A signed-in customer hitting /studio sees a plain 404 (see below), but
+  // founders should still know it happened — logged once per path visited,
+  // not on every render.
+  useEffect(() => {
+    if (ready && customer && !authed) {
+      logEvent({
+        type: "unauthorized_access",
+        actor: { kind: "customer", id: customer.id, name: customer.name },
+        path: pathname,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, customer, authed, pathname]);
 
   if (!ready) {
     return <div className="container py-24 text-center text-forest/50">Loading…</div>;
@@ -142,13 +158,13 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
         </form>
         <p className="mt-4 rounded-lg bg-parchment px-3 py-2 text-xs text-forest/60">
           Demo founder accounts:{" "}
-          {ADMIN_ACCOUNTS.map((a, i) => (
+          {getAdminAccounts().map((a, i) => (
             <span key={a.username}>
               {i > 0 && " · "}
               <b>{a.username}</b>
             </span>
           ))}{" "}
-          — password <b>demo123</b>.
+          — password shown in Team (or <b>demo123</b> for the original founder accounts).
         </p>
       </div>
     </div>

@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { getOrders, FULFILLMENT_FLOW, type Order, type FulfillmentStatus } from "@/lib/orders";
 import { formatPrice } from "@/lib/format";
+import { site } from "@/lib/site";
+import { getAdminSession } from "@/lib/admin";
+import { logEvent } from "@/lib/audit";
 
 const statusLabel: Record<FulfillmentStatus, string> = {
   CONFIRMED: "Confirmed",
@@ -26,6 +29,106 @@ function downloadCsv(filename: string, headers: string[], rows: (string | number
   a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+/**
+ * Opens a print-formatted window for the report and triggers the browser's
+ * print dialog — the person picks "Save as PDF". No PDF library needed, and
+ * it works offline; production could swap this for a server-rendered PDF.
+ */
+function exportPdf(title: string, headers: string[], rows: (string | number)[][]) {
+  const win = window.open("", "_blank", "width=800,height=900");
+  if (!win) return;
+  const escapeHtml = (v: string | number) =>
+    String(v).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c] as string);
+  win.document.write(`<!DOCTYPE html>
+<html><head><title>${escapeHtml(title)} — Surakshitam Naturals</title>
+<style>
+  body { font-family: -apple-system, Helvetica, Arial, sans-serif; padding: 32px; color: #1f2a1f; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p.meta { color: #667; font-size: 12px; margin: 0 0 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #ddd; }
+  th { color: #556; font-weight: 600; }
+</style></head><body>
+  <h1>${escapeHtml(title)}</h1>
+  <p class="meta">Surakshitam Naturals · Generated ${new Date().toLocaleString("en-IN")}</p>
+  <table><thead><tr>${headers.map((h) => `<th>${escapeHtml(h)}</th>`).join("")}</tr></thead>
+  <tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${escapeHtml(c)}</td>`).join("")}</tr>`).join("")}</tbody>
+  </table>
+</body></html>`);
+  win.document.close();
+  win.focus();
+  win.print();
+}
+
+/**
+ * Opens the person's default mail client with the report as a plain-text
+ * table, addressed to the store's own contact email. Prototype-friendly (no
+ * backend/email provider needed); production would send via a real service.
+ */
+function emailReport(title: string, headers: string[], rows: (string | number)[][]) {
+  const lines = [headers.join("\t"), ...rows.map((r) => r.join("\t"))];
+  const body = `${title} — Surakshitam Naturals\nGenerated ${new Date().toLocaleString("en-IN")}\n\n${lines.join("\n")}`;
+  const mailto = `mailto:${site.email}?subject=${encodeURIComponent(`${title} — Surakshitam Naturals`)}&body=${encodeURIComponent(body)}`;
+  window.location.href = mailto;
+}
+
+function logExport(report: string, format: "CSV" | "PDF" | "Email") {
+  const admin = getAdminSession();
+  logEvent({
+    type: "report_export",
+    actor: { kind: "admin", name: admin?.name },
+    meta: { report, format },
+  });
+}
+
+function ExportButtons({
+  title,
+  filename,
+  headers,
+  rows,
+}: {
+  title: string;
+  filename: string;
+  headers: string[];
+  rows: (string | number)[][];
+}) {
+  const btn = "rounded-full border border-forest/15 px-3.5 py-1.5 text-xs font-medium text-forest hover:bg-forest/5";
+  return (
+    <div className="flex flex-wrap gap-2">
+      <button
+        type="button"
+        onClick={() => {
+          downloadCsv(filename, headers, rows);
+          logExport(title, "CSV");
+        }}
+        className={btn}
+      >
+        Export CSV
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          exportPdf(title, headers, rows);
+          logExport(title, "PDF");
+        }}
+        className={btn}
+      >
+        Export PDF
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          emailReport(title, headers, rows);
+          logExport(title, "Email");
+        }}
+        className={btn}
+      >
+        Email report
+      </button>
+    </div>
+  );
 }
 
 interface DailyRow {
@@ -95,7 +198,9 @@ export function AdminReports() {
   return (
     <div className="container py-10">
       <h1 className="font-serif text-2xl font-semibold text-forest sm:text-3xl">Reports</h1>
-      <p className="mt-1 text-sm text-forest/60">Sales and fulfilment summaries, exportable as CSV.</p>
+      <p className="mt-1 text-sm text-forest/60">
+        Sales and fulfilment summaries — export as CSV, PDF, or email them to yourself.
+      </p>
 
       {orders.length === 0 ? (
         <div className="mt-8 rounded-lg border border-dashed border-forest/15 bg-parchment/40 p-10 text-center text-forest/60">
@@ -105,21 +210,14 @@ export function AdminReports() {
         <div className="mt-6 space-y-8">
           {/* Daily sales */}
           <section className="rounded-lg border border-forest/8 bg-white/60 p-5">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-serif text-lg font-semibold text-forest">Daily sales</h2>
-              <button
-                type="button"
-                onClick={() =>
-                  downloadCsv(
-                    "daily-sales.csv",
-                    ["Date", "Orders", "Units", "Revenue (₹)"],
-                    daily.map((d) => [d.date, d.orders, d.units, d.revenue / 100]),
-                  )
-                }
-                className="rounded-full border border-forest/15 px-3.5 py-1.5 text-xs font-medium text-forest hover:bg-forest/5"
-              >
-                Export CSV
-              </button>
+              <ExportButtons
+                title="Daily sales"
+                filename="daily-sales.csv"
+                headers={["Date", "Orders", "Units", "Revenue (₹)"]}
+                rows={daily.map((d) => [d.date, d.orders, d.units, d.revenue / 100])}
+              />
             </div>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full text-sm">
@@ -147,21 +245,14 @@ export function AdminReports() {
 
           {/* Product sales */}
           <section className="rounded-lg border border-forest/8 bg-white/60 p-5">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-serif text-lg font-semibold text-forest">Product sales</h2>
-              <button
-                type="button"
-                onClick={() =>
-                  downloadCsv(
-                    "product-sales.csv",
-                    ["Product", "SKU", "Units", "Revenue (₹)"],
-                    productRows.map((p) => [p.name, p.sku, p.units, p.revenue / 100]),
-                  )
-                }
-                className="rounded-full border border-forest/15 px-3.5 py-1.5 text-xs font-medium text-forest hover:bg-forest/5"
-              >
-                Export CSV
-              </button>
+              <ExportButtons
+                title="Product sales"
+                filename="product-sales.csv"
+                headers={["Product", "SKU", "Units", "Revenue (₹)"]}
+                rows={productRows.map((p) => [p.name, p.sku, p.units, p.revenue / 100])}
+              />
             </div>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full text-sm">
@@ -189,21 +280,14 @@ export function AdminReports() {
 
           {/* Order status */}
           <section className="rounded-lg border border-forest/8 bg-white/60 p-5">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-serif text-lg font-semibold text-forest">Order status</h2>
-              <button
-                type="button"
-                onClick={() =>
-                  downloadCsv(
-                    "order-status.csv",
-                    ["Status", "Orders"],
-                    statusRows.map((s) => [statusLabel[s.status], s.count]),
-                  )
-                }
-                className="rounded-full border border-forest/15 px-3.5 py-1.5 text-xs font-medium text-forest hover:bg-forest/5"
-              >
-                Export CSV
-              </button>
+              <ExportButtons
+                title="Order status"
+                filename="order-status.csv"
+                headers={["Status", "Orders"]}
+                rows={statusRows.map((s) => [statusLabel[s.status], s.count])}
+              />
             </div>
             <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
               {statusRows.map((s) => (

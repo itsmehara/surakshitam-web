@@ -25,7 +25,21 @@ export interface CustomerSession {
 }
 
 const KEY = "sn-auth-v1";
+const PW_KEY = "sn-customer-pw-v1";
 export const DEMO_OTP = "1234";
+
+/**
+ * Mock-only obfuscation for the demo password store — NOT a real hash and not
+ * secure. In production, passwords never touch client code; Supabase Auth
+ * handles hashing/verification server-side.
+ */
+function obfuscate(pw: string): string {
+  try {
+    return typeof window !== "undefined" ? window.btoa(unescape(encodeURIComponent(pw))) : pw;
+  } catch {
+    return pw;
+  }
+}
 
 /** Demo password accounts. In production these live in Supabase Auth. */
 interface DemoCredential {
@@ -119,16 +133,93 @@ export function loginWithPassword(username: string, password: string): boolean {
   const match = DEMO_CREDENTIALS.find(
     (c) => c.password === password && c.usernames.some((x) => x.toLowerCase() === u),
   );
-  if (!match) return false;
-  startSession({
-    id: normalizeId(match.mobile),
-    mobile: prettyMobile(match.mobile),
-    name: match.name,
-    email: match.email,
-    method: "password",
-    loggedInAt: new Date().toISOString(),
+  if (match) {
+    startSession({
+      id: normalizeId(match.mobile),
+      mobile: prettyMobile(match.mobile),
+      name: match.name,
+      email: match.email,
+      method: "password",
+      loggedInAt: new Date().toISOString(),
+    });
+    return true;
+  }
+
+  // Self-service password set from Account > Security, checked against the
+  // profile already saved on this device/browser (see profile.ts — this
+  // prototype keeps one customer profile per browser, not a real accounts DB).
+  if (hasCustomerPassword() && verifyCustomerPassword(password)) {
+    const profile = getProfile();
+    const idMatches = [normalizeId(profile.mobile), profile.email?.toLowerCase()].filter(Boolean);
+    if (idMatches.includes(u) || idMatches.includes(normalizeId(u))) {
+      startSession({
+        id: normalizeId(profile.mobile),
+        mobile: prettyMobile(profile.mobile),
+        name: profile.name,
+        email: profile.email,
+        method: "password",
+        loggedInAt: new Date().toISOString(),
+      });
+      return true;
+    }
+  }
+  return false;
+}
+
+/** True once the customer has set a password from Account > Security. */
+export function hasCustomerPassword(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return !!localStorage.getItem(PW_KEY);
+  } catch {
+    return false;
+  }
+}
+
+/** Sets (or changes) the self-service password for the profile on this device. */
+export function setCustomerPassword(newPassword: string): void {
+  try {
+    localStorage.setItem(PW_KEY, obfuscate(newPassword));
+  } catch {
+    /* ignore */
+  }
+  const s = getSession();
+  logEvent({
+    type: "profile_update",
+    actor: { kind: "customer", id: s?.id, name: s?.name },
+    meta: { field: "password" },
   });
-  return true;
+}
+
+export function verifyCustomerPassword(password: string): boolean {
+  try {
+    const stored = localStorage.getItem(PW_KEY);
+    return !!stored && stored === obfuscate(password);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Updates the live session's identity fields (name/email) after a profile
+ * edit, so the header and anywhere else reading `useAuth().user` reflect the
+ * change immediately — without this, saving a new name on the account page
+ * only updated the separate profile store and the header stayed stale until
+ * the next login.
+ */
+export function updateSessionIdentity(patch: { name?: string; email?: string }): void {
+  const s = getSession();
+  if (!s) return;
+  const next: CustomerSession = {
+    ...s,
+    name: patch.name?.trim() || s.name,
+    email: patch.email?.trim() || s.email,
+  };
+  try {
+    localStorage.setItem(KEY, JSON.stringify(next));
+  } catch {
+    /* ignore */
+  }
 }
 
 export function logout(): void {

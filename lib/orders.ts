@@ -4,6 +4,9 @@
  * change later. Swap these helpers for API/DB calls in production.
  */
 
+import { getAdminSession } from "./admin";
+import { logEvent } from "./audit";
+
 export type PaymentStatus = "PAID" | "FAILED" | "PENDING";
 export type FulfillmentStatus =
   | "CONFIRMED"
@@ -11,6 +14,28 @@ export type FulfillmentStatus =
   | "PACKED"
   | "SHIPPED"
   | "DELIVERED";
+
+/** Shared, friendly labels for each fulfilment stage — used by admin screens
+ *  and customer tracking so the wording stays consistent in one place. */
+export const FULFILLMENT_LABEL: Record<FulfillmentStatus, string> = {
+  CONFIRMED: "Confirmed",
+  PACKING: "Packing",
+  PACKED: "Packed",
+  SHIPPED: "Shipped",
+  DELIVERED: "Delivered",
+};
+
+/** Courier options offered when marking an order Shipped. "Handed over to
+ *  customer" covers local/self-delivery, where no tracking number applies. */
+export const COURIER_OPTIONS = [
+  "Handed over to customer",
+  "Delhivery",
+  "Blue Dart",
+  "DTDC",
+  "India Post (Speed Post)",
+  "Ekart",
+  "Other",
+] as const;
 
 export interface Address {
   fullName: string;
@@ -49,6 +74,9 @@ export interface Order {
   fulfillmentStatus: FulfillmentStatus;
   /** Owning customer id (10-digit mobile). Absent = legacy/guest; matched by phone. */
   userId?: string;
+  /** Set when marked Shipped — which courier, and (if applicable) their tracking number. */
+  courier?: string;
+  trackingNumber?: string;
 }
 
 /** Last-10-digits form used to match a customer to their orders. */
@@ -96,12 +124,43 @@ export const FULFILLMENT_FLOW: FulfillmentStatus[] = [
   "DELIVERED",
 ];
 
-export function updateOrderStatus(orderNumber: string, status: FulfillmentStatus): void {
+/**
+ * Advances/sets an order's fulfilment status. When marking Shipped, pass
+ * `shipping` to record the courier + tracking number in the same write.
+ * Logs a `order_status_changed` activity event here (rather than in each
+ * admin screen) so every status change is captured no matter which screen
+ * triggered it.
+ */
+export function updateOrderStatus(
+  orderNumber: string,
+  status: FulfillmentStatus,
+  shipping?: { courier?: string; trackingNumber?: string },
+): void {
   const all = readOrders();
-  const next = all.map((o) =>
-    o.orderNumber === orderNumber ? { ...o, fulfillmentStatus: status } : o,
-  );
+  let from: FulfillmentStatus | undefined;
+  const next = all.map((o) => {
+    if (o.orderNumber !== orderNumber) return o;
+    from = o.fulfillmentStatus;
+    return {
+      ...o,
+      fulfillmentStatus: status,
+      ...(shipping?.courier !== undefined ? { courier: shipping.courier } : {}),
+      ...(shipping?.trackingNumber !== undefined ? { trackingNumber: shipping.trackingNumber } : {}),
+    };
+  });
   writeOrders(next);
+
+  const admin = getAdminSession();
+  logEvent({
+    type: "order_status_changed",
+    actor: { kind: "admin", name: admin?.name },
+    meta: {
+      orderNumber,
+      from: from ?? "",
+      to: status,
+      ...(shipping?.courier ? { courier: shipping.courier } : {}),
+    },
+  });
 }
 
 export function getOrder(orderNumber: string): Order | undefined {

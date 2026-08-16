@@ -91,6 +91,24 @@ export default function TrackOrderPage() {
               })}
             </ol>
 
+            {order.courier && (
+              <div className="mt-6 rounded-lg bg-parchment/50 px-4 py-3 text-sm text-forest/80">
+                {order.courier === "Handed over to customer" ? (
+                  "Handed over to you directly — no courier tracking for this order."
+                ) : (
+                  <>
+                    Shipped via <span className="font-medium">{order.courier}</span>
+                    {order.trackingNumber && (
+                      <>
+                        {" "}
+                        · Tracking number <span className="font-medium">{order.trackingNumber}</span>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+
             <p className="mt-6 text-xs text-forest/45">
               Demo tracking — status updates would be driven by the admin/operations system.
             </p>

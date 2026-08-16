@@ -60,6 +60,13 @@ export function AdminDashboard() {
           </div>
         ))}
       </div>
+      <Link
+        href="/studio/reports"
+        className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-moss hover:text-forest"
+      >
+        These are today's numbers — for date-range history &amp; exports, see full reports{" "}
+        <ArrowRight width={15} />
+      </Link>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         {/* Recent orders */}

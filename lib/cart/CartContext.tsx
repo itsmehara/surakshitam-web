@@ -137,8 +137,30 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           qty: qty ?? 1,
         });
       },
-      setQty: (id, qty) => dispatch({ type: "set", id, qty }),
-      remove: (id) => dispatch({ type: "remove", id }),
+      setQty: (id, qty) => {
+        if (qty <= 0) {
+          const product = getProductById(id);
+          const s = getSession();
+          logEvent({
+            type: "cart_remove",
+            actor: s ? { kind: "customer", id: s.id, name: s.name } : { kind: "guest" },
+            productId: id,
+            productName: product?.name,
+          });
+        }
+        dispatch({ type: "set", id, qty });
+      },
+      remove: (id) => {
+        const product = getProductById(id);
+        const s = getSession();
+        logEvent({
+          type: "cart_remove",
+          actor: s ? { kind: "customer", id: s.id, name: s.name } : { kind: "guest" },
+          productId: id,
+          productName: product?.name,
+        });
+        dispatch({ type: "remove", id });
+      },
       clear: () => dispatch({ type: "clear" }),
       qtyOf: (id) => items.find((i) => i.product.id === id)?.qty ?? 0,
       drawerOpen,
