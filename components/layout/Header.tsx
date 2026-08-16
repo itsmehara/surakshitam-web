@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { primaryNav } from "@/lib/site";
+import { useCart } from "@/lib/cart/CartContext";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { Logo } from "@/components/ui/Logo";
 import { MenuIcon, CloseIcon, SearchIcon, CartIcon, UserIcon, ArrowRight } from "@/components/icons";
 import { cn } from "@/lib/cn";
@@ -14,6 +16,10 @@ export function Header() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get("category");
+  const { count, openCart } = useCart();
+  const { isLoggedIn: authed, user } = useAuth();
+  const accountHref = authed ? "/account" : "/login?next=/account";
+  const firstName = user?.name?.trim().split(/\s+/)[0] ?? "";
 
   // Which primary-nav item corresponds to the current page.
   const isActive = (href: string) => {
@@ -74,7 +80,7 @@ export function Header() {
           <Logo className="lg:mr-4" />
 
           {/* Desktop nav */}
-          <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary">
+          <nav className="hidden items-center gap-x-4 lg:flex xl:gap-x-6" aria-label="Primary">
             {primaryNav.map((item) => {
               const active = isActive(item.href);
               return (
@@ -109,22 +115,28 @@ export function Header() {
               <SearchIcon />
             </Link>
             <Link
-              href="/account"
-              aria-label="Account"
-              className="hidden h-10 w-10 items-center justify-center rounded-full text-forest transition-colors hover:bg-forest/5 sm:flex"
+              href={accountHref}
+              aria-label={authed ? `Account — ${firstName || "signed in"}` : "Sign in"}
+              className="hidden h-10 items-center gap-2 rounded-full px-2.5 text-forest transition-colors hover:bg-forest/5 sm:flex"
             >
               <UserIcon />
+              {authed && firstName && (
+                <span className="max-w-[8rem] truncate text-sm font-medium">{firstName}</span>
+              )}
             </Link>
-            <Link
-              href="/cart"
-              aria-label="Cart"
+            <button
+              type="button"
+              onClick={openCart}
+              aria-label={`Open cart, ${count} item${count === 1 ? "" : "s"}`}
               className="relative flex h-10 w-10 items-center justify-center rounded-full text-forest transition-colors hover:bg-forest/5"
             >
               <CartIcon />
-              <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-clay px-1 text-[0.6rem] font-semibold text-cream">
-                0
-              </span>
-            </Link>
+              {count > 0 && (
+                <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-clay px-1 text-[0.6rem] font-semibold text-cream">
+                  {count}
+                </span>
+              )}
+            </button>
           </div>
         </div>
       </div>
@@ -191,11 +203,12 @@ export function Header() {
           </nav>
           <div className="mt-auto border-t border-forest/10 px-5 py-5">
             <Link
-              href="/account"
+              href={accountHref}
               onClick={() => setOpen(false)}
               className="flex items-center gap-2 text-sm font-medium text-forest"
             >
-              <UserIcon width={18} /> Account &amp; Orders
+              <UserIcon width={18} />{" "}
+              {authed ? `${firstName ? firstName + " · " : ""}Account & Orders` : "Sign in / Sign up"}
             </Link>
           </div>
         </div>

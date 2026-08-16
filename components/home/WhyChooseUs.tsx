@@ -34,7 +34,7 @@ export function WhyChooseUs() {
           </h2>
           <p className="mt-4 text-base leading-relaxed text-forest/70">
             Surakshitam Naturals began with Supriya researching better ways to make everyday
-            household and personal-care products. These principles guide everything we formulate.
+            household, skin and hair-care products. These principles guide everything we formulate.
           </p>
         </div>
 

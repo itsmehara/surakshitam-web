@@ -4,10 +4,12 @@ import type { Product } from "@/lib/types";
 import { formatPrice, discountPercent } from "@/lib/format";
 import { StarRating } from "./StarRating";
 import { AddToCartButton } from "./AddToCartButton";
+import { QuickViewButton } from "./QuickViewButton";
 
 const categoryLabel: Record<Product["category"], string> = {
   "home-care": "Home Care",
-  "personal-care": "Personal Care",
+  "skin-care": "Skin Care",
+  "hair-care": "Hair Care",
 };
 
 export function ProductCard({ product, priority }: { product: Product; priority?: boolean }) {
@@ -17,32 +19,35 @@ export function ProductCard({ product, priority }: { product: Product; priority?
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-lg border border-forest/8 bg-white/60 shadow-soft transition-shadow duration-300 hover:shadow-card">
-      <Link
-        href={`/product/${product.slug}`}
-        className="relative block aspect-square overflow-hidden bg-cream"
-      >
-        {/* Badges */}
-        <div className="absolute left-3 top-3 z-10 flex flex-col gap-1.5">
-          {product.isNew && (
-            <span className="rounded-full bg-moss px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-cream">
-              New
-            </span>
-          )}
-          {discount && (
-            <span className="rounded-full bg-clay px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-cream">
-              {discount}% off
-            </span>
-          )}
-        </div>
-        <Image
-          src={product.image}
-          alt={product.name}
-          fill
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px"
-          priority={priority}
-          className="scale-[1.16] object-cover object-[50%_60%] transition-transform duration-500 ease-smooth group-hover:scale-[1.24]"
-        />
-      </Link>
+      <div className="relative">
+        <Link
+          href={`/product/${product.slug}`}
+          className="relative block aspect-square overflow-hidden bg-cream"
+        >
+          {/* Badges */}
+          <div className="absolute left-3 top-3 z-10 flex flex-col gap-1.5">
+            {product.isNew && (
+              <span className="rounded-full bg-moss px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-cream">
+                New
+              </span>
+            )}
+            {discount && (
+              <span className="rounded-full bg-clay px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-cream">
+                {discount}% off
+              </span>
+            )}
+          </div>
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px"
+            priority={priority}
+            className="scale-[1.16] object-cover object-[50%_60%] transition-transform duration-500 ease-smooth group-hover:scale-[1.24]"
+          />
+        </Link>
+        <QuickViewButton productId={product.id} />
+      </div>
 
       <div className="flex flex-1 flex-col p-3">
         <p className="text-[0.66rem] font-semibold uppercase tracking-[0.12em] text-moss">
@@ -76,7 +81,7 @@ export function ProductCard({ product, priority }: { product: Product; priority?
         </p>
 
         <div className="mt-2.5">
-          <AddToCartButton productName={product.name} disabled={outOfStock} />
+          <AddToCartButton productId={product.id} name={product.name} disabled={outOfStock} />
         </div>
       </div>
     </article>

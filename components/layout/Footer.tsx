@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { site, footerNav } from "@/lib/site";
 import { Logo } from "@/components/ui/Logo";
-import { WhatsAppIcon, InstagramIcon, FacebookIcon, ArrowRight } from "@/components/icons";
+import { WhatsAppIcon, InstagramIcon, FacebookIcon, YouTubeIcon, ArrowRight } from "@/components/icons";
 
 export function Footer() {
   return (
@@ -12,8 +12,8 @@ export function Footer() {
           <div className="max-w-sm">
             <Logo invert />
             <p className="mt-5 text-sm leading-relaxed text-cream/70">
-              Homemade, plant-based home-care and personal-care from Hyderabad — herbal soaps and
-              natural cleaners made with natural essential oils.
+              Homemade, plant-based home care, skin care and hair care from Hyderabad — made with
+              natural essential oils.
             </p>
             <address className="mt-4 space-y-1 text-sm not-italic text-cream/70">
               <p>
@@ -24,6 +24,11 @@ export function Footer() {
               <p>
                 <a href={`tel:${site.phone.replace(/\s/g, "")}`} className="transition-colors hover:text-cream">
                   {site.phone}
+                </a>
+              </p>
+              <p>
+                <a href={`mailto:${site.email}`} className="transition-colors hover:text-cream">
+                  {site.email}
                 </a>
               </p>
             </address>
@@ -45,9 +50,20 @@ export function Footer() {
               <a
                 href={site.social.facebook}
                 aria-label="Facebook"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-cream/10 text-cream transition-colors hover:bg-cream/20"
               >
                 <FacebookIcon width={18} />
+              </a>
+              <a
+                href={site.social.youtube}
+                aria-label="YouTube"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-cream/10 text-cream transition-colors hover:bg-cream/20"
+              >
+                <YouTubeIcon width={18} />
               </a>
             </div>
           </div>

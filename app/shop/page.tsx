@@ -8,7 +8,7 @@ import { cn } from "@/lib/cn";
 export const metadata: Metadata = {
   title: "Shop",
   description:
-    "Browse Surakshitam Naturals home-care and personal-care products — natural, small-batch essentials for everyday homes.",
+    "Browse Surakshitam Naturals home care, skin care and hair care — natural, small-batch essentials for everyday homes.",
 };
 
 const sortOptions = [

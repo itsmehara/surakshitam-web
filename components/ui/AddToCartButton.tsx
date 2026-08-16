@@ -1,23 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useCart } from "@/lib/cart/CartContext";
 import { cn } from "@/lib/cn";
 
-/**
- * Prototype Add-to-Cart control. Demonstrates the "Add → − 1 +" stepper
- * microinteraction with local state only. Wire to a real cart store when
- * the cart/checkout flow is built (see docs/DATA_MODEL.md → Cart).
- */
+/** Add-to-Cart control backed by the cart store. Turns into a −/qty/+ stepper. */
 export function AddToCartButton({
-  productName,
+  productId,
+  name,
   disabled,
   className,
 }: {
-  productName: string;
+  productId: string;
+  name: string;
   disabled?: boolean;
   className?: string;
 }) {
-  const [qty, setQty] = useState(0);
+  const { qtyOf, add, setQty } = useCart();
+  const qty = qtyOf(productId);
 
   if (disabled) {
     return (
@@ -38,8 +37,8 @@ export function AddToCartButton({
     return (
       <button
         type="button"
-        onClick={() => setQty(1)}
-        aria-label={`Add ${productName} to cart`}
+        onClick={() => add(productId, 1)}
+        aria-label={`Add ${name} to cart`}
         className={cn(
           "w-full rounded-full bg-forest px-4 py-2.5 text-sm font-medium text-cream transition-colors duration-200 hover:bg-ink",
           className,
@@ -59,8 +58,8 @@ export function AddToCartButton({
     >
       <button
         type="button"
-        onClick={() => setQty((q) => Math.max(0, q - 1))}
-        aria-label={`Decrease ${productName} quantity`}
+        onClick={() => setQty(productId, qty - 1)}
+        aria-label={`Decrease ${name} quantity`}
         className="flex h-8 w-8 items-center justify-center rounded-full text-lg leading-none transition-colors hover:bg-cream/15"
       >
         −
@@ -70,8 +69,8 @@ export function AddToCartButton({
       </span>
       <button
         type="button"
-        onClick={() => setQty((q) => q + 1)}
-        aria-label={`Increase ${productName} quantity`}
+        onClick={() => setQty(productId, qty + 1)}
+        aria-label={`Increase ${name} quantity`}
         className="flex h-8 w-8 items-center justify-center rounded-full text-lg leading-none transition-colors hover:bg-cream/15"
       >
         +

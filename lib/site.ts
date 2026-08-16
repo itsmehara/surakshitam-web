@@ -8,11 +8,11 @@ export const site = {
   shortName: "Surakshitam",
   tagline: "Homemade, plant-based care",
   description:
-    "Homemade, plant-based home-care and personal-care from Hyderabad — herbal soaps and natural cleaners made with natural essential oils for everyday, sustainable living.",
+    "Homemade, plant-based home care, skin care and hair care from Hyderabad — herbal soaps, natural cleaners and hair care made with natural essential oils for everyday, sustainable living.",
   url: "https://surakshitamnaturals.example", // DEMO — replace with production domain
   locale: "en_IN",
   currency: "INR",
-  email: "", // No public email supplied yet — WhatsApp/phone are the contact channels
+  email: "surakshitamnatural@gmail.com",
   phone: "+91 74163 94594",
   whatsapp: "+91 74163 94594",
   address: {
@@ -23,9 +23,11 @@ export const site = {
     region: "Telangana",
     country: "IN",
   },
+  instagramHandle: "surakshitam_naturals",
   social: {
-    instagram: "https://instagram.com/", // TODO — add real handle
-    facebook: "https://facebook.com/", // TODO — add real handle
+    instagram: "https://www.instagram.com/surakshitam_naturals/",
+    facebook: "https://www.facebook.com/profile.php?id=61580808786017",
+    youtube: "https://www.youtube.com/@SurakshitamNaturals",
   },
 } as const;
 
@@ -38,7 +40,8 @@ export type NavItem = {
 export const primaryNav: NavItem[] = [
   { label: "Shop", href: "/shop" },
   { label: "Home Care", href: "/shop?category=home-care" },
-  { label: "Personal Care", href: "/shop?category=personal-care" },
+  { label: "Skin Care", href: "/shop?category=skin-care" },
+  { label: "Hair Care", href: "/shop?category=hair-care" },
   { label: "Our Story", href: "/our-story" },
   { label: "Ingredients", href: "/ingredients" },
   { label: "Learn", href: "/learn" },
@@ -50,7 +53,8 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
     items: [
       { label: "All Products", href: "/shop" },
       { label: "Home Care", href: "/shop?category=home-care" },
-      { label: "Personal Care", href: "/shop?category=personal-care" },
+      { label: "Skin Care", href: "/shop?category=skin-care" },
+      { label: "Hair Care", href: "/shop?category=hair-care" },
       { label: "Best Sellers", href: "/shop?sort=best-selling" },
     ],
   },

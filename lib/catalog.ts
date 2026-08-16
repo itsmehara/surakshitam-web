@@ -1,11 +1,11 @@
 import type { Category, Product } from "./types";
 
 /**
- * DEMO CATALOG — all pricing, ratings and stock are placeholder data.
- * Product names are read from the actual packaging supplied in /Products.
- * Replace prices marked "DEMO PRICE" and verify all copy with the founders
- * before publishing. This module is the single source of truth for the
- * prototype and can be swapped for a CMS / database query later.
+ * DEMO CATALOG — pricing, ratings and stock are placeholder data.
+ * Structure mirrors Supriya's product card: three sections —
+ * Home Care, Skin Care, Hair Care. Products without real photos yet use a
+ * clearly-marked "photo coming soon" placeholder cover.
+ * Replace prices ("DEMO PRICE") and verify all copy with the founders.
  */
 
 export const categories: Category[] = [
@@ -14,21 +14,30 @@ export const categories: Category[] = [
     slug: "home-care",
     name: "Home Care",
     description:
-      "Everyday cleaning essentials for kitchens, floors and utensils — thoughtfully formulated for daily use.",
+      "Everyday household cleaning — dishwash, floor and laundry care, thoughtfully formulated for daily use.",
     image: "/products/dishwash-liquid.webp",
   },
   {
-    id: "cat-personal",
-    slug: "personal-care",
-    name: "Personal Care",
+    id: "cat-skin",
+    slug: "skin-care",
+    name: "Skin Care",
     description:
-      "Gentle soaps, cleansers and care for skin and hair, made in small, considered batches.",
+      "Soaps, cleansers, creams and everyday skin care, made in small, considered batches.",
     image: "/products/shea-butter-soap.webp",
+  },
+  {
+    id: "cat-hair",
+    slug: "hair-care",
+    name: "Hair Care",
+    description:
+      "Shampoo, oils, packs and serums — herbal hair care for everyday routines.",
+    image: "/products/herbal-shampoo.webp",
   },
 ];
 
-// Prices in paise (₹1 = 100 paise). All values below are DEMO PRICE — REPLACE.
+// Prices in paise (₹1 = 100 paise). All values are DEMO PRICE — REPLACE.
 export const products: Product[] = [
+  /* ------------------------------ HOME CARE ------------------------------ */
   {
     id: "p-dishwash-liquid",
     slug: "natural-dishwash-liquid",
@@ -94,6 +103,25 @@ export const products: Product[] = [
     bestSeller: true,
   },
   {
+    id: "p-washing-machine-liquid",
+    slug: "washing-machine-liquid",
+    name: "Washing Machine Liquid",
+    category: "home-care",
+    shortDescription: "Gentle liquid detergent for laundry",
+    description:
+      "A liquid laundry detergent for everyday washing — dissolves easily and rinses clean, leaving a light, fresh finish.",
+    benefits: ["Everyday laundry", "Gentle on fabrics", "Fresh finish"],
+    keyIngredients: ["Plant-derived surfactants", "Essential oils"],
+    usage: "Add one cap per load; use less for lightly soiled laundry.",
+    size: "500 ml",
+    price: 24900,
+    mrp: 29900,
+    sku: "SN-HC-WML-500",
+    image: "/products/washing-machine-liquid.webp",
+    stock: 20,
+    isNew: true,
+  },
+  {
     id: "p-natural-pitambari",
     slug: "natural-utensil-shine",
     name: "Natural Utensil Shine",
@@ -112,11 +140,13 @@ export const products: Product[] = [
     reviewCount: 51,
     stock: 25,
   },
+
+  /* ------------------------------ SKIN CARE ------------------------------ */
   {
     id: "p-shea-butter-soap",
     slug: "shea-butter-soap",
     name: "Shea Butter Soap",
-    category: "personal-care",
+    category: "skin-care",
     shortDescription: "Rich, moisturising daily bar",
     description:
       "A creamy shea butter soap made in small batches for a rich lather that helps skin feel soft and cared for.",
@@ -126,7 +156,7 @@ export const products: Product[] = [
     size: "100 g",
     price: 14900,
     mrp: 17900,
-    sku: "SN-PC-SHS-100",
+    sku: "SN-SC-SHS-100",
     image: "/products/shea-butter-soap.webp",
     rating: 4.8,
     reviewCount: 203,
@@ -138,7 +168,7 @@ export const products: Product[] = [
     id: "p-neem-tulsi-soap",
     slug: "neem-tulsi-soap",
     name: "Neem & Tulsi Soap",
-    category: "personal-care",
+    category: "skin-care",
     shortDescription: "Refreshing daily cleansing bar",
     description:
       "A refreshing bar with neem and tulsi for a clean, everyday feel. Crafted in small, considered batches.",
@@ -147,7 +177,7 @@ export const products: Product[] = [
     usage: "Work into a lather with water, cleanse, and rinse.",
     size: "100 g",
     price: 12900,
-    sku: "SN-PC-NTS-100",
+    sku: "SN-SC-NTS-100",
     image: "/products/neem-tulsi-soap.webp",
     rating: 4.7,
     reviewCount: 156,
@@ -159,7 +189,7 @@ export const products: Product[] = [
     id: "p-papaya-soap",
     slug: "papaya-soap",
     name: "Papaya Soap",
-    category: "personal-care",
+    category: "skin-care",
     shortDescription: "Brightening everyday bar",
     description:
       "A gentle papaya soap for a fresh, everyday cleanse, made in small batches with a soft fragrance.",
@@ -168,7 +198,7 @@ export const products: Product[] = [
     usage: "Work into a lather with water, cleanse, and rinse.",
     size: "100 g",
     price: 13900,
-    sku: "SN-PC-PYS-100",
+    sku: "SN-SC-PYS-100",
     image: "/products/papaya-soap.webp",
     rating: 4.6,
     reviewCount: 112,
@@ -179,7 +209,7 @@ export const products: Product[] = [
     id: "p-beetroot-soap",
     slug: "beetroot-soap",
     name: "Beetroot Soap",
-    category: "personal-care",
+    category: "skin-care",
     shortDescription: "Naturally coloured gentle bar",
     description:
       "A naturally tinted beetroot soap with a gentle lather for everyday cleansing.",
@@ -188,7 +218,7 @@ export const products: Product[] = [
     usage: "Work into a lather with water, cleanse, and rinse.",
     size: "100 g",
     price: 13900,
-    sku: "SN-PC-BTS-100",
+    sku: "SN-SC-BTS-100",
     image: "/products/beetroot-soap.webp",
     rating: 4.5,
     reviewCount: 74,
@@ -199,7 +229,7 @@ export const products: Product[] = [
     id: "p-glycerine-soap",
     slug: "glycerine-soap",
     name: "Glycerine Soap",
-    category: "personal-care",
+    category: "skin-care",
     shortDescription: "Transparent, mild cleansing bar",
     description:
       "A mild, transparent glycerine soap that keeps everyday cleansing simple and gentle.",
@@ -208,7 +238,7 @@ export const products: Product[] = [
     usage: "Work into a lather with water, cleanse, and rinse.",
     size: "100 g",
     price: 14900,
-    sku: "SN-PC-GLS-100",
+    sku: "SN-SC-GLS-100",
     image: "/products/glycerine-soap.webp",
     rating: 4.6,
     reviewCount: 98,
@@ -218,7 +248,7 @@ export const products: Product[] = [
     id: "p-triple-butter-soap",
     slug: "triple-butter-soap",
     name: "Triple Butter Soap",
-    category: "personal-care",
+    category: "skin-care",
     shortDescription: "Nourishing shea, cocoa & mango",
     description:
       "A nourishing bar blending three plant butters for a rich, creamy lather and a cared-for feel.",
@@ -228,7 +258,7 @@ export const products: Product[] = [
     size: "100 g",
     price: 16900,
     mrp: 19900,
-    sku: "SN-PC-TBS-100",
+    sku: "SN-SC-TBS-100",
     image: "/products/triple-butter-soap.webp",
     rating: 4.9,
     reviewCount: 187,
@@ -240,7 +270,7 @@ export const products: Product[] = [
     id: "p-rose-face-wash",
     slug: "rose-face-wash",
     name: "Rose Face Wash",
-    category: "personal-care",
+    category: "skin-care",
     shortDescription: "Gentle daily facial cleanser",
     description:
       "A gentle rose facial cleanser for a fresh, everyday clean without stripping the skin.",
@@ -250,7 +280,7 @@ export const products: Product[] = [
     size: "100 ml",
     price: 24900,
     mrp: 29900,
-    sku: "SN-PC-RFW-100",
+    sku: "SN-SC-RFW-100",
     image: "/products/rose-face-wash.webp",
     rating: 4.7,
     reviewCount: 143,
@@ -258,10 +288,157 @@ export const products: Product[] = [
     isNew: true,
   },
   {
+    id: "p-lavender-body-wash",
+    slug: "lavender-body-wash",
+    name: "Lavender Body Wash",
+    category: "skin-care",
+    shortDescription: "Calming everyday body cleanser",
+    description:
+      "A calming lavender body wash for a gentle, everyday cleanse with a soft, soothing scent.",
+    benefits: ["Gentle daily cleanse", "Calming lavender scent", "Everyday use"],
+    keyIngredients: ["Lavender oil", "Aloe vera", "Glycerin"],
+    usage: "Apply to a wet sponge or hand, lather over the body, then rinse.",
+    size: "250 ml",
+    price: 32900,
+    sku: "SN-SC-LBW-250",
+    image: "/products/lavender-body-wash.webp",
+    rating: 4.8,
+    reviewCount: 96,
+    stock: 18,
+    isNew: true,
+  },
+  {
+    id: "p-body-lotion",
+    slug: "body-lotion",
+    name: "Body Lotion",
+    category: "skin-care",
+    shortDescription: "Everyday moisture for soft skin",
+    description:
+      "A light, everyday body lotion that absorbs quickly and leaves skin feeling soft, not greasy.",
+    benefits: ["Light, non-greasy", "Everyday moisture", "Soft finish"],
+    keyIngredients: ["Shea butter", "Aloe vera", "Glycerin"],
+    usage: "Massage onto clean skin as often as needed.",
+    size: "200 ml",
+    price: 29900,
+    sku: "SN-SC-LOT-200",
+    image: "/products/body-lotion.webp",
+    stock: 24,
+    isNew: true,
+  },
+  {
+    id: "p-face-cream",
+    slug: "face-cream",
+    name: "Face Cream",
+    category: "skin-care",
+    shortDescription: "Daily nourishing face cream",
+    description:
+      "A light daily face cream for everyday nourishment, made with plant-forward ingredients.",
+    benefits: ["Daily nourishment", "Light texture", "Everyday use"],
+    keyIngredients: ["Aloe vera", "Plant oils", "Glycerin"],
+    usage: "Apply a small amount to a clean face, morning and night.",
+    size: "50 g",
+    price: 34900,
+    sku: "SN-SC-FCR-050",
+    image: "/products/face-cream.webp",
+    stock: 18,
+    isNew: true,
+  },
+  {
+    id: "p-herbal-bath-powder",
+    slug: "herbal-bath-powder",
+    name: "Herbal Bath Powder",
+    category: "skin-care",
+    shortDescription: "Traditional herbal cleansing powder",
+    description:
+      "A traditional bath powder blend for a gentle, natural cleanse — a time-honoured alternative to soap.",
+    benefits: ["Traditional cleanse", "Gentle on skin", "Herbal blend"],
+    keyIngredients: ["Herbal blend", "Gram flour"],
+    usage: "Mix with a little water into a paste and use as a cleanser, then rinse.",
+    size: "100 g",
+    price: 17900,
+    sku: "SN-SC-BTP-100",
+    image: "/products/herbal-bath-powder.webp",
+    stock: 30,
+  },
+  {
+    id: "p-foot-cream",
+    slug: "foot-cream",
+    name: "Foot Cream",
+    category: "skin-care",
+    shortDescription: "Softening care for tired feet",
+    description:
+      "A softening foot cream that helps care for dry heels and tired feet with a light, refreshing feel.",
+    benefits: ["Softens dry heels", "Refreshing feel", "Everyday care"],
+    keyIngredients: ["Shea butter", "Peppermint oil"],
+    usage: "Massage into clean, dry feet, ideally before bed.",
+    size: "50 g",
+    price: 24900,
+    sku: "SN-SC-FTC-050",
+    image: "/products/foot-cream.webp",
+    stock: 22,
+  },
+  {
+    id: "p-face-pack",
+    slug: "face-pack",
+    name: "Face Pack",
+    category: "skin-care",
+    shortDescription: "Refreshing weekly face pack",
+    description:
+      "A weekly face pack of natural clays and herbs for a fresh, clean feel.",
+    benefits: ["Weekly refresh", "Natural clays & herbs", "Fresh feel"],
+    keyIngredients: ["Multani mitti", "Herbal extracts"],
+    usage: "Apply an even layer, leave for 10–15 minutes, then rinse off.",
+    size: "100 g",
+    price: 27900,
+    sku: "SN-SC-FPK-100",
+    image: "/products/face-pack.webp",
+    stock: 20,
+    isNew: true,
+  },
+  {
+    id: "p-aloe-vera-gel",
+    slug: "aloe-vera-gel",
+    name: "Aloe Vera Gel",
+    category: "skin-care",
+    shortDescription: "Soothing multi-use aloe gel",
+    description:
+      "A light, soothing aloe vera gel for skin and hair — a gentle multi-use everyday essential.",
+    benefits: ["Soothing", "Multi-use", "Light gel"],
+    keyIngredients: ["Aloe vera"],
+    usage: "Apply to skin or hair as needed.",
+    size: "100 ml",
+    price: 19900,
+    sku: "SN-SC-ALG-100",
+    image: "/products/aloe-vera-gel.webp",
+    stock: 35,
+    bestSeller: true,
+  },
+  {
+    id: "p-strawberry-lip-balm",
+    slug: "strawberry-lip-balm",
+    name: "Strawberry Lip Balm",
+    category: "skin-care",
+    shortDescription: "Softening balm for dry lips",
+    description:
+      "A softening lip balm with a light strawberry note to help everyday dry lips feel comfortable.",
+    benefits: ["Softens dry lips", "Light strawberry note", "Pocket-sized"],
+    keyIngredients: ["Shea butter", "Beeswax", "Strawberry extract"],
+    usage: "Apply a thin layer to the lips as often as needed.",
+    size: "10 g",
+    price: 14900,
+    sku: "SN-SC-SLB-010",
+    image: "/products/strawberry-lip-balm.webp",
+    rating: 4.7,
+    reviewCount: 88,
+    stock: 54,
+  },
+
+  /* ------------------------------ HAIR CARE ------------------------------ */
+  {
     id: "p-herbal-shampoo",
     slug: "herbal-shampoo",
     name: "Herbal Shampoo",
-    category: "personal-care",
+    category: "hair-care",
     shortDescription: "Everyday cleansing for hair",
     description:
       "A herbal shampoo for everyday hair cleansing, formulated to be gentle for regular use.",
@@ -271,7 +448,7 @@ export const products: Product[] = [
     size: "200 ml",
     price: 29900,
     mrp: 34900,
-    sku: "SN-PC-HSH-200",
+    sku: "SN-HR-SHP-200",
     image: "/products/herbal-shampoo.webp",
     rating: 4.6,
     reviewCount: 121,
@@ -279,43 +456,77 @@ export const products: Product[] = [
     featured: true,
   },
   {
-    id: "p-lavender-body-wash",
-    slug: "lavender-body-wash",
-    name: "Lavender Body Wash",
-    category: "personal-care",
-    shortDescription: "Calming everyday body cleanser",
+    id: "p-herbal-hair-pack",
+    slug: "herbal-hair-pack",
+    name: "Herbal Hair Pack",
+    category: "hair-care",
+    shortDescription: "Nourishing weekly hair mask",
     description:
-      "A calming lavender body wash for a gentle, everyday cleanse with a soft, soothing scent.",
-    benefits: ["Gentle daily cleanse", "Calming lavender scent", "Everyday use"],
-    keyIngredients: ["Lavender oil", "Aloe vera", "Glycerin"],
-    usage: "Apply to a wet sponge or hand, lather over the body, then rinse.",
-    size: "250 ml",
-    price: 32900,
-    sku: "SN-PC-LBW-250",
-    image: "/products/lavender-body-wash.webp",
-    rating: 4.8,
-    reviewCount: 96,
+      "A weekly herbal hair pack to nourish and care for hair, made with a traditional herbal blend.",
+    benefits: ["Weekly nourishment", "Herbal blend", "For all hair types"],
+    keyIngredients: ["Amla", "Shikakai", "Hibiscus"],
+    usage: "Apply to damp hair, leave for 20–30 minutes, then rinse.",
+    size: "100 g",
+    price: 29900,
+    sku: "SN-HR-HPK-100",
+    image: "/products/herbal-hair-pack.webp",
     stock: 18,
     isNew: true,
   },
   {
-    id: "p-strawberry-lip-balm",
-    slug: "strawberry-lip-balm",
-    name: "Strawberry Lip Balm",
-    category: "personal-care",
-    shortDescription: "Softening balm for dry lips",
+    id: "p-hair-oil",
+    slug: "hair-oil",
+    name: "Hair Oil",
+    category: "hair-care",
+    shortDescription: "Everyday nourishing hair oil",
     description:
-      "A softening lip balm with a light strawberry note to help everyday dry lips feel comfortable.",
-    benefits: ["Softens dry lips", "Light strawberry note", "Pocket-sized"],
-    keyIngredients: ["Shea butter", "Beeswax", "Strawberry extract"],
-    usage: "Apply a thin layer to the lips as often as needed.",
-    size: "10 g",
-    price: 14900,
-    sku: "SN-PC-SLB-010",
-    image: "/products/strawberry-lip-balm.webp",
-    rating: 4.7,
-    reviewCount: 88,
-    stock: 54,
+      "A light, everyday hair oil to nourish the scalp and lengths without feeling heavy or sticky.",
+    benefits: ["Daily nourishment", "Light, non-sticky", "Herbal infusion"],
+    keyIngredients: ["Coconut oil", "Amla", "Curry leaf"],
+    usage: "Massage into the scalp and lengths; leave for a while before washing.",
+    size: "100 ml",
+    price: 24900,
+    sku: "SN-HR-OIL-100",
+    image: "/products/hair-oil.webp",
+    stock: 26,
+    bestSeller: true,
+  },
+  {
+    id: "p-rosemary-hair-spray",
+    slug: "rosemary-hair-spray",
+    name: "Rosemary Hair Spray",
+    category: "hair-care",
+    shortDescription: "Refreshing rosemary mist",
+    description:
+      "A refreshing rosemary mist for the scalp and hair, for a light pick-me-up during the day.",
+    benefits: ["Refreshing mist", "Everyday use", "Light finish"],
+    keyIngredients: ["Rosemary water", "Essential oils"],
+    usage: "Spray onto the scalp and hair; no need to rinse.",
+    size: "100 ml",
+    price: 27900,
+    sku: "SN-HR-RMS-100",
+    image: "/products/rosemary-hair-spray.webp",
+    stock: 20,
+    isNew: true,
+  },
+  {
+    id: "p-hair-serum",
+    slug: "hair-serum",
+    name: "Hair Serum",
+    category: "hair-care",
+    shortDescription: "Smoothing finish for frizz",
+    description:
+      "A lightweight hair serum for a smooth, finished look that helps tame everyday frizz.",
+    benefits: ["Smoothing finish", "Tames frizz", "Lightweight"],
+    keyIngredients: ["Argan oil", "Plant extracts"],
+    usage: "Apply a few drops to damp or dry hair, focusing on the ends.",
+    size: "50 ml",
+    price: 32900,
+    mrp: 37900,
+    sku: "SN-HR-SER-050",
+    image: "/products/hair-serum.webp",
+    stock: 16,
+    isNew: true,
   },
 ];
 
@@ -323,6 +534,29 @@ export const products: Product[] = [
 
 export function getProductBySlug(slug: string): Product | undefined {
   return products.find((p) => p.slug === slug);
+}
+
+export function getProductById(id: string): Product | undefined {
+  return products.find((p) => p.id === id);
+}
+
+/** Simple search across name, category, short description and key ingredients. */
+export function searchProducts(query: string): Product[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+  const terms = q.split(/\s+/);
+  return products.filter((p) => {
+    const haystack = [
+      p.name,
+      p.category.replace("-", " "),
+      p.shortDescription,
+      p.description,
+      ...p.keyIngredients,
+    ]
+      .join(" ")
+      .toLowerCase();
+    return terms.every((t) => haystack.includes(t));
+  });
 }
 
 export function getProductsByCategory(category: string): Product[] {

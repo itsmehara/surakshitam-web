@@ -5,8 +5,8 @@ import { products, getProductBySlug, getProductsByCategory } from "@/lib/catalog
 import { formatPrice, discountPercent } from "@/lib/format";
 import { StarRating } from "@/components/ui/StarRating";
 import { AddToCartButton } from "@/components/ui/AddToCartButton";
+import { BuyNowButton } from "@/components/ui/BuyNowButton";
 import { ProductGallery } from "@/components/ui/ProductGallery";
-import { LinkButton } from "@/components/ui/Button";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { CheckIcon, TruckIcon, LeafIcon, ChevronDown } from "@/components/icons";
 import { site } from "@/lib/site";
@@ -31,7 +31,8 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
 
 const categoryLabel: Record<string, string> = {
   "home-care": "Home Care",
-  "personal-care": "Personal Care",
+  "skin-care": "Skin Care",
+  "hair-care": "Hair Care",
 };
 
 export default function ProductPage({ params }: { params: { slug: string } }) {
@@ -43,6 +44,10 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
   const lowStock = product.stock > 0 && product.stock <= 10;
   const related = getProductsByCategory(product.category)
     .filter((p) => p.id !== product.id)
+    .slice(0, 4);
+  // Cross-sell: popular items from the other ranges to "complete the routine".
+  const crossSell = products
+    .filter((p) => p.category !== product.category && (p.featured || p.bestSeller))
     .slice(0, 4);
 
   const details: { title: string; body: React.ReactNode }[] = [
@@ -154,11 +159,9 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
             {/* Actions */}
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="sm:max-w-[220px] sm:flex-1">
-                <AddToCartButton productName={product.name} disabled={outOfStock} />
+                <AddToCartButton productId={product.id} name={product.name} disabled={outOfStock} />
               </div>
-              <LinkButton href="/cart" variant="secondary" size="md" className="sm:flex-1">
-                Buy Now
-              </LinkButton>
+              <BuyNowButton productId={product.id} disabled={outOfStock} className="sm:flex-1" />
             </div>
 
             {/* Assurances */}
@@ -188,6 +191,19 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">You may also like</h2>
             <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
               {related.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Cross-sell */}
+        {crossSell.length > 0 && (
+          <div className="mt-14 sm:mt-20">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Complete your routine</h2>
+            <p className="mt-2 text-sm text-forest/60">Loved across our home, skin and hair ranges.</p>
+            <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
+              {crossSell.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
             </div>

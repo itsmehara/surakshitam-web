@@ -1,12 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Suspense } from "react";
 // Self-hosted fonts (no external requests) — works offline for the demo.
 import "@fontsource-variable/fraunces";
 import "@fontsource-variable/inter";
 import { site } from "@/lib/site";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { WhatsAppFloat } from "@/components/ui/WhatsAppFloat";
+import { AppShell } from "@/components/layout/AppShell";
+import { AuthProvider } from "@/components/auth/AuthProvider";
+import { CartProvider } from "@/lib/cart/CartContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,7 +17,8 @@ export const metadata: Metadata = {
   description: site.description,
   keywords: [
     "natural home care",
-    "natural personal care",
+    "natural skin care",
+    "natural hair care",
     "handmade soap India",
     "natural dishwash",
     "Surakshitam Naturals",
@@ -80,12 +80,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to content
         </a>
-        <Suspense fallback={<div className="h-[6.25rem] bg-cream lg:h-[6.75rem]" />}>
-          <Header />
-        </Suspense>
-        <main id="main">{children}</main>
-        <Footer />
-        <WhatsAppFloat />
+        <AuthProvider>
+          <CartProvider>
+            <AppShell>{children}</AppShell>
+          </CartProvider>
+        </AuthProvider>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}

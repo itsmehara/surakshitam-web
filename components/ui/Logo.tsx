@@ -3,10 +3,18 @@ import Link from "next/link";
 import { cn } from "@/lib/cn";
 
 /** Brand lockup: the real Surakshitam Naturals emblem + wordmark. */
-export function Logo({ className, invert }: { className?: string; invert?: boolean }) {
+export function Logo({
+  className,
+  invert,
+  href = "/",
+}: {
+  className?: string;
+  invert?: boolean;
+  href?: string;
+}) {
   return (
     <Link
-      href="/"
+      href={href}
       aria-label="Surakshitam Naturals — home"
       className={cn("group inline-flex items-center gap-2.5", className)}
     >

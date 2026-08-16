@@ -5,7 +5,7 @@
  * smallest currency unit) to avoid floating-point errors.
  */
 
-export type CategorySlug = "home-care" | "personal-care";
+export type CategorySlug = "home-care" | "skin-care" | "hair-care";
 
 export interface Category {
   id: string;

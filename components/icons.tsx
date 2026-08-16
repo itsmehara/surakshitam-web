@@ -156,3 +156,10 @@ export const FacebookIcon = (p: IconProps) => (
     <path d="M14 8h2V5h-2a3 3 0 0 0-3 3v2H9v3h2v6h3v-6h2.2l.8-3H14V8z" />
   </svg>
 );
+
+export const YouTubeIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <rect x="3" y="6" width="18" height="12" rx="3.5" />
+    <path d="M11 9.8l4 2.2-4 2.2z" fill="currentColor" stroke="none" />
+  </svg>
+);

@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
-import { ComingSoon } from "@/components/ui/ComingSoon";
+import { AccountView } from "@/components/account/AccountView";
 
-export const metadata: Metadata = { title: "Account" };
+export const metadata: Metadata = { title: "My Account" };
 
 export default function AccountPage() {
-  return (
-    <ComingSoon
-      title="Your account"
-      description="Login, orders, saved addresses and reorder are part of the customer account experience planned for the next build phase."
-      note="Planned: login · orders · addresses · reorder"
-    />
-  );
+  return <AccountView />;
 }

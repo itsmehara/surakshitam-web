@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { site } from "@/lib/site";
-import { WhatsAppIcon } from "@/components/icons";
+import { WhatsAppIcon, InstagramIcon, FacebookIcon, YouTubeIcon } from "@/components/icons";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -32,7 +32,11 @@ export default function ContactPage() {
               {site.email && (
                 <div>
                   <dt className="text-forest/50">Email</dt>
-                  <dd className="text-forest">{site.email}</dd>
+                  <dd className="text-forest">
+                    <a href={`mailto:${site.email}`} className="hover:text-moss">
+                      {site.email}
+                    </a>
+                  </dd>
                 </div>
               )}
               <div>
@@ -59,6 +63,39 @@ export default function ContactPage() {
               <p className="text-sm text-cream/80">Usually the fastest way to reach us</p>
             </div>
           </a>
+
+          <div className="rounded-lg border border-forest/8 bg-parchment/60 p-6">
+            <h2 className="font-serif text-lg font-semibold text-forest">Follow us</h2>
+            <div className="mt-4 flex items-center gap-3">
+              <a
+                href={site.social.instagram}
+                aria-label="Instagram"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-forest/8 text-forest transition-colors hover:bg-forest/15"
+              >
+                <InstagramIcon width={18} />
+              </a>
+              <a
+                href={site.social.facebook}
+                aria-label="Facebook"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-forest/8 text-forest transition-colors hover:bg-forest/15"
+              >
+                <FacebookIcon width={18} />
+              </a>
+              <a
+                href={site.social.youtube}
+                aria-label="YouTube"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-forest/8 text-forest transition-colors hover:bg-forest/15"
+              >
+                <YouTubeIcon width={18} />
+              </a>
+            </div>
+          </div>
         </aside>
       </div>
     </>

@@ -83,24 +83,29 @@ const philosophy = [
   },
 ];
 
-const collage = [
-  { src: "/products/shea-butter-soap.webp", alt: "Shea Butter Soap" },
-  { src: "/products/herbal-shampoo.webp", alt: "Herbal Shampoo" },
-  { src: "/products/lavender-body-wash.webp", alt: "Lavender Body Wash" },
-  { src: "/products/dishwash-liquid.webp", alt: "Natural Dishwash Liquid" },
+const story = [
+  { src: "/story/founder-kitchen.webp", alt: "In the founder's kitchen", caption: "Founder Kitchen" },
+  { src: "/story/handcrafted-packaging.webp", alt: "Handcrafted packaging", caption: "Handcrafted Packaging" },
+  { src: "/story/botanical-workspace.webp", alt: "Botanical workspace", caption: "Botanical Workspace" },
 ];
 
-function CollageTile({ img }: { img: { src: string; alt: string } }) {
+function StoryTile({ img, className }: { img: (typeof story)[number]; className?: string }) {
   return (
-    <div className="relative aspect-square overflow-hidden rounded-lg border border-forest/8 bg-white shadow-soft">
+    <figure
+      /* Taller portrait tiles (~30% more height than the old 3:4 → 15:26). */
+      className={`group relative aspect-[15/26] overflow-hidden rounded-lg border border-forest/8 bg-white shadow-soft ${className ?? ""}`}
+    >
       <Image
         src={img.src}
         alt={img.alt}
         fill
-        sizes="(max-width: 1024px) 45vw, 240px"
-        className="scale-[1.14] object-cover object-[50%_60%]"
+        sizes="(max-width: 1024px) 32vw, 240px"
+        className="object-cover object-center transition-transform duration-500 ease-smooth group-hover:scale-105"
       />
-    </div>
+      <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-forest/80 to-transparent p-2.5 pt-8 text-[0.68rem] font-medium text-cream">
+        {img.caption}
+      </figcaption>
+    </figure>
   );
 }
 
@@ -110,7 +115,7 @@ export default function OurStoryPage() {
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-forest/8 bg-gradient-to-b from-[#F1F3E6] to-cream">
         <BotanicalBackdrop />
-        <div className="container relative grid items-center gap-10 py-14 lg:grid-cols-2 lg:gap-12 lg:py-20">
+        <div className="container relative grid items-center gap-10 py-14 lg:grid-cols-[2fr_3fr] lg:gap-14 lg:py-20">
           <div className="max-w-xl">
             <p className="eyebrow">Our story · Hyderabad</p>
             <h1 className="mt-4 text-hero font-semibold text-forest">
@@ -124,17 +129,12 @@ export default function OurStoryPage() {
             <p className="mt-6 text-sm font-medium text-moss">— Srikanth &amp; Supriya, founders</p>
           </div>
 
-          {/* editorial collage */}
+          {/* founder image collage */}
           <div className="relative">
-            <div className="mx-auto grid max-w-md grid-cols-2 gap-3 lg:max-w-none">
-              <div className="space-y-3 pt-6">
-                <CollageTile img={collage[0]} />
-                <CollageTile img={collage[2]} />
-              </div>
-              <div className="space-y-3">
-                <CollageTile img={collage[1]} />
-                <CollageTile img={collage[3]} />
-              </div>
+            <div className="mx-auto grid max-w-[33rem] grid-cols-3 gap-4 lg:max-w-none">
+              <StoryTile img={story[0]} />
+              <StoryTile img={story[1]} className="translate-y-6" />
+              <StoryTile img={story[2]} />
             </div>
           </div>
         </div>
@@ -160,7 +160,7 @@ export default function OurStoryPage() {
             </p>
             <p>
               That is how Surakshitam Naturals came to be — a small, founder-led business making
-              home-care and personal-care products the way you would make them for the people you
+              home care, skin care and hair care the way you would make them for the people you
               love: carefully, and without shortcuts.
             </p>
           </div>

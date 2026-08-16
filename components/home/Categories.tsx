@@ -19,30 +19,30 @@ export function Categories() {
           </Link>
         </div>
 
-        <div className="mt-10 grid gap-5 sm:grid-cols-2">
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((cat) => (
             <Link
               key={cat.id}
               href={`/shop?category=${cat.slug}`}
               className="group relative overflow-hidden rounded-lg border border-forest/8 bg-parchment"
             >
-              <div className="grid grid-cols-[1fr_auto] items-center gap-4 p-6 sm:p-8">
+              <div className="grid grid-cols-[1fr_auto] items-center gap-4 p-5 sm:p-6">
                 <div>
-                  <h3 className="font-serif text-2xl font-semibold text-forest">{cat.name}</h3>
-                  <p className="mt-2 max-w-xs text-sm leading-relaxed text-forest/65">
+                  <h3 className="font-serif text-xl font-semibold text-forest sm:text-2xl">{cat.name}</h3>
+                  <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-forest/65">
                     {cat.description}
                   </p>
-                  <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-moss transition-colors group-hover:text-forest">
+                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-moss transition-colors group-hover:text-forest">
                     Explore <ArrowRight width={16} className="transition-transform group-hover:translate-x-1" />
                   </span>
                 </div>
-                <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-lg bg-white shadow-soft sm:h-36 sm:w-36">
+                <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-white shadow-soft">
                   <Image
                     src={cat.image}
                     alt={cat.name}
                     fill
-                    sizes="150px"
-                    className="object-cover transition-transform duration-500 ease-smooth group-hover:scale-105"
+                    sizes="120px"
+                    className="scale-[1.12] object-cover object-[50%_55%] transition-transform duration-500 ease-smooth group-hover:scale-[1.18]"
                   />
                 </div>
               </div>
