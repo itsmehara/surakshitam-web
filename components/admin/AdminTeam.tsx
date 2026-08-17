@@ -140,6 +140,7 @@ export function AdminTeam() {
       )}
 
       <div className="mt-6 overflow-hidden rounded-lg border border-forest/8 bg-white/60">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-forest/8 text-left text-xs uppercase tracking-wide text-forest/50">
@@ -187,6 +188,7 @@ export function AdminTeam() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       <p className="mt-4 text-xs text-forest/45">

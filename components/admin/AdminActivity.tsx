@@ -240,11 +240,12 @@ export function AdminActivity() {
           </button>
         </div>
       </div>
-      <p className="-mt-2 mb-2 text-xs text-forest/40">
-        "Load sample activity" is a demo-only tool: it seeds realistic browsing, cart, order and
-        admin events (spanning ~9 days) using the same functions the real app uses, so the resulting
-        orders also appear in Orders/Packing/Reports/Dashboard.
-      </p>
+      <div className="mt-4 rounded-lg border border-moss/15 bg-moss/5 px-4 py-3 text-xs text-forest/55">
+        <span className="font-medium text-forest/70">&ldquo;Load sample activity&rdquo;</span> is a
+        demo-only tool: it seeds realistic browsing, cart, order and admin events (spanning ~9 days)
+        using the same functions the real app uses, so the resulting orders also appear in
+        Orders/Packing/Reports/Dashboard.
+      </div>
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-8">
         {cards.map((c) => (
@@ -337,6 +338,7 @@ export function AdminActivity() {
             {showPageViews ? "No events recorded yet." : "No business activity yet — try “Show page views”."}
           </p>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-forest/8 text-left text-xs uppercase tracking-wide text-forest/50">
@@ -372,6 +374,7 @@ export function AdminActivity() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
         {feedEvents.length > 0 && (
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-forest/8 px-5 py-3 text-sm">

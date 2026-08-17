@@ -52,14 +52,16 @@ export function AdminOrders() {
               </div>
 
               {/* status control */}
-              <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-forest/8 pt-4">
+              <div className="mt-4 border-t border-forest/8 pt-4">
                 <OrderStatusControl order={o} onUpdated={replaceOrder} />
-                <Link
-                  href={`/order/${o.orderNumber}`}
-                  className="ml-auto text-sm font-medium text-moss hover:text-forest"
-                >
-                  Customer view
-                </Link>
+                <div className="mt-3 border-t border-forest/8 pt-3">
+                  <Link
+                    href={`/order/${o.orderNumber}`}
+                    className="text-sm font-medium text-moss hover:text-forest"
+                  >
+                    Customer view
+                  </Link>
+                </div>
               </div>
             </div>
           ))}

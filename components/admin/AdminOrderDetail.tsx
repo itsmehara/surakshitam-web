@@ -59,14 +59,16 @@ export function AdminOrderDetail({ orderNumber }: { orderNumber: string }) {
             </span>
           ))}
         </div>
-        <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-forest/8 pt-4">
+        <div className="mt-4 border-t border-forest/8 pt-4">
           <OrderStatusControl order={order} onUpdated={setOrder} />
-          <Link
-            href={`/order/${order.orderNumber}`}
-            className="ml-auto text-sm font-medium text-moss hover:text-forest"
-          >
-            Customer view
-          </Link>
+          <div className="mt-3 border-t border-forest/8 pt-3">
+            <Link
+              href={`/order/${order.orderNumber}`}
+              className="text-sm font-medium text-moss hover:text-forest"
+            >
+              Customer view
+            </Link>
+          </div>
         </div>
       </section>
 

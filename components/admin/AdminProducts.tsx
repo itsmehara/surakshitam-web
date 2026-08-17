@@ -120,6 +120,7 @@ export function AdminProducts() {
       </div>
 
       <div className="mt-4 overflow-hidden rounded-lg border border-forest/8 bg-white/60">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-forest/8 text-left text-xs uppercase tracking-wide text-forest/50">
@@ -252,6 +253,7 @@ export function AdminProducts() {
         {filtered.length === 0 && (
           <p className="px-4 py-10 text-center text-sm text-forest/55">No products match “{query}”.</p>
         )}
+        </div>
       </div>
 
       <p className="mt-4 text-xs text-forest/45">

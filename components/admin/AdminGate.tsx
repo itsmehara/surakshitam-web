@@ -14,6 +14,7 @@ import { logEvent } from "@/lib/audit";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Logo } from "@/components/ui/Logo";
 import { NotFoundView } from "@/components/ui/NotFoundView";
+import { MenuIcon, CloseIcon, UserIcon } from "@/components/icons";
 import { cn } from "@/lib/cn";
 
 const NAV = [
@@ -33,6 +34,8 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
   const { user: customer } = useAuth();
 
@@ -59,6 +62,26 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, customer, authed, pathname]);
 
+  // Close the mobile drawer / account dropdown on navigation.
+  useEffect(() => {
+    setMobileOpen(false);
+    setMenuOpen(false);
+  }, [pathname]);
+
+  // Lock body scroll while the mobile drawer is open.
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
+  function doLogout() {
+    logEvent({ type: "logout", actor: { kind: "admin", name: adminName ?? "Admin" } });
+    logoutAdmin();
+    setAdminName(null);
+  }
+
   if (!ready) {
     return <div className="container py-24 text-center text-forest/50">Loading…</div>;
   }
@@ -67,22 +90,30 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
   if (authed) {
     return (
       <div className="min-h-screen bg-cream">
-        <header className="border-b border-forest/10 bg-white/70">
+        <header className="sticky top-0 z-50 border-b border-forest/10 bg-white/90 backdrop-blur-md">
           <div className="container flex h-16 items-center justify-between gap-4">
-            <div className="flex items-center gap-6">
-              {/* Stay inside the admin portal — don't switch to the storefront. */}
-              <Logo href={ADMIN_BASE} />
-              <span className="hidden rounded-full bg-forest/10 px-2.5 py-1 text-xs font-medium text-forest sm:inline">
-                {adminName} · admin
-              </span>
-            </div>
-            <nav className="flex items-center gap-1">
+            {/* Mobile: menu button */}
+            <button
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
+              className="-ml-2 flex h-10 w-10 items-center justify-center rounded-full text-forest hover:bg-forest/5 lg:hidden"
+            >
+              <MenuIcon />
+            </button>
+
+            {/* Stay inside the admin portal — don't switch to the storefront. */}
+            <Logo href={ADMIN_BASE} />
+
+            {/* Desktop nav */}
+            <nav className="hidden items-center gap-1 lg:flex" aria-label="Admin">
               {NAV.map((n) => {
                 const active = n.href === ADMIN_BASE ? pathname === ADMIN_BASE : pathname.startsWith(n.href);
                 return (
                   <Link
                     key={n.href}
                     href={n.href}
+                    aria-current={active ? "page" : undefined}
                     className={cn(
                       "rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
                       active ? "bg-forest text-cream" : "text-forest/70 hover:bg-forest/5",
@@ -92,20 +123,101 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
                   </Link>
                 );
               })}
+            </nav>
+
+            {/* Account icon + logout dropdown */}
+            <div className="relative">
               <button
                 type="button"
-                onClick={() => {
-                  logEvent({ type: "logout", actor: { kind: "admin", name: adminName ?? "Admin" } });
-                  logoutAdmin();
-                  setAdminName(null);
-                }}
-                className="ml-2 rounded-full px-3.5 py-1.5 text-sm font-medium text-forest/60 hover:text-clay"
+                onClick={() => setMenuOpen((o) => !o)}
+                aria-label={`Admin account — ${adminName}`}
+                aria-expanded={menuOpen}
+                className="flex h-10 items-center gap-2 rounded-full px-2.5 text-forest transition-colors hover:bg-forest/5"
               >
-                Log out
+                <UserIcon />
+                <span className="hidden max-w-[8rem] truncate text-sm font-medium sm:inline">{adminName}</span>
               </button>
-            </nav>
+              {menuOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+                  <div className="absolute right-0 top-12 z-50 w-44 rounded-lg border border-forest/10 bg-white p-1.5 shadow-soft">
+                    <p className="truncate px-3 py-1.5 text-xs text-forest/50">{adminName} · admin</p>
+                    <button
+                      type="button"
+                      onClick={doLogout}
+                      className="w-full rounded-md px-3 py-2 text-left text-sm font-medium text-forest/70 hover:bg-clay/10 hover:text-clay"
+                    >
+                      Log out
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </header>
+
+        {/* Mobile drawer */}
+        <div
+          className={cn("fixed inset-0 z-50 lg:hidden", mobileOpen ? "pointer-events-auto" : "pointer-events-none")}
+          aria-hidden={!mobileOpen}
+        >
+          <div
+            onClick={() => setMobileOpen(false)}
+            className={cn(
+              "absolute inset-0 bg-forest/40 transition-opacity duration-300",
+              mobileOpen ? "opacity-100" : "opacity-0",
+            )}
+          />
+          <div
+            className={cn(
+              "absolute left-0 top-0 flex h-full w-[84%] max-w-sm flex-col bg-cream shadow-xl transition-transform duration-300 ease-smooth",
+              mobileOpen ? "translate-x-0" : "-translate-x-full",
+            )}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Admin menu"
+          >
+            <div className="flex items-center justify-between border-b border-forest/10 px-5 py-4">
+              <Logo href={ADMIN_BASE} />
+              <button
+                type="button"
+                onClick={() => setMobileOpen(false)}
+                aria-label="Close menu"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-forest hover:bg-forest/5"
+              >
+                <CloseIcon />
+              </button>
+            </div>
+            <nav className="flex flex-col px-3 py-4" aria-label="Admin mobile">
+              {NAV.map((n) => {
+                const active = n.href === ADMIN_BASE ? pathname === ADMIN_BASE : pathname.startsWith(n.href);
+                return (
+                  <Link
+                    key={n.href}
+                    href={n.href}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "rounded-lg px-4 py-3.5 font-serif text-lg transition-colors",
+                      active ? "bg-parchment font-semibold text-moss" : "text-forest hover:bg-parchment",
+                    )}
+                  >
+                    {n.label}
+                  </Link>
+                );
+              })}
+            </nav>
+            <div className="mt-auto border-t border-forest/10 px-5 py-5">
+              <button
+                type="button"
+                onClick={doLogout}
+                className="flex items-center gap-2 text-sm font-medium text-forest"
+              >
+                <UserIcon width={18} /> {adminName} · Log out
+              </button>
+            </div>
+          </div>
+        </div>
+
         {children}
       </div>
     );

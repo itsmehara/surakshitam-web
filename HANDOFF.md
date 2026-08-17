@@ -95,8 +95,14 @@ All client-side. Each maps to a Supabase table in production.
   profiles missing an id.
 - `audit.ts` — activity log (`logEvent`, `getAuditEvents`, `describeBrowser`, visitor id). Types now
   include `cart_remove`, `order_status_changed`, `payment_failed`, `profile_update`, `report_export`,
-  `team_update` alongside the original `page_view`/`login`/`logout`/`cart_add`/`order_placed` (see
-  decision #23 on why the Activity page treats `page_view` differently from the rest).
+  `team_update`, `unauthorized_access` alongside the original
+  `page_view`/`login`/`logout`/`cart_add`/`order_placed` (see decision #23 on why the Activity page
+  treats `page_view` differently from the rest). `seedEvents()` — low-level bulk-insert used only by
+  `demo-seed.ts` (decision #26).
+- `demo-seed.ts` — **dev/demo-only** `seedDemoActivity()`, triggered by the "Load sample activity"
+  button on `/studio/activity`. Populates ~9 days of realistic activity (named customer journeys,
+  guest browsing, real orders via `createOrder`/`updateOrderStatus`, admin actions) using the same
+  functions the real app uses — see decision #26. Never runs automatically.
 - `catalog-store.ts` also now logs a **stock-change audit trail** (`sn-stock-audit-v1`) whenever
   `saveProduct`/`updateStock` change `stock` — `getStockHistory(productId)` reads it back.
 - `cart/CartContext.tsx` — cart provider (logs `cart_add` and now `cart_remove`).
@@ -108,18 +114,23 @@ All client-side. Each maps to a Supabase table in production.
   logs `page_view` per navigation. `layout/Header.tsx` — shows **first name next to the account icon
   when logged in**. `layout/Footer.tsx` — address/email/socials (incl. YouTube); no admin link.
 - `admin/AdminGate.tsx` — gate for `/studio/*`: founder-login / **customer→404 (NotFoundView)** /
-  portal (greets by name); nav includes Packing, Reports, Team. `AdminDashboard` (KPIs + recent
-  orders + packing preview + low stock + a link into full Reports), `AdminOrders` (list, links to
-  detail), `AdminOrderDetail` (status timeline/control + address/payment/items, at
-  `/studio/orders/[orderNumber]`), `OrderStatusControl` (shared by both — status dropdown/advance,
-  and a courier + tracking-number form that appears when marking an order Shipped; see decision
-  #22), `AdminPacking` (aggregated "prepare N × Product" from CONFIRMED/PACKING orders, at
-  `/studio/packing`), `AdminReports` (daily sales / product sales / order status tables, each
-  exportable as CSV / PDF / email, at `/studio/reports`), `AdminTeam` (add/edit/remove admin
-  accounts, at `/studio/team` — any founder can manage the whole team), `AdminProducts`,
-  `AdminProductForm` (now shows per-product inventory audit history), `AdminActivity` (Recent
-  activity table now has column headings, friendly page/product names instead of raw URLs, and
-  **hides `page_view` events by default** — see decision #23), `DevNotifications`.
+  portal. Portal header now **mirrors the storefront** (decision #27): mobile hamburger + slide-out
+  nav drawer, user icon showing the founder's name with a "Log out" dropdown (no more plain-text
+  "Log out" nav item). Also logs `unauthorized_access` once per path when a signed-in customer hits
+  `/studio` (decision #25). `AdminDashboard` (KPIs + recent orders + packing preview + low stock + a
+  link into full Reports), `AdminOrders` (list, links to detail), `AdminOrderDetail` (status
+  timeline/control + address/payment/items, at `/studio/orders/[orderNumber]`),
+  `OrderStatusControl` (shared by both — status dropdown/advance, and a courier + tracking-number
+  form that appears when marking an order Shipped; see decision #22), `AdminPacking` (aggregated
+  "prepare N × Product" from CONFIRMED/PACKING orders, at `/studio/packing`), `AdminReports` (daily
+  sales / product sales / order status tables, each exportable as CSV / PDF / email, at
+  `/studio/reports`), `AdminTeam` (add/edit/remove admin accounts, at `/studio/team` — any founder
+  can manage the whole team), `AdminProducts`, `AdminProductForm` (now shows per-product inventory
+  audit history), `AdminActivity` (Recent activity table has column headings, friendly page/product
+  names instead of raw URLs, **hides `page_view` events by default** — decision #23 — is now
+  **paginated** (15/page), and has a **"Load sample activity"** demo-seeding button — decision #26),
+  `DevNotifications`. All admin tables (Products/Team/Activity/Packing) now scroll horizontally on
+  mobile instead of clipping — decision #28.
 - `account/AccountView.tsx` — gated by `useAuth`; profile (incl. `customerId`) + a **Security**
   section (set/change password) + saved address + **their** orders + logout. Saving the profile now
   also calls `updateSessionIdentity()` so the header name updates immediately (decision #21).
@@ -239,6 +250,34 @@ products/[id],reports,team,activity,dev/notifications}`,
     can't answer "how many bottles of X do I need today" without the same aggregation Packing
     already does). Kept them separate but added light cross-links (Dashboard → Reports, Packing row
     → order detail) so navigation between them stays cheap.
+25. **`unauthorized_access` is logged when a signed-in customer hits `/studio`** — decision #5 makes
+    that path show a plain 404 to the customer (no "access denied" tell), but the founders still
+    want to know it happened. Logged once per path visited (a `useEffect` keyed on
+    `ready`/`customer`/`authed`/`pathname`, not on every render) so repeat visits to the same page
+    don't spam the log.
+26. **"Load sample activity" seeds data via the real app functions, not fake fixture JSON** —
+    `demo-seed.ts` calls `createOrder`, `updateOrderStatus`, `saveAdminAccount`, and a new low-level
+    `seedEvents()` bulk-insert (needed because `logEvent()` always stamps "now" + the current
+    browser's visitor id, which can't simulate multiple visitors/days). This exists because the
+    agent sandbox that built this feature **cannot run `next dev`** or drive a real browser, so
+    there was no way to "click through" a demo login/checkout/admin flow directly — the seed button
+    is the repeatable substitute, and it's genuinely useful for founder demos going forward. It
+    creates real orders (so Orders/Packing/Reports/Dashboard populate too) and includes a named
+    unauthorized-`/studio`-attempt example. Dev/demo-only; never runs automatically.
+27. **Admin portal header rebuilt to mirror the storefront header** — it was a plain inline nav that
+    didn't collapse on mobile (nav items just wrapped awkwardly) and logout was a text link sitting
+    among nav items. Now: hamburger + slide-out drawer below `lg`, and a user icon (matching the
+    storefront account icon) showing the founder's name that opens a small "Log out" dropdown,
+    instead of a permanent text nav item. Reuses the exact same drawer/overlay pattern as
+    `layout/Header.tsx` for consistency.
+28. **Admin tables scroll on mobile instead of clipping; `ml-auto`-in-a-wrapping-row replaced with a
+    bordered second row** — two related mobile bugs. (a) Products/Team/Activity/Packing tables sat
+    directly inside an `overflow-hidden` rounded-border wrapper with no inner scroll container, so
+    columns got squeezed/cut off on narrow screens instead of scrolling; fixed with an inner
+    `overflow-x-auto` div. (b) The "Customer view" link in `AdminOrders`/`AdminOrderDetail` used
+    `ml-auto` inside a `flex-wrap` row shared with the status control — when that row wrapped on
+    mobile, `ml-auto` still pinned the link to the far right of its own line, leaving a large empty
+    gap. Replaced with a second row under a thin `border-t` divider (stacked, not far-right-pinned).
 
 ---
 
@@ -272,6 +311,12 @@ products/[id],reports,team,activity,dev/notifications}`,
   page views, which are now opt-in via a checkbox (decision #23); **Dashboard/Orders/Packing/Reports
   deliberately kept as four separate screens** with light cross-links rather than merged (decision
   #24).
+- **Post-Phase-5 round 3: unauthorized-access tracking, demo seeding, mobile polish (2026-08-17)**
+  ✅ — `unauthorized_access` events for signed-in customers hitting `/studio` (decision #25);
+  **"Load sample activity"** demo-data button + paginated (15/page) Recent Activity table (decision
+  #26); **admin portal header rebuilt to mirror the storefront** — mobile drawer + user-icon logout
+  dropdown (decision #27); **mobile table/list fixes** — horizontal-scrolling tables instead of
+  clipping, and a bordered second row instead of `ml-auto` gaps in order cards (decision #28).
 - **Phase 6 Production hardening** ❌ — Supabase (Postgres + auth), real Razorpay + WhatsApp Business
   API (server secrets, idempotent webhooks), image uploads (Supabase Storage), Instagram Graph token,
   CMS, rate-limiting/2FA/security headers/monitoring/backups, cookie-consent banner + privacy
@@ -297,3 +342,66 @@ WhatsApp Business API; Supabase Storage uploads; consent banner; hosting on Verc
 ## 10. Housekeeping
 - Switch dev back to plain `npm run dev` (drop `SCREENSHOTS=1`) for normal work.
 - `outputs/_trash-old-loose-screenshots/` can be emptied.
+
+---
+
+## 11. Tech stack — plain-language guide, alternatives & switch cost (written for a Python reader)
+
+You don't need to become a web developer to make decisions about this project. Here's what it's
+built on, why, and what your other options are — with honest time estimates.
+
+**What each piece does, in Python terms:**
+- **Next.js** — the web framework running the whole thing. Rough analogue: Django's routing +
+  templates + production server + build tooling, bundled together, but for JavaScript.
+- **React** — the UI library Next.js sits on. You write "components": functions that return
+  markup, similar to a Python function returning an HTML string — except React re-runs a
+  component automatically when its data changes and updates *only* the part of the page that
+  changed, no full reload. That's what makes the cart drawer, quick view, and status dropdowns
+  feel instant.
+- **TypeScript** — JavaScript with type hints that are *enforced*, not just suggested. Similar
+  spirit to Python type hints + mypy, except stricter and non-optional here — `tsc` (see earlier
+  note) is the main way changes get verified without a live browser.
+- **Tailwind CSS** — instead of separate `.css` files with invented class names, small pre-defined
+  utility classes go directly in the markup (`text-sm font-semibold text-forest`). Faster and more
+  consistent once familiar; looks noisy at first glance.
+- **localStorage** (today's "database") — a small key-value store built into the browser, scoped
+  to one device. Everything (orders, cart, admin accounts) lives here today — this is *why* it's a
+  prototype. A real launch needs a real database (Phase 6).
+
+**Why this specific stack:** it's the dominant choice for e-commerce UIs right now — the reference
+implementations most people copy from (Vercel Commerce, Shopify Hydrogen, Medusa's storefront) use
+this exact combination — it has the deepest AI-assistance/tutorial coverage of any web stack
+(fastest to build and fix with AI help), and it deploys to Vercel with production-grade performance
+with near-zero configuration.
+
+**Effort spent so far:** roughly **72 productive core hours** of focused build time went into
+everything described in this document — every storefront page, checkout, accounts, and the full
+admin operations suite (Phases 1–5 plus the post-Phase-5 rounds above). That number matters for the
+comparison below: it's mostly *decision-making* time (what should "packing list" aggregate? what
+happens when you mark something Shipped? what should the activity log actually show?), not typing
+time — and any rewrite, in any language, inherits those decisions for free. What it does *not*
+inherit is the working code itself.
+
+**If you wanted to switch stacks — options and rough hours from here:**
+
+| Path | What changes | Rough hours | Best if... |
+|---|---|---|---|
+| **Stay here, do Phase 6** (recommended) | Swap localStorage → Supabase (Postgres), Razorpay live, WhatsApp Business API, real hosting | ~40–70 hrs | You want the fastest path to an actual launch; someone is willing to touch JS/TS for backend wiring only |
+| **Hybrid: keep this frontend, Python backend** (Django or FastAPI + Postgres, instead of Supabase) | Same UI/UX customers and founders already tested; the API/database layer becomes Python you can read and maintain yourself | ~55–90 hrs | You want to personally own and extend the backend long-term, without losing this UI |
+| **Full rewrite, Python-only** (Django + HTMX/Alpine, server-rendered) | Every page rebuilt as Django views/templates; JS interactivity (cart drawer, quick view, live status updates) becomes optional "sprinkles" via HTMX instead of built-in | ~100–160 hrs | You want zero JavaScript/React in the codebase and are OK with a slightly more page-refresh-y feel (HTMX narrows this a lot, but doesn't erase it) |
+| **Adopt Saleor** (open-source, Python/Django/GraphQL commerce engine) | Don't build commerce logic from scratch — install Saleor, then rebuild *this project's specific admin workflow* (packing list, courier tracking, team management, activity log) on top of it, since Saleor's own admin doesn't have these | ~60–100 hrs, but you inherit a production-grade, actively-maintained core (security, scaling) for free going forward | You want a serious commerce backend and don't mind Saleor's opinions about how orders/inventory work |
+
+All estimates assume someone reasonably comfortable in the target stack already — roughly double
+them if learning that stack from scratch while building. None of these numbers include real
+content work (final copy, product photography, legal/GST setup, courier account setup) — that
+effort is roughly the same regardless of which stack you pick.
+
+**Honest recommendation:** given 72 hours are already invested in a stack that works end-to-end
+and matches what most production e-commerce sites run on, the fastest, lowest-risk path to an
+actual launch is Phase 6 on the current stack (top row) — most of that remaining work is
+configuration and integration (payment keys, WhatsApp API tokens, hosting setup), not deep coding,
+even if you personally never touch the JS/TS. The Python-backend hybrid (second row) is the more
+attractive option if your real goal is long-term personal maintainability rather than fastest
+launch — you'd treat the frontend as "done" and only need to read/write Python afterward. A full
+Python-only rewrite (third row) or adopting Saleor (fourth row) make sense mainly if owning 100% of
+the code in a language you already know outweighs time-to-launch as a priority.

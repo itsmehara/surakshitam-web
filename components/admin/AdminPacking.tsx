@@ -65,6 +65,7 @@ export function AdminPacking() {
         </div>
       ) : (
         <div className="mt-6 overflow-hidden rounded-lg border border-forest/8 bg-white/60">
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b border-forest/8 bg-parchment/40 text-left text-xs font-medium text-forest/55">
               <tr>
@@ -104,6 +105,7 @@ export function AdminPacking() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

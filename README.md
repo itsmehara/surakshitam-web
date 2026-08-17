@@ -32,13 +32,34 @@ npm run lint                 # next lint
 SCREENSHOTS=1 npm run dev    # dev server with unoptimised images, for screenshot capture
 ```
 
+### Screenshot capture scripts
+
+With `SCREENSHOTS=1 npm run dev` running, `npm i -D playwright && npx playwright install chromium`,
+then run any of:
+
+```bash
+node scripts/capture-storefront-desktop.mjs   # → SurakshitamNaturals-Screenshots/Desktop-Shopping-Cart/
+node scripts/capture-storefront-mobile.mjs    # → SurakshitamNaturals-Screenshots/Mobile-Shopping-Cart/
+node scripts/capture-admin-desktop.mjs        # → SurakshitamNaturals-Screenshots/Desktop-Admin-Portal/
+node scripts/capture-admin-mobile.mjs         # → SurakshitamNaturals-Screenshots/Mobile-Admin-Portal/
+```
+
+Each produces numbered, framed, watermarked PNGs (`001-<section>-<feature>.png`, ...) — the
+watermark text always matches the filename. Shared logic lives in `scripts/screenshot-utils.mjs`.
+The watermark is drawn as a real DOM element in the browser before each screenshot (not composited
+afterwards with sharp/SVG) — some prebuilt sharp/libvips binaries silently drop SVG `<text>` when
+fontconfig isn't linked in, so text is rendered by Chromium itself instead, which always works. The
+outer dark border is still added afterwards with sharp (a pure image op, unaffected by that issue).
+
 ## Demo credentials
 
 - **Customer:** mobile + OTP login — any 10-digit mobile, OTP `1234` (any 4–6 digits works). Use
   `9849116181` (blank name) to load as the seeded customer Bhavesh Allapati. Password login also
-  works: username `bhavesh`, password `demo123`.
+  works: username `bhavesh`, password `demo123`. Customers can also set/change their own password
+  from Account → Security.
 - **Founders (admin):** sign in at **`/studio`** — username `srikanthnaturals` or
-  `supriyanaturals`, password `demo123`.
+  `supriyanaturals`, password `demo123`. Any signed-in founder can add/edit/remove admin accounts
+  from `/studio/team`.
 
 ## Tech stack
 
@@ -48,25 +69,39 @@ SCREENSHOTS=1 npm run dev    # dev server with unoptimised images, for screensho
 - **Self-hosted fonts** via `@fontsource-variable` (Fraunces + Inter)
 - Optimised **WebP** product imagery via `next/image`
 
+**New to web dev / coming from Python?** `HANDOFF.md` §11 explains each piece in plain language
+(with Python analogies), why this stack was chosen, and — if you'd rather rewrite parts of this in
+Python (Django/FastAPI, or the Python-based Saleor commerce engine) — a comparison table with
+rough hours for each path, benchmarked against the ~72 core hours already spent building this
+prototype in the current stack.
+
 ## What's included
 
 **Storefront** — home, shop (filters/sort), product detail, ingredients, our story, learn,
 contact, policies, search, cart (drawer + full page), quick view, cross-sell.
 
 **Checkout & accounts** — 4-step checkout (contact/OTP → address → review → mock Razorpay
-payment), guest checkout, order confirmation, customer account dashboard, order history and
-tracking, mock WhatsApp order/status notifications.
+payment), guest checkout, order confirmation, customer account dashboard (incl. a friendly
+`SN-CU-#####` customer ID and self-service password), order history and tracking (incl. courier +
+tracking number once shipped), mock WhatsApp order/status notifications.
 
-**Admin ("Studio")**, at `/studio`, founder-only:
-- Dashboard — KPIs, recent orders, packing preview, low stock
+**Admin ("Studio")**, at `/studio`, founder-only — responsive header (mobile drawer nav, user-icon
+logout, matches the storefront header):
+- Dashboard — KPIs, recent orders, packing preview, low stock, link into full Reports
 - Orders — list with fulfilment-status workflow, and a per-order detail page
-  (`/studio/orders/[orderNumber]`)
+  (`/studio/orders/[orderNumber]`). Marking an order Shipped requires a courier (or "Handed over to
+  customer") and a tracking number.
 - Packing list (`/studio/packing`) — aggregates pending orders into "prepare N × Product"
 - Reports (`/studio/reports`) — daily sales, product sales, order-status breakdown, each
-  exportable as CSV
+  exportable as CSV, PDF, or email
+- Team (`/studio/team`) — add/edit/remove admin accounts; any signed-in founder can manage the team
 - Products — catalogue/inventory management, with a per-product stock-change audit history
-- Activity — anonymised visitor/admin activity log
+- Activity — business-event-first activity log (logins, orders, status changes, exports,
+  unauthorized `/studio` attempts, ...), paginated, with a "Load sample activity" demo-data button
 - Notifications — viewer for simulated WhatsApp messages
+
+All of the above — storefront, checkout, accounts, and the full admin portal — is fully responsive
+and has been designed and verified on **both desktop and mobile** screen sizes, not just desktop.
 
 **SEO & performance** — per-page metadata, OpenGraph, `sitemap.xml`, `robots.txt`,
 JSON-LD (Organization + Product), semantic HTML, accessible focus states and skip link.
@@ -83,7 +118,7 @@ app/                       # routes (App Router)
   order/[orderNumber]/      # order confirmation / tracking
   studio/                   # admin ("Studio"): dashboard, orders, orders/[orderNumber],
                              #   packing, products, products/[id], products/new, reports,
-                             #   activity, dev/notifications
+                             #   team, activity, dev/notifications
   ingredients/ our-story/ learn/ contact/ policies/[slug]/ search/ track-order/
 components/
   layout/                   # AppShell, Header, Footer (hides storefront chrome on /studio)
@@ -91,12 +126,13 @@ components/
   ui/                       # reusable primitives (Button, ProductCard, NotFoundView, ...)
   auth/ account/ cart/ checkout/ search/  # feature components
   admin/                    # AdminGate, AdminDashboard, AdminOrders, AdminOrderDetail,
-                             #   AdminPacking, AdminReports, AdminProducts, AdminProductForm,
-                             #   AdminActivity, DevNotifications
+                             #   OrderStatusControl, AdminPacking, AdminReports, AdminTeam,
+                             #   AdminProducts, AdminProductForm, AdminActivity, DevNotifications
 lib/
   catalog.ts catalog-store.ts   # seed catalogue + admin overlay (localStorage)
   orders.ts payments.ts notifications.ts   # order model, mock Razorpay, mock WhatsApp
   auth.ts admin.ts audit.ts profile.ts     # customer/admin auth, activity log
+  demo-seed.ts                  # dev-only: seeds realistic Activity/order sample data
   types.ts format.ts site.ts cn.ts
 public/products/ public/story/ public/reels/
 ```
