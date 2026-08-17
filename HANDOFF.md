@@ -576,7 +576,7 @@ this exact combination — it has the deepest AI-assistance/tutorial coverage of
 (fastest to build and fix with AI help), and it deploys to Vercel with production-grade performance
 with near-zero configuration.
 
-**Effort spent so far:** roughly **72 productive core hours** of focused build time went into
+**Effort spent so far:** roughly **96 productive core hours** of focused build time went into
 everything described in this document — every storefront page, checkout, accounts, and the full
 admin operations suite (Phases 1–5 plus the post-Phase-5 rounds above). That number matters for the
 comparison below: it's mostly *decision-making* time (what should "packing list" aggregate? what
@@ -598,7 +598,7 @@ them if learning that stack from scratch while building. None of these numbers i
 content work (final copy, product photography, legal/GST setup, courier account setup) — that
 effort is roughly the same regardless of which stack you pick.
 
-**Honest recommendation:** given 72 hours are already invested in a stack that works end-to-end
+**Honest recommendation:** given 96 hours are already invested in a stack that works end-to-end
 and matches what most production e-commerce sites run on, the fastest, lowest-risk path to an
 actual launch is Phase 6 on the current stack (top row) — most of that remaining work is
 configuration and integration (payment keys, WhatsApp API tokens, hosting setup), not deep coding,

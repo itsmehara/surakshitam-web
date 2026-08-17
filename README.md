@@ -101,7 +101,7 @@ page, in filename order, each page sized to match its screenshot exactly.
 **New to web dev / coming from Python?** `HANDOFF.md` §11 explains each piece in plain language
 (with Python analogies), why this stack was chosen, and — if you'd rather rewrite parts of this in
 Python (Django/FastAPI, or the Python-based Saleor commerce engine) — a comparison table with
-rough hours for each path, benchmarked against the ~72 core hours already spent building this
+rough hours for each path, benchmarked against the ~96 core hours already spent building this
 prototype in the current stack.
 
 ## What's included
