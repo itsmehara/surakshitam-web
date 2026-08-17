@@ -530,9 +530,16 @@ WhatsApp Business API; Supabase Storage uploads; consent banner; hosting on Verc
 ---
 
 ## 9. Deliverables already produced
-- Screenshots for founder review: `outputs/SurakshitamNaturals-Screenshots/` — 56 shots across 12
-  numbered folders (01-Home … 12-Access-and-404). Regenerate via
-  `surakshitam-web/scripts/capture-screenshots.mjs` (needs `SCREENSHOTS=1 npm run dev` + Playwright).
+- Screenshots for founder review: `outputs/SurakshitamNaturals-Screenshots/`, one folder each for
+  Desktop-Shopping-Cart / Desktop-Admin-Portal / Mobile-Shopping-Cart / Mobile-Admin-Portal.
+  Regenerate all four via `node scripts/capture-all.mjs` (needs `SCREENSHOTS=1 npm run dev` +
+  Playwright), or run one script standalone, e.g. `node scripts/capture-storefront-desktop.mjs`.
+  The older single `capture-screenshots.mjs` (56 shots / 12 folders) is superseded by this 4-script
+  setup and no longer maintained.
+  **Updated for round 5/6 features** — the storefront scripts now also seed a sample offer and
+  combo (and a wishlist for the customer context) and capture `/offers` (both tabs), `/wishlist`,
+  `/faqs`, `?concern=` filtering, and the homepage floating-Offers-button modal; the admin scripts
+  capture the Products page's Offers and Combos tabs. Increases the shot count in every folder.
 
 ## 10. Housekeeping
 - Switch dev back to plain `npm run dev` (drop `SCREENSHOTS=1`) for normal work.

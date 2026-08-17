@@ -106,8 +106,13 @@ prototype in the current stack.
 
 ## What's included
 
-**Storefront** — home, shop (filters/sort), product detail, ingredients, our story, learn,
-contact, policies, search, cart (drawer + full page), quick view, cross-sell.
+**Storefront** — home, shop (filters/sort, incl. shop-by-concern e.g. `/shop?concern=dry-skin`),
+product detail, ingredients, our story, learn, contact, FAQs, policies, search, cart (drawer +
+full page), quick view, cross-sell, wishlist (`/wishlist`, heart icon on product cards), a unified
+Offers & Combos page (`/offers`, tab switcher between live discount codes and combo kits — combos
+auto-decrement each component product's stock on purchase), click-to-call/WhatsApp header links,
+and a homepage promo carousel + banner + a larger floating "Offers" button surfacing whatever's
+currently live (all admin-toggleable — see Admin below).
 
 **Checkout & accounts** — 4-step checkout (contact/OTP → address → review → mock Razorpay
 payment), guest checkout, order confirmation, customer account dashboard (incl. a friendly
@@ -124,7 +129,10 @@ logout, matches the storefront header):
 - Reports (`/studio/reports`) — daily sales, product sales, order-status breakdown, each
   exportable as CSV, PDF, or email
 - Team (`/studio/team`) — add/edit/remove admin accounts; any signed-in founder can manage the team
-- Products — catalogue/inventory management, with a per-product stock-change audit history
+- Products — catalogue/inventory management, with a per-product stock-change audit history;
+  Offers and Combos live as tabs on this same page (not separate nav items), each with its own
+  CRUD. The Offers tab also has a checkbox controlling whether "Offers" shows anywhere on the
+  storefront (nav link, floating button, banner, carousel) — on by default
 - Activity — business-event-first activity log (logins, orders, status changes, exports,
   unauthorized `/studio` attempts, ...), paginated, with a "Load sample activity" demo-data button
 - Notifications — viewer for simulated WhatsApp messages
@@ -141,24 +149,31 @@ JSON-LD (Organization + Product), semantic HTML, accessible focus states and ski
 app/                       # routes (App Router)
   layout.tsx                # shell: fonts, metadata
   page.tsx                  # homepage
-  shop/ product/[slug]/     # catalogue + product detail
+  shop/ product/[slug]/     # catalogue (incl. ?concern= filter) + product detail
+  wishlist/ offers/ combos/ # wishlist page; unified Offers/Combos page; /combos redirects there
   cart/ checkout/           # cart + 4-step checkout
   account/ login/           # customer auth + account dashboard
   order/[orderNumber]/      # order confirmation / tracking
   studio/                   # admin ("Studio"): dashboard, orders, orders/[orderNumber],
-                             #   packing, products, products/[id], products/new, reports,
-                             #   team, activity, dev/notifications
-  ingredients/ our-story/ learn/ contact/ policies/[slug]/ search/ track-order/
+                             #   packing, products (Catalog/Offers/Combos tabs), products/[id],
+                             #   products/new, reports, team, activity, dev/notifications
+  ingredients/ our-story/ learn/ contact/ faqs/ policies/[slug]/ search/ track-order/
 components/
-  layout/                   # AppShell, Header, Footer (hides storefront chrome on /studio)
-  home/                     # homepage sections
-  ui/                       # reusable primitives (Button, ProductCard, NotFoundView, ...)
+  layout/                   # AppShell, Header, Footer, OfferBanner (hides storefront chrome on /studio)
+  home/                     # homepage sections, incl. PromoCarousel (offers/combos/sale carousel)
+  ui/                       # reusable primitives (Button, ProductCard, WishlistButton, ComboCard,
+                             #   OffersFab + PromoCardGrid, FaqAccordion, NotFoundView, ...)
   auth/ account/ cart/ checkout/ search/  # feature components
   admin/                    # AdminGate, AdminDashboard, AdminOrders, AdminOrderDetail,
                              #   OrderStatusControl, AdminPacking, AdminReports, AdminTeam,
-                             #   AdminProducts, AdminProductForm, AdminActivity, DevNotifications
+                             #   AdminProducts (tab switcher), AdminOffers, AdminCombos,
+                             #   AdminProductForm, AdminActivity, DevNotifications
 lib/
   catalog.ts catalog-store.ts   # seed catalogue + admin overlay (localStorage)
+  wishlist/WishlistContext.tsx  # localStorage-backed wishlist, mirrors cart/CartContext.tsx
+  offers.ts bundles.ts promotions.ts   # coupon codes, combo kits, and the combined "what's
+                                        #   promotable right now" feed used by the carousel/FAB
+  site-settings.ts          # admin on/off toggles (currently: whether "Offers" shows anywhere)
   orders.ts payments.ts notifications.ts   # order model, mock Razorpay, mock WhatsApp
   auth.ts admin.ts audit.ts profile.ts     # customer/admin auth, activity log
   demo-seed.ts                  # dev-only: seeds realistic Activity/order sample data

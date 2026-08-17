@@ -37,6 +37,10 @@ const NOTIFS = [
   { id: "ntf_3", channel: "whatsapp", audience: "customer", recipient: "Customer · Bhavesh Allapati", to: "9849116181", template: "customer_status_packed", status: "sent", createdAt: "2026-08-16T09:00:00.000Z", archived: true, message: "Hi Bhavesh Allapati, an update on your order 🌿\n\nOrder: SURK-2026-482913\nYour order is packed and ready for dispatch." },
 ];
 const ADMIN = { username: "srikanthnaturals", name: "Srikanth" };
+// Post-Phase-5 round 5/6 features: seeded so Products → Offers/Combos tabs show populated
+// tables instead of the "no offers/combos yet" empty state.
+const OFFERS = [{ id: "off_demo1", code: "WELCOME10", description: "10% off your first order", type: "percent", value: 10, startDate: "2026-08-01", endDate: "2026-12-31", enabled: true }];
+const BUNDLES = [{ id: "bundle_demo1", slug: "daily-essentials-kit", name: "Daily Essentials Kit", description: "Our shea butter soap, hair oil and dishwash liquid, together at a special price.", image: "", productIds: ["p-shea-butter-soap", "p-hair-oil", "p-dishwash-liquid"], price: 55000, enabled: true }];
 
 function seedScript() {
   // addInitScript re-runs on EVERY navigation in this context, not just the first load —
@@ -48,6 +52,8 @@ function seedScript() {
       localStorage.setItem('sn-notifications-v1', ${JSON.stringify(JSON.stringify(NOTIFS))});
       localStorage.setItem('sn-visitor-v1', 'v_demo12ab');
       localStorage.setItem('sn-admin-v1', ${JSON.stringify(JSON.stringify(ADMIN))});
+      localStorage.setItem('sn-offers-v1', ${JSON.stringify(JSON.stringify(OFFERS))});
+      localStorage.setItem('sn-bundles-v1', ${JSON.stringify(JSON.stringify(BUNDLES))});
       localStorage.removeItem('sn-auth-v1');
       localStorage.removeItem('sn-orders-v1');
       localStorage.removeItem('sn-audit-v1');
@@ -126,6 +132,17 @@ export async function run(browser) {
   log("product forms");
   await twoShotMobile(page, BASE, "/studio/products/p-shea-butter-soap", shot, "product-edit-form", 5000);
   await twoShotMobile(page, BASE, "/studio/products/new", shot, "product-add-form", 5000);
+
+  log("products — offers tab");
+  await goto(page, BASE, "/studio/products");
+  await clickText(page, "button", /^offers$/i);
+  await page.waitForTimeout(300);
+  await shot(page, "products-offers-tab");
+
+  log("products — combos tab");
+  await clickText(page, "button", /^combos$/i);
+  await page.waitForTimeout(300);
+  await shot(page, "products-combos-tab");
 
   log("reports");
   await twoShotMobile(page, BASE, "/studio/reports", shot, "reports-tables", 5000);

@@ -4,9 +4,21 @@ A quick summary of what the website and admin portal can do today.
 
 ## Storefront (customer-facing)
 
-Home, shop with filters/sort, product pages, category pages (home care / skin care / hair care),
-ingredients glossary, our story, learn articles, search, contact, and policy pages — fully
-responsive on mobile, tablet, and laptop.
+Home, shop with filters/sort, "shop by concern" browsing (dry skin, dandruff, hair fall, etc.
+alongside the usual categories), product pages, category pages (home care / skin care / hair
+care), ingredients glossary, our story, learn articles, FAQs, search, contact, and policy pages —
+fully responsive on mobile, tablet, and laptop.
+
+- **Wishlist** — heart icon on every product card, saved on the customer's device, own page at
+  `/wishlist`
+- **Offers & Combos page** — one page (`/offers`) with a tab switch between live discount codes
+  (tap to copy) and combo kits; a floating "Offers" button (bottom-right, below the WhatsApp
+  button) opens the same list from anywhere on the site
+- **Combo kits** — bundles of 2+ products sold together at a special price; adding one to cart
+  adds the individual products, so stock still tracks correctly per product
+- **Homepage promo strip** — a compact, auto-advancing row of whatever's currently live (offers,
+  combos, discounted products), plus a slim banner near the top when there's an active code
+- **Real click-to-call and WhatsApp links** in the header, not just the admin notification viewer
 
 ## Cart & checkout
 
@@ -35,8 +47,12 @@ responsive on mobile, tablet, and laptop.
 - **Order detail page** — full breakdown per order, with its own "print shipping label" button
 - **Products & inventory** — add/edit/hide products, manage stock, full stock-change history log;
   stock now reduces automatically when a customer buys (previously manual only)
-- **Offers/coupons** — new tab under Products: create discount codes (percentage or flat amount),
-  set a start/end date so they turn on and off automatically, optional minimum order value
+- **Offers/coupons** — a tab under Products: create discount codes (percentage or flat amount),
+  set a start/end date so they turn on and off automatically, optional minimum order value; a
+  checkbox on this tab turns the "Offers" nav link, floating button, banner and homepage strip
+  on or off site-wide (on by default)
+- **Combos** — another tab under Products: bundle 2 or more products at a special price; the
+  discount applies automatically at checkout once every product in the combo is in the cart
 - **Reports** — daily sales, product sales, order status, now with a date filter (Today / This
   Week / This Month / Custom range) so any period can be pulled, not just daily — exportable as
   CSV, PDF, or straight to email
