@@ -67,6 +67,8 @@ All client-side. Each maps to a Supabase table in production.
 - `sn-catalog-v1` — admin catalog overlay `{overrides:{id:Product}, hidden:[id]}`.
 - `sn-stock-audit-v1` — per-product stock-change history (see decision #15).
 - `sn-audit-v1` — activity events; `sn-visitor-v1` — anonymous per-browser id.
+- `sn-offers-v1` — offer/coupon codes `[{id, code, description, type:'percent'|'flat', value,
+  startDate, endDate, enabled, minOrderValue?}]` (decision #32).
 
 ---
 
@@ -105,7 +107,15 @@ All client-side. Each maps to a Supabase table in production.
   functions the real app uses — see decision #26. Never runs automatically.
 - `catalog-store.ts` also now logs a **stock-change audit trail** (`sn-stock-audit-v1`) whenever
   `saveProduct`/`updateStock` change `stock` — `getStockHistory(productId)` reads it back.
+  `decrementStockForOrder(items)` reduces stock for a placed order's line items, logged with actor
+  "Order placed" instead of an admin name (decision #29).
 - `cart/CartContext.tsx` — cart provider (logs `cart_add` and now `cart_remove`).
+- `offers.ts` — offer/coupon CRUD (`getOffers`, `saveOffer`, `deleteOffer`, `blankOffer`), plus
+  `isOfferLive(offer)` (enabled + within date range) and `applyOfferCode(code, subtotal)` →
+  `{ok:true, offer, discount}` or `{ok:false, reason}` (decision #32).
+- `print-label.ts` — `printShippingLabels(orders)`, opens a print window with one address label per
+  order (same `window.open` + `window.print()` pattern as the Reports PDF export — no shipping-API
+  integration needed; decision #31).
 
 **components/**
 - `auth/AuthProvider.tsx` — **`useAuth()` context** (user, isLoggedIn, loginOtp, loginPassword,
@@ -124,9 +134,12 @@ All client-side. Each maps to a Supabase table in production.
   form that appears when marking an order Shipped; see decision #22), `AdminPacking` (aggregated
   "prepare N × Product" from CONFIRMED/PACKING orders, at `/studio/packing`), `AdminReports` (daily
   sales / product sales / order status tables, each exportable as CSV / PDF / email, at
-  `/studio/reports`), `AdminTeam` (add/edit/remove admin accounts, at `/studio/team` — any founder
-  can manage the whole team), `AdminProducts`, `AdminProductForm` (now shows per-product inventory
-  audit history), `AdminActivity` (Recent activity table has column headings, friendly page/product
+  `/studio/reports`, now with a **date-range picker** — All time/Today/This week/This month/Custom —
+  that filters all three tables, replacing separate daily/monthly report screens; decision #30),
+  `AdminTeam` (add/edit/remove admin accounts, at `/studio/team` — any founder can manage the whole
+  team), `AdminProducts` (now has **Catalog / Offers tabs** — Offers is `AdminOffers.tsx`, admin CRUD
+  for coupon codes with a start/end duration, nested here instead of a new top-level nav item;
+  decision #32), `AdminProductForm` (now shows per-product inventory audit history), `AdminActivity` (Recent activity table has column headings, friendly page/product
   names instead of raw URLs, **hides `page_view` events by default** — decision #23 — is now
   **paginated** (15/page), and has a **"Load sample activity"** demo-seeding button — decision #26),
   `DevNotifications`. All admin tables (Products/Team/Activity/Packing) now scroll horizontally on
@@ -278,6 +291,28 @@ products/[id],reports,team,activity,dev/notifications}`,
     `ml-auto` inside a `flex-wrap` row shared with the status control — when that row wrapped on
     mobile, `ml-auto` still pinned the link to the far right of its own line, leaving a large empty
     gap. Replaced with a second row under a thin `border-t` divider (stacked, not far-right-pinned).
+29. **Stock decrements automatically on purchase, attributed to "Order placed" not an admin** —
+    `createOrder()` now calls `decrementStockForOrder()` right after writing the order. Previously
+    stock only changed via a manual admin edit, so a real sale didn't reduce inventory — a founder
+    request (Srikanth, via friend feedback shared 2026-08-17). Logged to the existing stock-audit
+    trail with a distinct actor label so it's visually distinguishable from a manual correction.
+30. **Reports gets one date-range picker instead of separate daily/monthly report screens** —
+    Today/This week/This month/Custom range filters all three existing tables (daily sales, product
+    sales, order status) in place. Chosen over adding "Monthly report" and "Product-wise monthly
+    report" as new pages/tabs specifically to avoid growing the admin nav — same request flagged
+    "too many menus" as a concern, so existing screens got smarter instead of the menu getting longer.
+31. **Shipping-label printing reuses the Reports PDF pattern (`window.open` + `window.print()`)**,
+    not a shipping-carrier API — `lib/print-label.ts`'s `printShippingLabels(orders)` is shared by a
+    single "Print label" button on Order Detail and a bulk "Print all labels" button on Packing.
+    Kept as a lib function (not a component) since it has no UI of its own, only a side effect.
+32. **Offers/coupons nested as a tab inside the existing Products page, not a new nav item** —
+    same "too many menus" reasoning as #30. `AdminProducts.tsx` gained a Catalog/Offers tab switcher;
+    `AdminOffers.tsx` is a self-contained CRUD list+form (mirrors `AdminTeam.tsx`'s pattern) for
+    percent/flat discount codes with a start/end duration. Checkout gained a code field in the Review
+    step (`lib/offers.ts`'s `applyOfferCode(code, subtotal)`); the resulting discount is stored on the
+    order (`Order.discount`, `Order.offerCode`) so it survives in reports/order-detail even if the
+    offer is later deleted. Prototype-only validation — production must re-check the code
+    server-side before charging, never trust a client-computed discount.
 
 ---
 
@@ -317,6 +352,15 @@ products/[id],reports,team,activity,dev/notifications}`,
   #26); **admin portal header rebuilt to mirror the storefront** — mobile drawer + user-icon logout
   dropdown (decision #27); **mobile table/list fixes** — horizontal-scrolling tables instead of
   clipping, and a bordered second row instead of `ml-auto` gaps in order cards (decision #28).
+- **Post-Phase-5 round 4: founder-feedback build (2026-08-17)** ✅ — triaged a feature-request list
+  a friend of Srikanth's sent after reviewing screenshots; implemented the four items that don't
+  require a new external account (see decisions #29-32): **automatic stock decrement on purchase**,
+  a **Reports date-range picker** (replacing separate daily/monthly report ideas), **shipping-label
+  printing** (Order Detail + bulk from Packing), and **offers/coupon codes** (admin CRUD nested under
+  Products, applied at checkout). Two other requested items — real payment gateway and real WhatsApp
+  Business API — remain intentionally mocked; both need Srikanth to set up real third-party accounts
+  first (Razorpay merchant account; a WhatsApp Business API provider like Meta direct or
+  Gupshup/Twilio) before "real" integration is even possible.
 - **Phase 6 Production hardening** ❌ — Supabase (Postgres + auth), real Razorpay + WhatsApp Business
   API (server secrets, idempotent webhooks), image uploads (Supabase Storage), Instagram Graph token,
   CMS, rate-limiting/2FA/security headers/monitoring/backups, cookie-consent banner + privacy

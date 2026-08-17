@@ -18,6 +18,7 @@ import {
 import { getProfile } from "@/lib/profile";
 import { getSession } from "@/lib/auth";
 import { logEvent } from "@/lib/audit";
+import { applyOfferCode, type Offer } from "@/lib/offers";
 import {
   mockNotificationProvider,
   customerOrderPlaced,
@@ -58,6 +59,10 @@ export function Checkout() {
   const [addrError, setAddrError] = useState("");
   const [failed, setFailed] = useState(false);
   const [razorOpen, setRazorOpen] = useState(false);
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedOffer, setAppliedOffer] = useState<Offer | null>(null);
+  const [discount, setDiscount] = useState(0);
+  const [couponError, setCouponError] = useState("");
 
   useEffect(() => {
     const saved = getSavedAddress();
@@ -98,9 +103,29 @@ export function Checkout() {
   }
 
   const shipping = subtotal >= FREE_SHIP ? 0 : SHIP_FEE;
-  const total = subtotal + shipping;
+  const total = Math.max(0, subtotal + shipping - discount);
 
   const setA = (k: keyof Address, v: string) => setAddress((a) => ({ ...a, [k]: v }));
+
+  function applyCoupon() {
+    const result = applyOfferCode(couponInput, subtotal);
+    if (!result.ok) {
+      setCouponError(result.reason);
+      setAppliedOffer(null);
+      setDiscount(0);
+      return;
+    }
+    setCouponError("");
+    setAppliedOffer(result.offer);
+    setDiscount(result.discount);
+  }
+
+  function removeCoupon() {
+    setAppliedOffer(null);
+    setDiscount(0);
+    setCouponInput("");
+    setCouponError("");
+  }
 
   function verifyOtp() {
     if (otp.trim() === "123456") {
@@ -143,6 +168,8 @@ export function Checkout() {
       })),
       subtotal,
       shipping,
+      discount: discount || undefined,
+      offerCode: appliedOffer?.code,
       total,
       address,
       paymentStatus: "PAID",
@@ -342,6 +369,37 @@ export function Checkout() {
                   ))}
                 </ul>
               </div>
+              <div className="rounded-lg border border-forest/8 bg-white/60 p-6">
+                <h2 className="font-serif text-xl font-semibold text-forest">Offer code</h2>
+                {appliedOffer ? (
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-moss/10 px-4 py-2.5">
+                    <p className="text-sm text-moss">
+                      <span className="font-semibold">{appliedOffer.code}</span> applied — you saved{" "}
+                      {formatPrice(discount)}.
+                    </p>
+                    <button type="button" onClick={removeCoupon} className="text-sm font-medium text-forest/60 hover:text-forest">
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mt-3 flex max-w-sm gap-2">
+                    <input
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                      placeholder="Enter code"
+                      className="flex-1 rounded-lg border border-forest/15 bg-white px-4 py-2.5 text-sm uppercase focus:border-moss focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={applyCoupon}
+                      className="rounded-full border border-forest/20 px-5 py-2.5 text-sm font-medium text-forest hover:bg-forest/5"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                )}
+                {couponError && <p className="mt-2 text-sm text-clay">{couponError}</p>}
+              </div>
               <div className="flex gap-3">
                 <button type="button" onClick={() => setStep(1)} className="text-sm font-medium text-forest/60 hover:text-forest">
                   Back
@@ -444,6 +502,12 @@ export function Checkout() {
               <dt className="text-forest/70">Shipping</dt>
               <dd className="font-medium text-forest">{shipping === 0 ? "Free" : formatPrice(shipping)}</dd>
             </div>
+            {discount > 0 && (
+              <div className="flex justify-between">
+                <dt className="text-moss">Offer ({appliedOffer?.code})</dt>
+                <dd className="font-medium text-moss">−{formatPrice(discount)}</dd>
+              </div>
+            )}
             <div className="flex justify-between border-t border-forest/10 pt-3 text-base">
               <dt className="font-semibold text-forest">Total</dt>
               <dd className="font-semibold text-forest">{formatPrice(total)}</dd>

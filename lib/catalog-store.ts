@@ -49,9 +49,9 @@ function writeStockAudit(list: StockAuditEvent[]) {
   }
 }
 
-function logStockChange(productId: string, productName: string, from: number, to: number) {
+function logStockChange(productId: string, productName: string, from: number, to: number, actorOverride?: string) {
   if (from === to) return;
-  const actor = getAdminSession()?.name ?? "Admin";
+  const actor = actorOverride ?? (getAdminSession()?.name ?? "Admin");
   const evt: StockAuditEvent = {
     id: `sa_${Math.random().toString(36).slice(2, 10)}`,
     ts: new Date().toISOString(),
@@ -139,13 +139,13 @@ export function setProductHidden(id: string, hidden: boolean): void {
 }
 
 /** Create or update a product. */
-export function saveProduct(product: Product): void {
+export function saveProduct(product: Product, actorOverride?: string): void {
   const previous = getAdminProduct(product.id);
   const state = read();
   state.overrides[product.id] = product;
   state.hidden = state.hidden.filter((h) => h !== product.id);
   write(state);
-  if (previous) logStockChange(product.id, product.name, previous.stock, product.stock);
+  if (previous) logStockChange(product.id, product.name, previous.stock, product.stock, actorOverride);
 }
 
 /** Fast inventory update. */
@@ -153,6 +153,22 @@ export function updateStock(id: string, stock: number): void {
   const current = getAdminProduct(id);
   if (!current) return;
   saveProduct({ ...current, stock: Math.max(0, Math.round(stock)) });
+}
+
+/**
+ * Reduces stock for each line item in a placed order (stock never goes below 0).
+ * Called once from `createOrder()` so every order — checkout or otherwise — keeps
+ * inventory accurate without admins having to manually adjust it after each sale.
+ * Logged to the same stock-audit history as manual admin edits, attributed to
+ * "Order placed" rather than an admin name (the customer isn't an admin session).
+ */
+export function decrementStockForOrder(items: { productId: string; qty: number }[]): void {
+  for (const item of items) {
+    const current = getAdminProduct(item.productId);
+    if (!current) continue; // custom/removed product — nothing to decrement
+    const next = Math.max(0, current.stock - item.qty);
+    saveProduct({ ...current, stock: next }, "Order placed");
+  }
 }
 
 /** Permanently remove a custom product. (Seed products can only be hidden.) */

@@ -1,19 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getOrders, FULFILLMENT_FLOW, type Order, type FulfillmentStatus } from "@/lib/orders";
+import { getOrders, FULFILLMENT_FLOW, FULFILLMENT_LABEL, type Order, type FulfillmentStatus } from "@/lib/orders";
 import { formatPrice } from "@/lib/format";
 import { site } from "@/lib/site";
 import { getAdminSession } from "@/lib/admin";
 import { logEvent } from "@/lib/audit";
 
-const statusLabel: Record<FulfillmentStatus, string> = {
-  CONFIRMED: "Confirmed",
-  PACKING: "Packing",
-  PACKED: "Packed",
-  SHIPPED: "Shipped",
-  DELIVERED: "Delivered",
-};
+const statusLabel = FULFILLMENT_LABEL;
 
 /** Builds a CSV string from rows of string/number cells and triggers a browser download. */
 function downloadCsv(filename: string, headers: string[], rows: (string | number)[][]) {
@@ -187,33 +181,183 @@ function buildStatus(orders: Order[]): { status: FulfillmentStatus; count: numbe
   }));
 }
 
+/** Range presets replace separate "daily report" / "monthly report" pages — one
+ *  filter drives all three tables below (daily sales, product sales, order status),
+ *  so "monthly" or "this product this month" is just a range selection, not a
+ *  different screen. */
+type RangeOption = "all" | "today" | "week" | "month" | "custom";
+const RANGE_LABEL: Record<RangeOption, string> = {
+  all: "All time",
+  today: "Today",
+  week: "This week",
+  month: "This month",
+  custom: "Custom range",
+};
+
+function startOfDay(d: Date): Date {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+}
+function startOfWeek(d: Date): Date {
+  const x = startOfDay(d);
+  x.setDate(x.getDate() - x.getDay());
+  return x;
+}
+function startOfMonth(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+
+/** Returns [from, toExclusive) for the selected range, or null for "all time". */
+function rangeBounds(
+  range: RangeOption,
+  customFrom: string,
+  customTo: string,
+): [Date, Date] | null {
+  const now = new Date();
+  const tomorrow = new Date(startOfDay(now));
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  switch (range) {
+    case "today":
+      return [startOfDay(now), tomorrow];
+    case "week":
+      return [startOfWeek(now), tomorrow];
+    case "month":
+      return [startOfMonth(now), tomorrow];
+    case "custom": {
+      if (!customFrom || !customTo) return null;
+      const from = startOfDay(new Date(customFrom));
+      const to = startOfDay(new Date(customTo));
+      to.setDate(to.getDate() + 1); // inclusive of the end date
+      return [from, to];
+    }
+    default:
+      return null;
+  }
+}
+
+function filterOrdersByRange(orders: Order[], bounds: [Date, Date] | null): Order[] {
+  if (!bounds) return orders;
+  const [from, to] = bounds;
+  return orders.filter((o) => {
+    const t = new Date(o.createdAt);
+    return t >= from && t < to;
+  });
+}
+
+function RangePicker({
+  range,
+  setRange,
+  customFrom,
+  setCustomFrom,
+  customTo,
+  setCustomTo,
+}: {
+  range: RangeOption;
+  setRange: (r: RangeOption) => void;
+  customFrom: string;
+  setCustomFrom: (v: string) => void;
+  customTo: string;
+  setCustomTo: (v: string) => void;
+}) {
+  const options: RangeOption[] = ["all", "today", "week", "month", "custom"];
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="inline-flex flex-wrap rounded-full border border-forest/15 bg-white/60 p-1">
+        {options.map((opt) => (
+          <button
+            key={opt}
+            type="button"
+            onClick={() => setRange(opt)}
+            className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
+              range === opt ? "bg-forest text-cream" : "text-forest/65 hover:text-forest"
+            }`}
+          >
+            {RANGE_LABEL[opt]}
+          </button>
+        ))}
+      </div>
+      {range === "custom" && (
+        <div className="flex items-center gap-2">
+          <input
+            type="date"
+            value={customFrom}
+            onChange={(e) => setCustomFrom(e.target.value)}
+            className="rounded-lg border border-forest/15 px-2.5 py-1.5 text-xs text-forest focus:border-moss focus:outline-none"
+          />
+          <span className="text-xs text-forest/50">to</span>
+          <input
+            type="date"
+            value={customTo}
+            onChange={(e) => setCustomTo(e.target.value)}
+            className="rounded-lg border border-forest/15 px-2.5 py-1.5 text-xs text-forest focus:border-moss focus:outline-none"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function AdminReports() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [range, setRange] = useState<RangeOption>("all");
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
   useEffect(() => setOrders(getOrders()), []);
 
-  const daily = buildDaily(orders);
-  const productRows = buildProducts(orders);
-  const statusRows = buildStatus(orders);
+  const bounds = rangeBounds(range, customFrom, customTo);
+  const scoped = filterOrdersByRange(orders, bounds);
+  const rangeLabel = range === "custom" && !bounds ? "Custom range (pick both dates)" : RANGE_LABEL[range];
+
+  const daily = buildDaily(scoped);
+  const productRows = buildProducts(scoped);
+  const statusRows = buildStatus(scoped);
 
   return (
     <div className="container py-10">
-      <h1 className="font-serif text-2xl font-semibold text-forest sm:text-3xl">Reports</h1>
-      <p className="mt-1 text-sm text-forest/60">
-        Sales and fulfilment summaries — export as CSV, PDF, or email them to yourself.
-      </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="font-serif text-2xl font-semibold text-forest sm:text-3xl">Reports</h1>
+          <p className="mt-1 text-sm text-forest/60">
+            Sales and fulfilment summaries — export as CSV, PDF, or email them to yourself.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-5">
+        <RangePicker
+          range={range}
+          setRange={setRange}
+          customFrom={customFrom}
+          setCustomFrom={setCustomFrom}
+          customTo={customTo}
+          setCustomTo={setCustomTo}
+        />
+      </div>
 
       {orders.length === 0 ? (
         <div className="mt-8 rounded-lg border border-dashed border-forest/15 bg-parchment/40 p-10 text-center text-forest/60">
           No orders yet — reports will populate once orders come in.
+        </div>
+      ) : range === "custom" && !bounds ? (
+        <div className="mt-8 rounded-lg border border-dashed border-forest/15 bg-parchment/40 p-10 text-center text-forest/60">
+          Pick both a start and end date to see the custom range.
+        </div>
+      ) : scoped.length === 0 ? (
+        <div className="mt-8 rounded-lg border border-dashed border-forest/15 bg-parchment/40 p-10 text-center text-forest/60">
+          No orders in this range — try a wider range.
         </div>
       ) : (
         <div className="mt-6 space-y-8">
           {/* Daily sales */}
           <section className="rounded-lg border border-forest/8 bg-white/60 p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="font-serif text-lg font-semibold text-forest">Daily sales</h2>
+              <div>
+                <h2 className="font-serif text-lg font-semibold text-forest">Daily sales</h2>
+                <p className="text-xs text-forest/50">{rangeLabel}</p>
+              </div>
               <ExportButtons
-                title="Daily sales"
+                title={`Daily sales — ${rangeLabel}`}
                 filename="daily-sales.csv"
                 headers={["Date", "Orders", "Units", "Revenue (₹)"]}
                 rows={daily.map((d) => [d.date, d.orders, d.units, d.revenue / 100])}
@@ -246,9 +390,12 @@ export function AdminReports() {
           {/* Product sales */}
           <section className="rounded-lg border border-forest/8 bg-white/60 p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="font-serif text-lg font-semibold text-forest">Product sales</h2>
+              <div>
+                <h2 className="font-serif text-lg font-semibold text-forest">Product sales</h2>
+                <p className="text-xs text-forest/50">{rangeLabel}</p>
+              </div>
               <ExportButtons
-                title="Product sales"
+                title={`Product sales — ${rangeLabel}`}
                 filename="product-sales.csv"
                 headers={["Product", "SKU", "Units", "Revenue (₹)"]}
                 rows={productRows.map((p) => [p.name, p.sku, p.units, p.revenue / 100])}
@@ -281,9 +428,12 @@ export function AdminReports() {
           {/* Order status */}
           <section className="rounded-lg border border-forest/8 bg-white/60 p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="font-serif text-lg font-semibold text-forest">Order status</h2>
+              <div>
+                <h2 className="font-serif text-lg font-semibold text-forest">Order status</h2>
+                <p className="text-xs text-forest/50">{rangeLabel}</p>
+              </div>
               <ExportButtons
-                title="Order status"
+                title={`Order status — ${rangeLabel}`}
                 filename="order-status.csv"
                 headers={["Status", "Orders"]}
                 rows={statusRows.map((s) => [statusLabel[s.status], s.count])}

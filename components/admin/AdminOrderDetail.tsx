@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getOrder, FULFILLMENT_FLOW, FULFILLMENT_LABEL, type Order } from "@/lib/orders";
 import { formatPrice } from "@/lib/format";
+import { printShippingLabels } from "@/lib/print-label";
 import { OrderStatusControl } from "./OrderStatusControl";
 
 export function AdminOrderDetail({ orderNumber }: { orderNumber: string }) {
@@ -74,7 +75,16 @@ export function AdminOrderDetail({ orderNumber }: { orderNumber: string }) {
 
       <div className="mt-6 grid gap-5 sm:grid-cols-2">
         <section className="rounded-lg border border-forest/8 bg-white/60 p-5">
-          <h2 className="font-serif text-lg font-semibold text-forest">Delivery address</h2>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-serif text-lg font-semibold text-forest">Delivery address</h2>
+            <button
+              type="button"
+              onClick={() => printShippingLabels([order])}
+              className="rounded-full border border-forest/20 px-3 py-1 text-xs font-medium text-forest hover:bg-forest/5"
+            >
+              Print label
+            </button>
+          </div>
           <p className="mt-2 text-sm text-forest/75">
             {order.address.fullName} · {order.address.phone}
             {order.address.altPhone ? ` / ${order.address.altPhone}` : ""}
@@ -121,6 +131,12 @@ export function AdminOrderDetail({ orderNumber }: { orderNumber: string }) {
             <span>Shipping</span>
             <span>{order.shipping === 0 ? "Free" : formatPrice(order.shipping)}</span>
           </div>
+          {!!order.discount && (
+            <div className="flex justify-between text-moss">
+              <span>Offer{order.offerCode ? ` (${order.offerCode})` : ""}</span>
+              <span>−{formatPrice(order.discount)}</span>
+            </div>
+          )}
           <div className="flex justify-between font-semibold text-forest">
             <span>Total</span>
             <span>{formatPrice(order.total)}</span>

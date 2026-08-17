@@ -6,6 +6,7 @@
 
 import { getAdminSession } from "./admin";
 import { logEvent } from "./audit";
+import { decrementStockForOrder } from "./catalog-store";
 
 export type PaymentStatus = "PAID" | "FAILED" | "PENDING";
 export type FulfillmentStatus =
@@ -18,10 +19,10 @@ export type FulfillmentStatus =
 /** Shared, friendly labels for each fulfilment stage — used by admin screens
  *  and customer tracking so the wording stays consistent in one place. */
 export const FULFILLMENT_LABEL: Record<FulfillmentStatus, string> = {
-  CONFIRMED: "Confirmed",
-  PACKING: "Packing",
+  CONFIRMED: "Order received",
+  PACKING: "Order in packing",
   PACKED: "Packed",
-  SHIPPED: "Shipped",
+  SHIPPED: "Dispatched",
   DELIVERED: "Delivered",
 };
 
@@ -67,6 +68,10 @@ export interface Order {
   items: OrderItem[];
   subtotal: number;
   shipping: number;
+  /** Discount applied via an offer code, in paise (0 if none). */
+  discount?: number;
+  /** The offer code used, if any — kept for reporting/audit even if the offer is later deleted. */
+  offerCode?: string;
   total: number;
   address: Address;
   paymentStatus: PaymentStatus;
@@ -113,6 +118,10 @@ export function createOrder(order: Order): void {
   const all = readOrders();
   all.unshift(order);
   writeOrders(all);
+  // Inventory should reflect sales automatically — admins shouldn't have to manually
+  // subtract every purchase. Runs after the order write so the order itself is never
+  // blocked by a stock-side issue.
+  decrementStockForOrder(order.items.map((i) => ({ productId: i.productId, qty: i.qty })));
 }
 
 /** Ordered fulfilment lifecycle (used by admin controls + customer tracking). */

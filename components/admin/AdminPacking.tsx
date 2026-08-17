@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getOrders, type Order } from "@/lib/orders";
+import { printShippingLabels } from "@/lib/print-label";
 
 interface PackingLine {
   productId: string;
@@ -53,11 +54,24 @@ export function AdminPacking() {
 
   return (
     <div className="container py-10">
-      <h1 className="font-serif text-2xl font-semibold text-forest sm:text-3xl">Packing list</h1>
-      <p className="mt-1 text-sm text-forest/60">
-        Units to prepare today, aggregated across {pendingOrders.length} order
-        {pendingOrders.length === 1 ? "" : "s"} awaiting packing.
-      </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-serif text-2xl font-semibold text-forest sm:text-3xl">Packing list</h1>
+          <p className="mt-1 text-sm text-forest/60">
+            Units to prepare today, aggregated across {pendingOrders.length} order
+            {pendingOrders.length === 1 ? "" : "s"} awaiting packing.
+          </p>
+        </div>
+        {pendingOrders.length > 0 && (
+          <button
+            type="button"
+            onClick={() => printShippingLabels(pendingOrders)}
+            className="rounded-full border border-forest/20 px-4 py-2 text-sm font-medium text-forest hover:bg-forest/5"
+          >
+            Print all labels ({pendingOrders.length})
+          </button>
+        )}
+      </div>
 
       {lines.length === 0 ? (
         <div className="mt-8 rounded-lg border border-dashed border-forest/15 bg-parchment/40 p-10 text-center text-forest/60">
