@@ -26,3 +26,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated screenshots + PDFs (capture-all.mjs / build-pdfs.mjs output)
+/SurakshitamNaturals-Screenshots/
