@@ -35,21 +35,50 @@ SCREENSHOTS=1 npm run dev    # dev server with unoptimised images, for screensho
 ### Screenshot capture scripts
 
 With `SCREENSHOTS=1 npm run dev` running, `npm i -D playwright && npx playwright install chromium`,
-then run any of:
+run everything in one go:
 
 ```bash
-node scripts/capture-storefront-desktop.mjs   # → SurakshitamNaturals-Screenshots/Desktop-Shopping-Cart/
-node scripts/capture-storefront-mobile.mjs    # → SurakshitamNaturals-Screenshots/Mobile-Shopping-Cart/
-node scripts/capture-admin-desktop.mjs        # → SurakshitamNaturals-Screenshots/Desktop-Admin-Portal/
-node scripts/capture-admin-mobile.mjs         # → SurakshitamNaturals-Screenshots/Mobile-Admin-Portal/
+node scripts/capture-all.mjs
 ```
 
-Each produces numbered, framed, watermarked PNGs (`001-<section>-<feature>.png`, ...) — the
+This produces four separate folders under `SurakshitamNaturals-Screenshots/`:
+`Desktop-Shopping-Cart/`, `Mobile-Shopping-Cart/`, `Desktop-Admin-Portal/`, `Mobile-Admin-Portal/`.
+Each pass can also be run on its own if you only need to redo one folder:
+
+```bash
+node scripts/capture-storefront-desktop.mjs
+node scripts/capture-storefront-mobile.mjs
+node scripts/capture-admin-desktop.mjs
+node scripts/capture-admin-mobile.mjs
+```
+
+Every image is numbered, framed, and watermarked (`001-<section>-<feature>.png`, ...) — the
 watermark text always matches the filename. Shared logic lives in `scripts/screenshot-utils.mjs`.
 The watermark is drawn as a real DOM element in the browser before each screenshot (not composited
 afterwards with sharp/SVG) — some prebuilt sharp/libvips binaries silently drop SVG `<text>` when
 fontconfig isn't linked in, so text is rendered by Chromium itself instead, which always works. The
 outer dark border is still added afterwards with sharp (a pure image op, unaffected by that issue).
+The two admin passes seed realistic sample orders + activity **before** capturing anything and wait
+for the seed to actually land in localStorage (not a fixed timeout), so Packing/Orders/Dashboard show
+real pending orders rather than empty states.
+
+The two storefront passes give every page 15 seconds to settle (lazy-loaded images,
+scroll-reveal animations) before the first shot, and scroll long/animated pages top-to-bottom in
+even steps rather than 2-3 fixed positions: **Home** gets 12 shots, **Our Story** 7, **Ingredients**
+6, Learn index/article 3+2 — everywhere else stays 1-4 shots per screen/state as appropriate.
+Mobile passes use a "regular" phone-sized viewport (360×780, 1x scale) matching common Android
+widths and iPhone mini/SE — not an oversized modern iPhone.
+
+Once the four screenshot folders exist, combine each into a shareable PDF:
+
+```bash
+npm i -D pdf-lib   # one-time
+node scripts/build-pdfs.mjs
+```
+
+This produces `SurakshitamNaturals-Screenshots/PDFs/Desktop-Shopping-Cart.pdf`,
+`Desktop-Admin-Portal.pdf`, `Mobile-Shopping-Cart.pdf`, and `Mobile-Admin-Portal.pdf` — one PNG per
+page, in filename order, each page sized to match its screenshot exactly.
 
 ## Demo credentials
 

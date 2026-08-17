@@ -2,20 +2,36 @@
  * Surakshitam Naturals — storefront (shopping + cart + checkout) screenshots, MOBILE.
  * Produces ./SurakshitamNaturals-Screenshots/Mobile-Shopping-Cart/<NNN>-<section>-<feature>.png
  *
- * Same feature list as capture-storefront-desktop.mjs (see that file's header comment),
- * captured at an iPhone-sized viewport instead.
+ * Same feature list as capture-storefront-desktop.mjs (see that file's header comment), at
+ * a "regular" phone viewport (360×780 — matches common Android widths and iPhone
+ * mini/SE, not an oversized modern iPhone). Home/Our-Story/Ingredients/Learn already get
+ * multiple scrolled shots via gallery(); every other single-shot screen gets 2 shots (top +
+ * scrolled) via twoShotMobile() since a phone screen shows much less at once than desktop.
  *
- * HOW TO RUN (from surakshitam-web/, with `SCREENSHOTS=1 npm run dev` already running):
+ * Exports `run(browser)` so it can be called standalone or from capture-all.mjs.
+ *
+ * HOW TO RUN standalone (from surakshitam-web/, with `SCREENSHOTS=1 npm run dev` running):
  *   npm i -D playwright   (sharp is already a devDependency)
  *   npx playwright install chromium
  *   node scripts/capture-storefront-mobile.mjs
  */
 import { chromium } from "playwright";
-import { mkdir, settle, goto, clickText, makeShotter } from "./screenshot-utils.mjs";
+import { fileURLToPath } from "url";
+import {
+  mkdir,
+  gotoAndWait,
+  clickText,
+  makeShotter,
+  gallery,
+  assertServerUp,
+  twoShotMobile,
+  log,
+} from "./screenshot-utils.mjs";
 
 const BASE = process.env.BASE || "http://localhost:3000";
 const ROOT = "./SurakshitamNaturals-Screenshots/Mobile-Shopping-Cart";
-const VIEWPORT = { width: 390, height: 844 }; // iPhone 14-ish
+const VIEWPORT = { width: 360, height: 780 }; // "regular" phone size — common Android width, iPhone mini/SE range
+const PAGE_WAIT = 15000;
 
 const CART = [{ id: "p-shea-butter-soap", qty: 1 }, { id: "p-hair-oil", qty: 2 }, { id: "p-dishwash-liquid", qty: 1 }];
 const PROFILE = { name: "Bhavesh Allapati", mobile: "+91 98491 16181", email: "srikanth.alapati@yahoo.com", address: "Nagole, Hyderabad, Telangana – 500068" };
@@ -34,113 +50,95 @@ function seedScript({ customer = false } = {}) {
   }catch(e){}`;
 }
 
-const run = async () => {
+export async function run(browser) {
+  await assertServerUp(browser, BASE);
   mkdir(ROOT);
   const shot = makeShotter(ROOT);
-  const browser = await chromium.launch();
 
-  const custCtx = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  const custCtx = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
   await custCtx.addInitScript(seedScript({ customer: true }));
   const cp = await custCtx.newPage();
 
-  const guestCtx = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  const guestCtx = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
   await guestCtx.addInitScript(seedScript({ customer: false }));
   const gp = await guestCtx.newPage();
 
-  console.log("home");
-  await goto(cp, BASE, "/");
-  await shot(cp, "home-hero");
+  log("home (12 shots, scrolled)");
+  await gallery(cp, BASE, "/", shot, "home", 12, { waitAfterLoad: PAGE_WAIT });
   await cp.click('button[aria-label*="menu" i]').catch(() => {});
   await cp.waitForTimeout(300);
   await shot(cp, "home-mobile-menu");
   await cp.keyboard.press("Escape").catch(() => {});
-  await cp.evaluate(() => window.scrollTo(0, 900));
-  await cp.waitForTimeout(400);
-  await shot(cp, "home-featured-products");
 
-  console.log("shop");
-  await goto(cp, BASE, "/shop");
-  await shot(cp, "shop-catalogue-grid");
-  await goto(cp, BASE, "/shop?category=home-care");
-  await shot(cp, "shop-category-filter");
-  await goto(cp, BASE, "/product/shea-butter-soap");
-  await shot(cp, "shop-product-detail");
-  await cp.evaluate(() => window.scrollTo(0, 900));
-  await cp.waitForTimeout(400);
-  await shot(cp, "shop-product-ingredients-usage");
+  log("shop");
+  await twoShotMobile(cp, BASE, "/shop", shot, "shop-catalogue-grid", PAGE_WAIT);
+  await twoShotMobile(cp, BASE, "/shop?category=home-care", shot, "shop-category-filter", PAGE_WAIT);
+  await twoShotMobile(cp, BASE, "/product/shea-butter-soap", shot, "shop-product-detail", PAGE_WAIT);
 
-  console.log("skin & hair care");
-  await goto(cp, BASE, "/shop?category=skin-care");
-  await shot(cp, "skincare-category");
-  await goto(cp, BASE, "/shop?category=hair-care");
-  await shot(cp, "haircare-category");
+  log("skin & hair care");
+  await twoShotMobile(cp, BASE, "/shop?category=skin-care", shot, "skincare-category", PAGE_WAIT);
+  await twoShotMobile(cp, BASE, "/shop?category=hair-care", shot, "haircare-category", PAGE_WAIT);
 
-  console.log("our story");
-  await goto(cp, BASE, "/our-story");
-  await shot(cp, "story-brand-page");
+  log("our story (7 shots, scrolled)");
+  await gallery(cp, BASE, "/our-story", shot, "story", 7, { waitAfterLoad: PAGE_WAIT });
 
-  console.log("ingredients");
-  await goto(cp, BASE, "/ingredients");
-  await shot(cp, "ingredients-glossary");
+  log("ingredients (6 shots, scrolled)");
+  await gallery(cp, BASE, "/ingredients", shot, "ingredients", 6, { waitAfterLoad: PAGE_WAIT });
 
-  console.log("learn");
-  await goto(cp, BASE, "/learn");
-  await shot(cp, "learn-article-index");
-  await goto(cp, BASE, "/learn/from-idea-to-a-finished-bar-of-soap");
-  await shot(cp, "learn-article-detail");
+  log("learn");
+  await gallery(cp, BASE, "/learn", shot, "learn-index", 3, { waitAfterLoad: PAGE_WAIT });
+  await gallery(cp, BASE, "/learn/from-idea-to-a-finished-bar-of-soap", shot, "learn-article", 2, { waitAfterLoad: PAGE_WAIT });
 
-  console.log("search");
-  await goto(cp, BASE, "/search?q=soap");
-  await shot(cp, "search-results");
+  log("search");
+  await twoShotMobile(cp, BASE, "/search?q=soap", shot, "search-results", PAGE_WAIT);
 
-  console.log("account");
-  await goto(gp, BASE, "/login?next=/account");
-  await shot(gp, "account-login-otp");
+  log("account");
+  await twoShotMobile(gp, BASE, "/login?next=/account", shot, "account-login-otp", PAGE_WAIT);
   await clickText(gp, "button", /password/i);
-  await gp.waitForTimeout(400);
+  await gp.waitForTimeout(500);
   await shot(gp, "account-login-password");
-  await goto(cp, BASE, "/account");
-  await shot(cp, "account-overview");
-  await cp.evaluate(() => window.scrollTo(0, 500));
-  await cp.waitForTimeout(400);
-  await shot(cp, "account-order-history");
-  await goto(cp, BASE, "/account");
+  await twoShotMobile(cp, BASE, "/account", shot, "account-overview", PAGE_WAIT);
+  await gotoAndWait(cp, BASE, "/account", PAGE_WAIT);
   await clickText(cp, "button", /^edit$/i);
-  await cp.waitForTimeout(400);
+  await cp.waitForTimeout(500);
   await shot(cp, "account-edit-profile");
 
-  console.log("cart & checkout");
-  await goto(cp, BASE, "/cart");
-  await shot(cp, "cart-page");
-  await goto(cp, BASE, "/checkout");
+  log("cart & checkout");
+  await twoShotMobile(cp, BASE, "/cart", shot, "cart-page", PAGE_WAIT);
+  await gotoAndWait(cp, BASE, "/checkout", PAGE_WAIT);
   await shot(cp, "checkout-contact");
   await cp.evaluate(() => document.querySelectorAll("input").forEach((i) => { if (!i.value) { if (i.type === "email") i.value = "bhavesh@example.com"; else if (i.type === "tel") i.value = "9849116181"; } }));
   await clickText(cp, "button", /continue/i);
-  await cp.waitForTimeout(500);
+  await cp.waitForTimeout(800);
   await shot(cp, "checkout-address");
   await clickText(cp, "button", /continue to review/i);
-  await cp.waitForTimeout(500);
+  await cp.waitForTimeout(800);
   await shot(cp, "checkout-review");
   await clickText(cp, "button", /continue to payment/i);
-  await cp.waitForTimeout(500);
+  await cp.waitForTimeout(800);
   await clickText(cp, "button", /pay .*secur|pay ₹/i);
-  await cp.waitForTimeout(900);
+  await cp.waitForTimeout(1200);
   await shot(cp, "checkout-payment-modal");
-  await goto(cp, BASE, "/order/SURK-2026-482913");
-  await shot(cp, "checkout-order-confirmation");
-  await goto(cp, BASE, "/track-order");
-  await shot(cp, "checkout-order-tracking");
+  await twoShotMobile(cp, BASE, "/order/SURK-2026-482913", shot, "checkout-order-confirmation", PAGE_WAIT);
+  await twoShotMobile(cp, BASE, "/track-order", shot, "checkout-order-tracking", PAGE_WAIT);
 
-  console.log("policies");
-  await goto(cp, BASE, "/policies/shipping");
-  await shot(cp, "policies-shipping");
-  await goto(cp, BASE, "/policies/returns");
-  await shot(cp, "policies-returns");
+  log("policies");
+  await twoShotMobile(cp, BASE, "/policies/shipping", shot, "policies-shipping", PAGE_WAIT);
+  await twoShotMobile(cp, BASE, "/policies/returns", shot, "policies-returns", PAGE_WAIT);
 
-  await browser.close();
-  console.log("\nDONE → " + ROOT);
-};
-run().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+  await custCtx.close();
+  await guestCtx.close();
+  log("DONE → " + ROOT);
+}
+
+const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+if (isMain) {
+  (async () => {
+    const browser = await chromium.launch();
+    await run(browser);
+    await browser.close();
+  })().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+}

@@ -1,0 +1,49 @@
+/**
+ * Surakshitam Naturals — runs ALL FOUR screenshot passes in one command, each into its
+ * own separate folder under ./SurakshitamNaturals-Screenshots/:
+ *
+ *   Desktop-Shopping-Cart/   (capture-storefront-desktop.mjs)
+ *   Mobile-Shopping-Cart/    (capture-storefront-mobile.mjs)
+ *   Desktop-Admin-Portal/    (capture-admin-desktop.mjs)
+ *   Mobile-Admin-Portal/     (capture-admin-mobile.mjs)
+ *
+ * Every image is numbered, bordered and watermarked (see screenshot-utils.mjs). The two
+ * admin passes seed realistic sample orders + audit-log activity before capturing anything,
+ * and wait for that seed to actually land (not a fixed timeout) so Packing/Orders/Dashboard
+ * show real pending orders instead of empty states.
+ *
+ * HOW TO RUN (from surakshitam-web/, with `SCREENSHOTS=1 npm run dev` already running):
+ *   npm i -D playwright   (sharp is already a devDependency)
+ *   npx playwright install chromium
+ *   node scripts/capture-all.mjs
+ *
+ * Each pass can still be run individually (e.g. `node scripts/capture-admin-mobile.mjs`)
+ * if you only need to redo one folder.
+ */
+import { chromium } from "playwright";
+import { log } from "./screenshot-utils.mjs";
+import { run as storefrontDesktop } from "./capture-storefront-desktop.mjs";
+import { run as storefrontMobile } from "./capture-storefront-mobile.mjs";
+import { run as adminDesktop } from "./capture-admin-desktop.mjs";
+import { run as adminMobile } from "./capture-admin-mobile.mjs";
+
+const PASSES = [
+  ["Storefront — Desktop", storefrontDesktop],
+  ["Storefront — Mobile", storefrontMobile],
+  ["Admin Portal — Desktop", adminDesktop],
+  ["Admin Portal — Mobile", adminMobile],
+];
+
+const run = async () => {
+  const browser = await chromium.launch();
+  for (const [label, pass] of PASSES) {
+    log(`\n=== ${label} ===`);
+    await pass(browser);
+  }
+  await browser.close();
+  log("\nAll four passes complete → ./SurakshitamNaturals-Screenshots/");
+};
+run().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

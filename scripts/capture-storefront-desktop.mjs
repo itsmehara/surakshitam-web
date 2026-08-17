@@ -2,31 +2,42 @@
  * Surakshitam Naturals — storefront (shopping + cart + checkout) screenshots, DESKTOP.
  * Produces ./SurakshitamNaturals-Screenshots/Desktop-Shopping-Cart/<NNN>-<section>-<feature>.png
  *
- * Feature list captured (one screenshot per row unless noted):
- *   Home            — hero, featured products, our-story teaser, ingredients teaser
- *   Shop            — full catalogue grid, category filter (home-care), product detail
+ * Feature list captured:
+ *   Home            — 12 shots, scrolled top-to-bottom (hero, featured, story teaser,
+ *                      ingredients teaser, testimonials, footer, ...) — home has a lot of
+ *                      scroll-reveal sections, a couple of shots would miss most of it.
+ *   Shop            — catalogue grid, category filter (home-care), product detail,
+ *                      ingredients/usage detail (4 shots)
  *   Skin/Hair care  — category views
- *   Our story       — brand story page
- *   Ingredients     — ingredient glossary
- *   Learn           — article index, single article
+ *   Our story       — 7 shots, scrolled top-to-bottom
+ *   Ingredients     — 6 shots, scrolled top-to-bottom
+ *   Learn           — article index (3, scrolled), single article (2, scrolled)
  *   Search          — search results
  *   Account         — login (OTP), login (password), account overview, order history,
  *                     edit-profile form
- *   Cart & checkout — cart drawer/page, checkout contact, address, review, mock payment
- *                     modal, order confirmation, order tracking
+ *   Cart & checkout — cart page, checkout contact, address, review, mock payment modal,
+ *                     order confirmation, order tracking
  *   Policies        — shipping policy, returns policy
  *
- * HOW TO RUN (from surakshitam-web/, with `SCREENSHOTS=1 npm run dev` already running):
+ * Every page gets a long settle window (15s + image-load wait) before its first
+ * screenshot — the storefront uses lazy-loaded images and scroll-reveal animations that
+ * need real time to finish, not just network-idle.
+ *
+ * Exports `run(browser)` so it can be called standalone or from capture-all.mjs.
+ *
+ * HOW TO RUN standalone (from surakshitam-web/, with `SCREENSHOTS=1 npm run dev` running):
  *   npm i -D playwright   (sharp is already a devDependency)
  *   npx playwright install chromium
  *   node scripts/capture-storefront-desktop.mjs
  */
 import { chromium } from "playwright";
-import { mkdir, settle, goto, clickText, makeShotter } from "./screenshot-utils.mjs";
+import { fileURLToPath } from "url";
+import { mkdir, gotoAndWait, clickText, makeShotter, gallery, assertServerUp, log } from "./screenshot-utils.mjs";
 
 const BASE = process.env.BASE || "http://localhost:3000";
 const ROOT = "./SurakshitamNaturals-Screenshots/Desktop-Shopping-Cart";
 const VIEWPORT = { width: 1440, height: 960 };
+const PAGE_WAIT = 15000; // every storefront page gets this long to settle before its first shot
 
 const CART = [{ id: "p-shea-butter-soap", qty: 1 }, { id: "p-hair-oil", qty: 2 }, { id: "p-dishwash-liquid", qty: 1 }];
 const PROFILE = { name: "Bhavesh Allapati", mobile: "+91 98491 16181", email: "srikanth.alapati@yahoo.com", address: "Nagole, Hyderabad, Telangana – 500068" };
@@ -45,10 +56,10 @@ function seedScript({ customer = false } = {}) {
   }catch(e){}`;
 }
 
-const run = async () => {
+export async function run(browser) {
+  await assertServerUp(browser, BASE);
   mkdir(ROOT);
   const shot = makeShotter(ROOT);
-  const browser = await chromium.launch();
 
   const custCtx = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 2 });
   await custCtx.addInitScript(seedScript({ customer: true }));
@@ -58,99 +69,97 @@ const run = async () => {
   await guestCtx.addInitScript(seedScript({ customer: false }));
   const gp = await guestCtx.newPage();
 
-  console.log("home");
-  await goto(cp, BASE, "/");
-  await shot(cp, "home-hero");
-  await cp.evaluate(() => window.scrollTo(0, 900));
-  await cp.waitForTimeout(400);
-  await shot(cp, "home-featured-products");
-  await cp.evaluate(() => window.scrollTo(0, document.body.scrollHeight * 0.6));
-  await cp.waitForTimeout(400);
-  await shot(cp, "home-story-teaser");
+  log("home (12 shots, scrolled)");
+  await gallery(cp, BASE, "/", shot, "home", 12, { waitAfterLoad: PAGE_WAIT });
 
-  console.log("shop");
-  await goto(cp, BASE, "/shop");
+  log("shop");
+  await gotoAndWait(cp, BASE, "/shop", PAGE_WAIT);
   await shot(cp, "shop-catalogue-grid");
-  await goto(cp, BASE, "/shop?category=home-care");
+  await gotoAndWait(cp, BASE, "/shop?category=home-care", PAGE_WAIT);
   await shot(cp, "shop-category-filter");
-  await goto(cp, BASE, "/product/shea-butter-soap");
+  await gotoAndWait(cp, BASE, "/product/shea-butter-soap", PAGE_WAIT);
   await shot(cp, "shop-product-detail");
   await cp.evaluate(() => window.scrollTo(0, 900));
-  await cp.waitForTimeout(400);
+  await cp.waitForTimeout(800);
   await shot(cp, "shop-product-ingredients-usage");
 
-  console.log("skin & hair care");
-  await goto(cp, BASE, "/shop?category=skin-care");
+  log("skin & hair care");
+  await gotoAndWait(cp, BASE, "/shop?category=skin-care", PAGE_WAIT);
   await shot(cp, "skincare-category");
-  await goto(cp, BASE, "/shop?category=hair-care");
+  await gotoAndWait(cp, BASE, "/shop?category=hair-care", PAGE_WAIT);
   await shot(cp, "haircare-category");
 
-  console.log("our story");
-  await goto(cp, BASE, "/our-story");
-  await shot(cp, "story-brand-page");
+  log("our story (7 shots, scrolled)");
+  await gallery(cp, BASE, "/our-story", shot, "story", 7, { waitAfterLoad: PAGE_WAIT });
 
-  console.log("ingredients");
-  await goto(cp, BASE, "/ingredients");
-  await shot(cp, "ingredients-glossary");
+  log("ingredients (6 shots, scrolled)");
+  await gallery(cp, BASE, "/ingredients", shot, "ingredients", 6, { waitAfterLoad: PAGE_WAIT });
 
-  console.log("learn");
-  await goto(cp, BASE, "/learn");
-  await shot(cp, "learn-article-index");
-  await goto(cp, BASE, "/learn/from-idea-to-a-finished-bar-of-soap");
-  await shot(cp, "learn-article-detail");
+  log("learn");
+  await gallery(cp, BASE, "/learn", shot, "learn-index", 3, { waitAfterLoad: PAGE_WAIT });
+  await gallery(cp, BASE, "/learn/from-idea-to-a-finished-bar-of-soap", shot, "learn-article", 2, { waitAfterLoad: PAGE_WAIT });
 
-  console.log("search");
-  await goto(cp, BASE, "/search?q=soap");
+  log("search");
+  await gotoAndWait(cp, BASE, "/search?q=soap", PAGE_WAIT);
   await shot(cp, "search-results");
 
-  console.log("account");
-  await goto(gp, BASE, "/login?next=/account");
+  log("account");
+  await gotoAndWait(gp, BASE, "/login?next=/account", PAGE_WAIT);
   await shot(gp, "account-login-otp");
   await clickText(gp, "button", /password/i);
-  await gp.waitForTimeout(400);
+  await gp.waitForTimeout(500);
   await shot(gp, "account-login-password");
-  await goto(cp, BASE, "/account");
+  await gotoAndWait(cp, BASE, "/account", PAGE_WAIT);
   await shot(cp, "account-overview");
   await cp.evaluate(() => window.scrollTo(0, 500));
-  await cp.waitForTimeout(400);
+  await cp.waitForTimeout(500);
   await shot(cp, "account-order-history");
-  await goto(cp, BASE, "/account");
+  await gotoAndWait(cp, BASE, "/account", PAGE_WAIT);
   await clickText(cp, "button", /^edit$/i);
-  await cp.waitForTimeout(400);
+  await cp.waitForTimeout(500);
   await shot(cp, "account-edit-profile");
 
-  console.log("cart & checkout");
-  await goto(cp, BASE, "/cart");
+  log("cart & checkout");
+  await gotoAndWait(cp, BASE, "/cart", PAGE_WAIT);
   await shot(cp, "cart-page");
-  await goto(cp, BASE, "/checkout");
+  await gotoAndWait(cp, BASE, "/checkout", PAGE_WAIT);
   await shot(cp, "checkout-contact");
   await cp.evaluate(() => document.querySelectorAll("input").forEach((i) => { if (!i.value) { if (i.type === "email") i.value = "bhavesh@example.com"; else if (i.type === "tel") i.value = "9849116181"; } }));
   await clickText(cp, "button", /continue/i);
-  await cp.waitForTimeout(500);
+  await cp.waitForTimeout(800);
   await shot(cp, "checkout-address");
   await clickText(cp, "button", /continue to review/i);
-  await cp.waitForTimeout(500);
+  await cp.waitForTimeout(800);
   await shot(cp, "checkout-review");
   await clickText(cp, "button", /continue to payment/i);
-  await cp.waitForTimeout(500);
+  await cp.waitForTimeout(800);
   await clickText(cp, "button", /pay .*secur|pay ₹/i);
-  await cp.waitForTimeout(900);
+  await cp.waitForTimeout(1200);
   await shot(cp, "checkout-payment-modal");
-  await goto(cp, BASE, "/order/SURK-2026-482913");
+  await gotoAndWait(cp, BASE, "/order/SURK-2026-482913", PAGE_WAIT);
   await shot(cp, "checkout-order-confirmation");
-  await goto(cp, BASE, "/track-order");
+  await gotoAndWait(cp, BASE, "/track-order", PAGE_WAIT);
   await shot(cp, "checkout-order-tracking");
 
-  console.log("policies");
-  await goto(cp, BASE, "/policies/shipping");
+  log("policies");
+  await gotoAndWait(cp, BASE, "/policies/shipping", PAGE_WAIT);
   await shot(cp, "policies-shipping");
-  await goto(cp, BASE, "/policies/returns");
+  await gotoAndWait(cp, BASE, "/policies/returns", PAGE_WAIT);
   await shot(cp, "policies-returns");
 
-  await browser.close();
-  console.log("\nDONE → " + ROOT);
-};
-run().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+  await custCtx.close();
+  await guestCtx.close();
+  log("DONE → " + ROOT);
+}
+
+const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+if (isMain) {
+  (async () => {
+    const browser = await chromium.launch();
+    await run(browser);
+    await browser.close();
+  })().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+}
