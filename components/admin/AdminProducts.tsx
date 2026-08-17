@@ -14,10 +14,23 @@ import {
 import { formatPrice } from "@/lib/format";
 import type { Product } from "@/lib/types";
 import { AdminOffers } from "./AdminOffers";
+import { AdminCombos } from "./AdminCombos";
 
 const LOW_STOCK = 10;
 type Filter = "all" | "live" | "hidden";
-type Tab = "catalog" | "offers";
+type Tab = "catalog" | "offers" | "combos";
+
+const TAB_LABEL: Record<Tab, string> = { catalog: "Catalog", offers: "Offers", combos: "Combos" };
+const TAB_HEADING: Record<Tab, string> = {
+  catalog: "Products & inventory",
+  offers: "Offers",
+  combos: "Combos",
+};
+const TAB_SUBTITLE: Record<Tab, string> = {
+  catalog: "Add products, edit details & images, and keep stock up to date.",
+  offers: "Discount codes customers can apply at checkout.",
+  combos: "Bundle products together at a special price.",
+};
 
 export function AdminProducts() {
   const [tab, setTab] = useState<Tab>("catalog");
@@ -77,13 +90,9 @@ export function AdminProducts() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-serif text-2xl font-semibold text-forest sm:text-3xl">
-            {tab === "catalog" ? "Products & inventory" : "Offers"}
+            {TAB_HEADING[tab]}
           </h1>
-          <p className="mt-1 text-sm text-forest/60">
-            {tab === "catalog"
-              ? "Add products, edit details & images, and keep stock up to date."
-              : "Discount codes customers can apply at checkout."}
-          </p>
+          <p className="mt-1 text-sm text-forest/60">{TAB_SUBTITLE[tab]}</p>
         </div>
         {tab === "catalog" && (
           <Link
@@ -96,7 +105,7 @@ export function AdminProducts() {
       </div>
 
       <div className="mt-5 inline-flex rounded-full border border-forest/15 bg-white/60 p-1">
-        {(["catalog", "offers"] as Tab[]).map((t) => (
+        {(["catalog", "offers", "combos"] as Tab[]).map((t) => (
           <button
             key={t}
             type="button"
@@ -105,7 +114,7 @@ export function AdminProducts() {
               tab === t ? "bg-forest text-cream" : "text-forest/65 hover:text-forest"
             }`}
           >
-            {t === "catalog" ? "Catalog" : "Offers"}
+            {TAB_LABEL[t]}
           </button>
         ))}
       </div>
@@ -113,6 +122,10 @@ export function AdminProducts() {
       {tab === "offers" ? (
         <div className="mt-6">
           <AdminOffers />
+        </div>
+      ) : tab === "combos" ? (
+        <div className="mt-6">
+          <AdminCombos />
         </div>
       ) : (
         <>

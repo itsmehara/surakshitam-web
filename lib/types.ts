@@ -47,6 +47,8 @@ export interface Product {
   featured?: boolean;
   bestSeller?: boolean;
   isNew?: boolean;
+  /** Customer-concern tags (see lib/site.ts `concerns`) for "shop by concern" browsing. */
+  concerns?: string[];
 }
 
 export type IngredientGroup =

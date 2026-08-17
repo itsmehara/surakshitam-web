@@ -65,10 +65,20 @@ const config: Config = {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
         },
+        "slide-in-rtl": {
+          "0%": { opacity: "0", transform: "translateX(32px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
+        "slide-in-ltr": {
+          "0%": { opacity: "0", transform: "translateX(-20px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
       },
       animation: {
         "fade-up": "fade-up 0.6s cubic-bezier(0.22,1,0.36,1) both",
         marquee: "marquee 90s linear infinite",
+        "slide-in-rtl": "slide-in-rtl 0.6s cubic-bezier(0.22,1,0.36,1) both",
+        "slide-in-ltr": "slide-in-ltr 0.45s cubic-bezier(0.22,1,0.36,1) both",
       },
     },
   },

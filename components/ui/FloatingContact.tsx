@@ -1,9 +1,11 @@
 import { site } from "@/lib/site";
 import { WhatsAppIcon, InstagramIcon } from "@/components/icons";
+import { OffersFab } from "@/components/ui/OffersFab";
 
 /**
- * Stacked floating contact buttons (bottom-right): Instagram + WhatsApp.
- * Labels expand leftward on hover so they never clip the viewport edge.
+ * Stacked floating contact buttons (bottom-right): Instagram, WhatsApp, then Offers (only
+ * shown when there's a live promotion). Labels expand leftward on hover so they never clip
+ * the viewport edge.
  */
 export function FloatingContact() {
   const wa = site.whatsapp.replace(/\D/g, "");
@@ -48,6 +50,9 @@ export function FloatingContact() {
           <WhatsAppIcon width={26} height={26} />
         </span>
       </a>
+
+      {/* Offers — below WhatsApp; renders nothing if there's no live promotion */}
+      <OffersFab />
     </div>
   );
 }

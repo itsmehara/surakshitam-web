@@ -5,6 +5,7 @@ import { formatPrice, discountPercent } from "@/lib/format";
 import { StarRating } from "./StarRating";
 import { AddToCartButton } from "./AddToCartButton";
 import { QuickViewButton } from "./QuickViewButton";
+import { WishlistButton } from "./WishlistButton";
 
 const categoryLabel: Record<Product["category"], string> = {
   "home-care": "Home Care",
@@ -47,6 +48,7 @@ export function ProductCard({ product, priority }: { product: Product; priority?
           />
         </Link>
         <QuickViewButton productId={product.id} />
+        <WishlistButton productId={product.id} />
       </div>
 
       <div className="flex flex-1 flex-col p-3">

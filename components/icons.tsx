@@ -136,10 +136,29 @@ export const ChevronDown = (p: IconProps) => (
   </svg>
 );
 
+export const PauseIcon = (p: IconProps) => (
+  <svg {...base} fill="currentColor" stroke="none" {...p}>
+    <rect x="6" y="5" width="4" height="14" rx="1" />
+    <rect x="14" y="5" width="4" height="14" rx="1" />
+  </svg>
+);
+
+export const PlayIconSolid = (p: IconProps) => (
+  <svg {...base} fill="currentColor" stroke="none" {...p}>
+    <path d="M8 5v14l11-7z" />
+  </svg>
+);
+
 export const WhatsAppIcon = (p: IconProps) => (
   <svg {...base} {...p}>
     <path d="M4 20l1.4-4A7.5 7.5 0 1 1 9 19.6z" />
     <path d="M9 9.5c.2 2 2.5 4.3 4.5 4.5.7 0 1.3-.6 1.5-1.2l-1.8-1-1 .8c-.8-.4-1.4-1-1.8-1.8l.8-1-1-1.8c-.6.2-1.2.8-1.2 1.5z" />
+  </svg>
+);
+
+export const PhoneIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="M6.5 3.5h2.7l1.3 3.6-1.8 1.5a11 11 0 0 0 5 5l1.5-1.8 3.6 1.3v2.7c0 1-.8 1.7-1.8 1.6-8-1-13-6-14-14C3.9 4.4 5.5 3.5 6.5 3.5z" />
   </svg>
 );
 

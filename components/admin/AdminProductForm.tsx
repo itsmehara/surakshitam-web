@@ -13,6 +13,7 @@ import {
   type StockAuditEvent,
 } from "@/lib/catalog-store";
 import type { Product, CategorySlug } from "@/lib/types";
+import { concerns } from "@/lib/site";
 
 const CATEGORIES: { slug: CategorySlug; label: string }[] = [
   { slug: "home-care", label: "Home Care" },
@@ -276,6 +277,33 @@ export function AdminProductForm({ productId }: { productId?: string }) {
                 {lbl}
               </label>
             ))}
+          </div>
+
+          <p className="mb-2 mt-5 text-sm font-medium text-forest">Shop-by-concern tags</p>
+          <div className="flex flex-wrap gap-2">
+            {concerns.map((c) => {
+              const active = (p.concerns ?? []).includes(c.slug);
+              return (
+                <button
+                  key={c.slug}
+                  type="button"
+                  onClick={() =>
+                    set({
+                      concerns: active
+                        ? (p.concerns ?? []).filter((s) => s !== c.slug)
+                        : [...(p.concerns ?? []), c.slug],
+                    })
+                  }
+                  className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                    active
+                      ? "border-moss bg-moss/15 text-moss"
+                      : "border-forest/15 text-forest/60 hover:border-forest/30"
+                  }`}
+                >
+                  {c.name}
+                </button>
+              );
+            })}
           </div>
         </section>
 

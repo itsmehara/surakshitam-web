@@ -19,6 +19,7 @@ import { getProfile } from "@/lib/profile";
 import { getSession } from "@/lib/auth";
 import { logEvent } from "@/lib/audit";
 import { applyOfferCode, type Offer } from "@/lib/offers";
+import { getBundleDiscountForCart } from "@/lib/bundles";
 import {
   mockNotificationProvider,
   customerOrderPlaced,
@@ -103,7 +104,10 @@ export function Checkout() {
   }
 
   const shipping = subtotal >= FREE_SHIP ? 0 : SHIP_FEE;
-  const total = Math.max(0, subtotal + shipping - discount);
+  const cartProductIds = items.flatMap(({ product, qty }) => Array(qty).fill(product.id));
+  const comboMatches = getBundleDiscountForCart(cartProductIds);
+  const comboDiscount = comboMatches.reduce((sum, m) => sum + m.discount, 0);
+  const total = Math.max(0, subtotal + shipping - discount - comboDiscount);
 
   const setA = (k: keyof Address, v: string) => setAddress((a) => ({ ...a, [k]: v }));
 
@@ -168,7 +172,7 @@ export function Checkout() {
       })),
       subtotal,
       shipping,
-      discount: discount || undefined,
+      discount: discount + comboDiscount || undefined,
       offerCode: appliedOffer?.code,
       total,
       address,
@@ -506,6 +510,12 @@ export function Checkout() {
               <div className="flex justify-between">
                 <dt className="text-moss">Offer ({appliedOffer?.code})</dt>
                 <dd className="font-medium text-moss">−{formatPrice(discount)}</dd>
+              </div>
+            )}
+            {comboDiscount > 0 && (
+              <div className="flex justify-between">
+                <dt className="text-moss">Combo savings</dt>
+                <dd className="font-medium text-moss">−{formatPrice(comboDiscount)}</dd>
               </div>
             )}
             <div className="flex justify-between border-t border-forest/10 pt-3 text-base">

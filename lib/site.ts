@@ -39,6 +39,7 @@ export type NavItem = {
 /** Primary navigation kept deliberately simple (per IA spec). */
 export const primaryNav: NavItem[] = [
   { label: "Shop", href: "/shop" },
+  { label: "Offers", href: "/offers" },
   { label: "Home Care", href: "/shop?category=home-care" },
   { label: "Skin Care", href: "/shop?category=skin-care" },
   { label: "Hair Care", href: "/shop?category=hair-care" },
@@ -47,11 +48,25 @@ export const primaryNav: NavItem[] = [
   { label: "Learn", href: "/learn" },
 ];
 
+export type Concern = { slug: string; name: string };
+
+/** Curated "shop by concern" tags — kept short and customer-language, not ingredient-language. */
+export const concerns: Concern[] = [
+  { slug: "dry-skin", name: "Dry Skin" },
+  { slug: "sensitive-skin", name: "Sensitive Skin" },
+  { slug: "dandruff", name: "Dandruff" },
+  { slug: "hair-fall", name: "Hair Fall" },
+  { slug: "frizz-control", name: "Frizz & Shine" },
+  { slug: "deep-clean", name: "Deep Clean" },
+  { slug: "daily-freshness", name: "Daily Freshness" },
+];
+
 export const footerNav: { title: string; items: NavItem[] }[] = [
   {
     title: "Shop",
     items: [
       { label: "All Products", href: "/shop" },
+      { label: "Offers & Combos", href: "/offers" },
       { label: "Home Care", href: "/shop?category=home-care" },
       { label: "Skin Care", href: "/shop?category=skin-care" },
       { label: "Hair Care", href: "/shop?category=hair-care" },
@@ -70,6 +85,7 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
   {
     title: "Help",
     items: [
+      { label: "FAQs", href: "/faqs" },
       { label: "Contact", href: "/contact" },
       { label: "Track Order", href: "/track-order" },
       { label: "Shipping Policy", href: "/policies/shipping" },

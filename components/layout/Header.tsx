@@ -3,11 +3,23 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { primaryNav } from "@/lib/site";
+import { primaryNav, site } from "@/lib/site";
+import { isOffersNavEnabled } from "@/lib/site-settings";
 import { useCart } from "@/lib/cart/CartContext";
+import { useWishlist } from "@/lib/wishlist/WishlistContext";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Logo } from "@/components/ui/Logo";
-import { MenuIcon, CloseIcon, SearchIcon, CartIcon, UserIcon, ArrowRight } from "@/components/icons";
+import {
+  MenuIcon,
+  CloseIcon,
+  SearchIcon,
+  CartIcon,
+  UserIcon,
+  ArrowRight,
+  PhoneIcon,
+  WhatsAppIcon,
+  HeartIcon,
+} from "@/components/icons";
 import { cn } from "@/lib/cn";
 
 export function Header() {
@@ -17,9 +29,15 @@ export function Header() {
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get("category");
   const { count, openCart } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const { isLoggedIn: authed, user } = useAuth();
   const accountHref = authed ? "/account" : "/login?next=/account";
   const firstName = user?.name?.trim().split(/\s+/)[0] ?? "";
+
+  // "Offers" nav item is admin-toggleable (default on) — see AdminOffers.tsx.
+  const [offersNavEnabled, setOffersNavEnabled] = useState(true);
+  useEffect(() => setOffersNavEnabled(isOffersNavEnabled()), []);
+  const nav = offersNavEnabled ? primaryNav : primaryNav.filter((item) => item.href !== "/offers");
 
   // Which primary-nav item corresponds to the current page.
   const isActive = (href: string) => {
@@ -49,14 +67,38 @@ export function Header() {
     };
   }, [open]);
 
+  const telHref = `tel:${site.phone.replace(/\s+/g, "")}`;
+  const waHref = `https://wa.me/${site.whatsapp.replace(/\D/g, "")}`;
+
   return (
     <header className="sticky top-0 z-50">
-      {/* Announcement bar */}
+      {/* Announcement bar — also doubles as real, clickable contact channels (not just a mocked
+          notification viewer): a customer can call or WhatsApp the founders directly. */}
       <div className="bg-forest text-cream">
-        <div className="container flex h-9 items-center justify-center text-center text-xs sm:text-[0.8rem]">
-          <p className="tracking-wide">
+        <div className="container flex h-9 items-center justify-between gap-3 text-xs sm:text-[0.8rem]">
+          <p className="hidden min-w-0 flex-1 truncate tracking-wide sm:block">
             Homemade &amp; plant-based · Made with natural essential oils · Handcrafted in Hyderabad
           </p>
+          <div className="flex flex-1 items-center justify-center gap-4 sm:flex-none">
+            <a
+              href={telHref}
+              className="inline-flex items-center gap-1.5 text-cream/90 transition-colors hover:text-cream"
+              aria-label={`Call us at ${site.phone}`}
+            >
+              <PhoneIcon width={13} height={13} />
+              <span className="hidden sm:inline">{site.phone}</span>
+            </a>
+            <a
+              href={waHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-cream/90 transition-colors hover:text-cream"
+              aria-label="Chat with us on WhatsApp"
+            >
+              <WhatsAppIcon width={13} height={13} />
+              <span className="hidden sm:inline">WhatsApp</span>
+            </a>
+          </div>
         </div>
       </div>
 
@@ -81,7 +123,7 @@ export function Header() {
 
           {/* Desktop nav */}
           <nav className="hidden items-center gap-x-4 lg:flex xl:gap-x-6" aria-label="Primary">
-            {primaryNav.map((item) => {
+            {nav.map((item) => {
               const active = isActive(item.href);
               return (
                 <Link
@@ -122,6 +164,18 @@ export function Header() {
               <UserIcon />
               {authed && firstName && (
                 <span className="max-w-[8rem] truncate text-sm font-medium">{firstName}</span>
+              )}
+            </Link>
+            <Link
+              href="/wishlist"
+              aria-label={`Wishlist, ${wishlistCount} item${wishlistCount === 1 ? "" : "s"}`}
+              className="relative hidden h-10 w-10 items-center justify-center rounded-full text-forest transition-colors hover:bg-forest/5 sm:flex"
+            >
+              <HeartIcon />
+              {wishlistCount > 0 && (
+                <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-clay px-1 text-[0.6rem] font-semibold text-cream">
+                  {wishlistCount}
+                </span>
               )}
             </Link>
             <button
@@ -177,7 +231,7 @@ export function Header() {
             </button>
           </div>
           <nav className="flex flex-col px-3 py-4" aria-label="Mobile">
-            {primaryNav.map((item) => {
+            {nav.map((item) => {
               const active = isActive(item.href);
               return (
                 <Link
@@ -201,7 +255,14 @@ export function Header() {
               );
             })}
           </nav>
-          <div className="mt-auto border-t border-forest/10 px-5 py-5">
+          <div className="mt-auto flex flex-col gap-3 border-t border-forest/10 px-5 py-5">
+            <Link
+              href="/wishlist"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 text-sm font-medium text-forest"
+            >
+              <HeartIcon width={18} /> Wishlist{wishlistCount > 0 ? ` (${wishlistCount})` : ""}
+            </Link>
             <Link
               href={accountHref}
               onClick={() => setOpen(false)}

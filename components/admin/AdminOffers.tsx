@@ -9,6 +9,7 @@ import {
   isOfferLive,
   type Offer,
 } from "@/lib/offers";
+import { isOffersNavEnabled, setOffersNavEnabled } from "@/lib/site-settings";
 import { formatPrice } from "@/lib/format";
 
 export function AdminOffers() {
@@ -16,9 +17,16 @@ export function AdminOffers() {
   const [editingId, setEditingId] = useState<string | null>(null); // null = not editing
   const [draft, setDraft] = useState<Offer>(blankOffer());
   const [error, setError] = useState("");
+  const [navEnabled, setNavEnabled] = useState(true);
 
   const refresh = () => setOffers(getOffers());
   useEffect(refresh, []);
+  useEffect(() => setNavEnabled(isOffersNavEnabled()), []);
+
+  function toggleNav(enabled: boolean) {
+    setNavEnabled(enabled);
+    setOffersNavEnabled(enabled);
+  }
 
   function startAdd() {
     setDraft(blankOffer());
@@ -73,7 +81,17 @@ export function AdminOffers() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <label className="flex items-center gap-2 rounded-lg border border-forest/8 bg-white/60 px-4 py-3 text-sm text-forest/80">
+        <input
+          type="checkbox"
+          checked={navEnabled}
+          onChange={(e) => toggleNav(e.target.checked)}
+          className="h-4 w-4 rounded border-forest/30 text-forest focus:ring-moss"
+        />
+        Show offers on the site (menu link, floating button, homepage banner &amp; carousel — default on)
+      </label>
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-forest/60">
           Discount codes customers enter at checkout — set a start/end duration and they switch
           on and off automatically.

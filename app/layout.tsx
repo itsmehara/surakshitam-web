@@ -6,6 +6,7 @@ import { site } from "@/lib/site";
 import { AppShell } from "@/components/layout/AppShell";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { CartProvider } from "@/lib/cart/CartContext";
+import { WishlistProvider } from "@/lib/wishlist/WishlistContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -82,7 +83,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         <AuthProvider>
           <CartProvider>
-            <AppShell>{children}</AppShell>
+            <WishlistProvider>
+              <AppShell>{children}</AppShell>
+            </WishlistProvider>
           </CartProvider>
         </AuthProvider>
         <script

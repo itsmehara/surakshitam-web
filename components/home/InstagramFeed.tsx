@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { site } from "@/lib/site";
 import type { Reel } from "@/lib/instagram";
 import { InstagramIcon, ArrowRight, CloseIcon } from "@/components/icons";
@@ -19,9 +19,10 @@ function ReelCard({ reel, onOpen }: { reel: Reel; onOpen: () => void }) {
   return (
     <button
       type="button"
+      data-reel-card
       onClick={onOpen}
       aria-label={`${reel.caption} — watch reel on Instagram`}
-      className="group relative w-40 shrink-0 snap-start transition-transform duration-300 hover:-translate-y-1 sm:w-44"
+      className="group relative w-40 shrink-0 transition-transform duration-300 hover:-translate-y-1 sm:w-44"
     >
       {/* thick multicolour gradient frame */}
       <span className="block overflow-hidden rounded-[1.4rem] bg-gradient-to-br from-fuchsia-400 via-rose-400 to-amber-300 p-[6px] shadow-card">
@@ -56,8 +57,19 @@ function ReelCard({ reel, onOpen }: { reel: Reel; onOpen: () => void }) {
   );
 }
 
+const HOLD_MS = 3000; // wait between moves — kept at/under 4s per feedback
+const MOVE_MS = 1400; // glide duration — a real slide, not an instant jump
+const GAP_PX = 24; // matches gap-6 below
+
 export function InstagramFeed({ reels }: { reels: Reel[] }) {
   const [active, setActive] = useState<string | null>(null);
+  const [paused, setPaused] = useState(false);
+  const [inView, setInView] = useState(true);
+  const [cardStep, setCardStep] = useState(184); // re-measured on mount/resize
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const [index, setIndex] = useState(reels.length);
+  const [transitionOn, setTransitionOn] = useState(true);
 
   useEffect(() => {
     if (!active) return;
@@ -70,8 +82,63 @@ export function InstagramFeed({ reels }: { reels: Reel[] }) {
     };
   }, [active]);
 
+  // Card width (incl. its Tailwind breakpoint) can only be known from the rendered DOM.
+  useEffect(() => {
+    const measure = () => {
+      const card = trackRef.current?.querySelector<HTMLElement>("[data-reel-card]");
+      if (card) setCardStep(card.offsetWidth + GAP_PX);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [reels.length]);
+
+  // Only auto-advance while the strip is actually on screen.
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), {
+      threshold: 0.2,
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const canSlide = reels.length > 1;
+
+  // Glide one reel left, then hold — same cadence/mechanism as the homepage promo carousel.
+  useEffect(() => {
+    if (!canSlide || paused || !inView) return;
+    const id = setInterval(() => setIndex((i) => i + 1), HOLD_MS + MOVE_MS);
+    return () => clearInterval(id);
+  }, [canSlide, paused, inView]);
+
+  // Wrap around a 3x-duplicated track without a visible jump (transition off for one frame).
+  useEffect(() => {
+    if (!canSlide) return;
+    const count = reels.length;
+    if (index >= count * 2 || index < count) {
+      const t = setTimeout(() => {
+        setTransitionOn(false);
+        setIndex((i) => (i >= count * 2 ? i - count : i + count));
+      }, MOVE_MS);
+      return () => clearTimeout(t);
+    }
+  }, [index, reels.length, canSlide]);
+
+  useEffect(() => {
+    if (transitionOn) return;
+    const raf = requestAnimationFrame(() => setTransitionOn(true));
+    return () => cancelAnimationFrame(raf);
+  }, [transitionOn]);
+
+  const tripled = [...reels, ...reels, ...reels];
+
   return (
-    <section className="overflow-hidden bg-gradient-to-b from-cream to-[#FBF1F4] py-16 sm:py-20">
+    <section
+      ref={sectionRef}
+      className="overflow-hidden bg-gradient-to-b from-cream to-[#FBF1F4] py-16 sm:py-20"
+    >
       <div className="container">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-xl">
@@ -97,10 +164,21 @@ export function InstagramFeed({ reels }: { reels: Reel[] }) {
         </div>
       </div>
 
-      {/* Continuous marquee (pauses on hover; scrollable when motion is reduced) */}
-      <div className="group relative mt-10 overflow-hidden motion-reduce:overflow-x-auto">
-        <div className="flex w-max animate-marquee gap-6 px-6 hover:[animation-play-state:paused] motion-reduce:animate-none">
-          {[...reels, ...reels].map((reel, i) => (
+      {/* Glides one reel left, holds ~3s, glides again — pauses on hover/off-screen */}
+      <div
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        className="mt-10 overflow-hidden px-6"
+      >
+        <div
+          ref={trackRef}
+          className="flex gap-6"
+          style={{
+            transform: `translateX(-${index * cardStep}px)`,
+            transition: transitionOn ? `transform ${MOVE_MS}ms cubic-bezier(0.65,0,0.35,1)` : "none",
+          }}
+        >
+          {tripled.map((reel, i) => (
             <ReelCard key={`${reel.url}-${i}`} reel={reel} onOpen={() => setActive(reel.url)} />
           ))}
         </div>

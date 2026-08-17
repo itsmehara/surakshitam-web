@@ -69,6 +69,13 @@ All client-side. Each maps to a Supabase table in production.
 - `sn-audit-v1` — activity events; `sn-visitor-v1` — anonymous per-browser id.
 - `sn-offers-v1` — offer/coupon codes `[{id, code, description, type:'percent'|'flat', value,
   startDate, endDate, enabled, minOrderValue?}]` (decision #32).
+- `sn-wishlist-v1` — wishlist product ids `string[]` (decision #33).
+- `sn-bundles-v1` — combo/bundle kits `[{id, slug, name, description, image, productIds, price,
+  enabled}]` (decision #35).
+- `sn-offer-banner-dismissed` (**sessionStorage**, not localStorage) — dismissed-offer-code memory
+  so the active-offer banner reappears on the next visit (decision #34).
+- `sn-offers-nav-enabled-v1` — whether the "Offers" header/footer nav link is shown; absence of
+  the key (fresh browser) means **enabled**, admin-toggleable from the Offers tab (decision #41).
 
 ---
 
@@ -113,9 +120,70 @@ All client-side. Each maps to a Supabase table in production.
 - `offers.ts` — offer/coupon CRUD (`getOffers`, `saveOffer`, `deleteOffer`, `blankOffer`), plus
   `isOfferLive(offer)` (enabled + within date range) and `applyOfferCode(code, subtotal)` →
   `{ok:true, offer, discount}` or `{ok:false, reason}` (decision #32).
+- `promotions.ts` — `getHomePromotions()` aggregates live offers + live combos + any discounted
+  product (mrp>price) into a single `PromoSlide[]` for the homepage carousel (decision #37).
 - `print-label.ts` — `printShippingLabels(orders)`, opens a print window with one address label per
   order (same `window.open` + `window.print()` pattern as the Reports PDF export — no shipping-API
   integration needed; decision #31).
+- `wishlist/WishlistContext.tsx` — wishlist provider, same reducer+localStorage-hydration shape as
+  `cart/CartContext.tsx` but simpler (just an id set, no qty). `useWishlist()` → `{ids, items, count,
+  has, toggle}` (decision #33).
+- `bundles.ts` — combo/bundle CRUD (`getBundles`, `saveBundle`, `deleteBundle`, `blankBundle`,
+  `getEnabledBundles`, `bundleRegularTotal`, `bundleSavings`) plus `getBundleDiscountForCart
+  (cartProductIds)` which auto-detects when every component of a bundle is present in the cart and
+  returns the discount to apply. **Bundles are not a separate cart-line type** — "Add combo to cart"
+  just adds each component as a normal product line, so `decrementStockForOrder` and the rest of
+  checkout/orders work unchanged; only the discount calculation is bundle-aware (decision #35).
+
+**components/**
+- `layout/OfferBanner.tsx` — site-wide banner surfacing the best live offer (`getLiveOffers()`),
+  dismissible for the session via `sessionStorage` (decision #34). Mounted above `<Header>` in
+  `AppShell.tsx`.
+- `ui/WishlistButton.tsx` — heart-icon overlay button on `ProductCard`, bottom-right (opposite corner
+  from `QuickViewButton`'s top-right) to avoid collision. `app/wishlist/page.tsx` lists saved items.
+- `ui/ComboCard.tsx` / `app/combos/page.tsx` — storefront combo listing; "Add combo to cart" adds all
+  component products, and `Checkout.tsx` auto-applies the bundle discount (on top of any coupon)
+  once every component is in the cart.
+- `admin/AdminCombos.tsx` — combo CRUD (name, description, price, enabled, multi-select product
+  picker), nested as a third tab (Catalog / Offers / Combos) inside `AdminProducts.tsx` — same
+  "avoid a new admin nav item" pattern as Offers (decision #35).
+- `ui/FaqAccordion.tsx` / `app/faqs/page.tsx` — simple accordion FAQ page, linked from the footer
+  Help section (decision #36).
+- `home/PromoCarousel.tsx` — homepage section, mounted above `<Hero>` in `app/page.tsx`. Capped at
+  `max-h-[20vh]` so it can never dominate the hero. Shows a **sliding window** of `PromoSlide`s
+  (from `lib/promotions.ts`) — 1 on phones / 2 on small tablets / 3 on desktop / 4 on wide screens,
+  responsive via a resize-listening hook — advancing by one every 5s (so with 10 offers: 1-2-3, then
+  2-3-4, then 3-4-5, …). Left/right arrow buttons step manually; small clay-coloured dots (one per
+  offer, inside the section) jump directly and double as a progress indicator; a pause/play toggle
+  sits next to them. An `IntersectionObserver` stops the auto-advance timer once the section
+  scrolls out of view, so it never runs invisibly. Each card leads with a large bold figure (the
+  offer %/amount, combo savings, or product discount %) — that number is the point of the card, so
+  it's the biggest text in it. Returns `null` entirely if there's nothing to promote (decision #37,
+  redesigned 2026-08-18 — see #38).
+- `home/InstagramFeed.tsx` — glides one reel left every ~3s (own `HOLD_MS`/`MOVE_MS` constants),
+  using the same transform-track wrap technique as `PromoCarousel` rather than `scrollTo` — see
+  decision #40. **Trade-off:** manual swipe/drag-scroll was removed to get the smooth glide; only
+  auto-advance + click-to-open remain. Still pauses on hover and off-screen.
+- `ui/OffersFab.tsx` — a larger floating button rendered as the **third item inside
+  `FloatingContact.tsx`'s bottom-right stack** (below WhatsApp — not a separately-positioned
+  button; see decision #40b). Opens a modal listing **every** live offer/combo/discounted
+  product (not just the carousel's current window). Only renders when there's at least one
+  promotion.
+- `ui/PromoCardGrid.tsx` — the actual card grid, extracted out of `OffersFab` once the `/offers`
+  page needed the identical grid too. Both consumers pass a `PromoSlide[]`; card copy/styling
+  comes from `lib/promotions.ts`'s `promoCardContent`/`PROMO_TONE_BG`/`PROMO_TONE_TEXT` (decision
+  #40), so `PromoCarousel`, `OffersFab`, and `/offers` never drift out of sync with each other.
+- `lib/site-settings.ts` — `isOffersNavEnabled()`/`setOffersNavEnabled()`, a tiny localStorage
+  toggle (default **on**) controlling whether "Offers" shows in the header/footer nav. Admin
+  control lives at the top of the Offers tab (`AdminOffers.tsx`) as a checkbox (decision #41).
+  `Header.tsx` reads it client-side on mount and filters `primaryNav` accordingly (both the
+  desktop nav and the mobile drawer use the same filtered `nav` array).
+- `app/offers/page.tsx` — unified Offers/Combos page (client component, tab switcher, `?tab=`
+  query param sets the initial tab so e.g. a combo card can deep-link straight to the Combos
+  tab). Offers tab lists every `getLiveOffers()` result as a card with a tap-to-copy code;
+  Combos tab reuses `ComboCard`/`getEnabledBundles()` from the old `/combos` page. **`/combos` now
+  redirects to `/offers?tab=combos`** rather than being deleted, so old links/bookmarks still
+  resolve (decision #41).
 
 **components/**
 - `auth/AuthProvider.tsx` — **`useAuth()` context** (user, isLoggedIn, loginOtp, loginPassword,
@@ -313,6 +381,79 @@ products/[id],reports,team,activity,dev/notifications}`,
     order (`Order.discount`, `Order.offerCode`) so it survives in reports/order-detail even if the
     offer is later deleted. Prototype-only validation — production must re-check the code
     server-side before charging, never trust a client-computed discount.
+33. **Wishlist gets its own context, not folded into cart** — `lib/wishlist/WishlistContext.tsx`
+    mirrors `CartContext.tsx`'s reducer + localStorage-hydration shape but is deliberately simpler
+    (an id set, no qty, no price math). Kept separate because a wishlist item isn't a purchase
+    intent the way a cart line is — merging them would have forced qty/price fields onto something
+    that doesn't need them.
+34. **Active-offer banner dismissal uses `sessionStorage`, not `localStorage`** — so a customer who
+    dismisses it still sees it again on their next visit (localStorage would hide it forever once
+    dismissed, which defeats the point of a promo banner).
+35. **Combos don't get a new cart-line type — they expand into normal product lines at add-to-cart
+    time** — `lib/bundles.ts`'s `getBundleDiscountForCart(cartProductIds)` detects when every
+    component of an enabled bundle is present in the cart and returns the discount to apply. This
+    keeps `CartContext`, `Order.items`, and `decrementStockForOrder` completely unchanged — a combo
+    purchase decrements each component's stock exactly like buying them separately would. The
+    tradeoff: the discount only "activates" once literally all components are in the cart (by
+    design — that's what makes it a combo rather than a blanket discount). Admin CRUD
+    (`AdminCombos.tsx`) is nested as a third tab inside Products, same "avoid a new nav item"
+    reasoning as #30/#32.
+36. **"Founder's favourites" reuses the existing `featured` field instead of adding a new one** —
+    the round-4 catalog already had `Product.featured` wired end-to-end (admin toggle, homepage
+    section, shop sort, cross-sell). Baskin Nature's "founder favourites" section is functionally
+    the same thing (a curated, admin-picked homepage row), so `components/home/FeaturedProducts.tsx`
+    was relabeled rather than duplicating the schema — avoids two near-identical merchandising
+    fields drifting out of sync.
+37. **Homepage promo carousel and the Instagram strip both use a discrete "step every 10s" motion,
+    not a continuous marquee** — user specifically wanted right-to-left movement that pauses
+    between steps rather than scrolling continuously. `PromoCarousel.tsx` is new (built for this);
+    `InstagramFeed.tsx`'s old `animate-marquee` CSS scroll was replaced with the same
+    `setInterval`-driven `scrollTo` step so both carousels feel consistent. Both pause on hover.
+    The promo carousel is populated by `lib/promotions.ts`, which folds together live offers, live
+    combos, and any product currently on sale (mrp > price) into one slide list — and the whole
+    section renders nothing if that list is empty, so it never shows an empty/dead carousel.
+38. **Promo carousel redesigned from one-big-slide to a height-capped sliding window** — first
+    version (#37) was a single large slide; follow-up feedback wanted it capped at ~20% viewport
+    height so it can't compete with the Hero headline, with 3-4 compact cards visible at once
+    (fewer on mobile), the offer figure in large type, manual arrows, and a pause control alongside
+    the dots. Implemented as a modulo-indexed sliding window (`index, index+1, index+2, …`) rather
+    than a true infinite-scroll transform track — simpler to reason about and sized this small, the
+    difference is not visually detectable. Auto-advance is gated on both a manual pause toggle and
+    an `IntersectionObserver` (`inView`), so scrolling the carousel off-screen stops the timer.
+39. **Promo carousel moves with a real glide (1.8s), not an instant swap, then holds 8s** —
+    follow-up feedback: the initial version replaced the visible cards outright each step, which
+    read as an instant jump. Rebuilt as a genuine `translateX`-animated track holding **3 back-to-
+    back copies** of the slide list (`tripled`), starting in the middle copy; stepping forward or
+    back glides smoothly, and once the track has glided a full copy past either edge it snaps back
+    to the equivalent spot in the middle copy with the CSS transition switched off for one frame
+    (invisible, since it's the same content) — the standard "infinite carousel" trick, needed in
+    both directions here since manual prev/next stepping is supported alongside autoplay. `1800ms`
+    glide / `8000ms` hold, both easy to retune via the `MOVE_MS`/`HOLD_MS` constants at the top of
+    `PromoCarousel.tsx`. Each card also gained a **product image on the left 40%** of the card
+    (combos borrow their first component's photo, offer codes borrow any currently-discounted
+    product's photo, falls back to `/products/placeholder.webp`), and the big discount figure was
+    bumped to `text-2xl`/`text-3xl` extrabold so it's the clear focal point.
+40. **Card-rendering logic (copy, tone colours) extracted into `lib/promotions.ts` so the carousel
+    and the new "see all offers" floating button never drift apart** — `promoCardContent()`,
+    `PROMO_TONE_BG`, `PROMO_TONE_TEXT` were pulled out of `PromoCarousel.tsx` (previously
+    private to it) once a second consumer (`OffersFab.tsx`) needed identical card styling/copy.
+    The Instagram strip was also converted from `scrollTo`-based "smooth" scrolling to the same
+    transform-track glide technique as the promo carousel, per feedback that native smooth-scroll
+    still read as an instant jump — this cost manual swipe-scrolling on the Instagram strip (now
+    fully automated, same as the promo carousel), which is a known trade-off, not an oversight.
+41. **Combos and Offers merged into one `/offers` page with a tab switcher, admin-toggleable nav
+    link, default on.** Follow-up feedback: (a) `/combos` was only discoverable via the footer or
+    a currently-live promo card — no header entry point, so it was invisible whenever nothing was
+    live; (b) there was no page listing offer codes themselves, only the checkout coupon field;
+    (c) wanted the header link itself to be admin-controllable. Resolved by replacing the header's
+    "Combos" link with "Offers" → `/offers`, a new page with an Offers/Combos tab switcher
+    (`?tab=combos` deep-links straight to the Combos tab, used by combo promo cards); the old
+    `/combos` route now redirects there rather than being deleted, so no link breaks. Visibility
+    of the "Offers" nav item is a new localStorage toggle (`lib/site-settings.ts`,
+    `sn-offers-nav-enabled-v1`, **default true** — absence of the key means on), with the control
+    living at the top of the Offers admin tab; `Header.tsx` filters `primaryNav` client-side based
+    on it, applied identically to the desktop nav and mobile drawer. Deliberately did **not** make
+    this a broader "site settings" page — one checkbox didn't warrant new IA.
 
 ---
 
@@ -361,6 +502,16 @@ products/[id],reports,team,activity,dev/notifications}`,
   Business API — remain intentionally mocked; both need Srikanth to set up real third-party accounts
   first (Razorpay merchant account; a WhatsApp Business API provider like Meta direct or
   Gupshup/Twilio) before "real" integration is even possible.
+- **Post-Phase-5 round 5: storefront features benchmarked against baskinnature.in (2026-08-18)** ✅
+  — all 7 items implemented (see decisions #33-36; award/press badges intentionally excluded, no
+  awards yet): real **click-to-call + click-to-WhatsApp header links**; **wishlist** (heart icon on
+  product cards, `/wishlist` page, header icon+count); **active-offer banner** (auto-shows the best
+  live offer, session-dismissible); **FAQs page**; **"Founder's favourites" relabel** of the existing
+  admin-toggleable Featured homepage section (no schema duplication — `featured` already did this
+  job); **combos/bundle kits** (`/combos` page, admin CRUD nested under Products, auto-applied
+  discount at checkout, no cart/order schema changes needed); **shop-by-concern navigation**
+  (`concerns` tag array on `Product`, admin-editable, `/shop?concern=X` filter alongside the
+  existing category chips).
 - **Phase 6 Production hardening** ❌ — Supabase (Postgres + auth), real Razorpay + WhatsApp Business
   API (server secrets, idempotent webhooks), image uploads (Supabase Storage), Instagram Graph token,
   CMS, rate-limiting/2FA/security headers/monitoring/backups, cookie-consent banner + privacy
@@ -369,7 +520,7 @@ products/[id],reports,team,activity,dev/notifications}`,
 ---
 
 ## 8. Remaining work — recommended order
-**Phase 5 is complete.** Next up:
+**Phase 5 and post-Phase-5 rounds 1-5 are complete** (see §7 for what each round shipped). Next up:
 
 **Phase 6 to go live (backend swaps):**
 Supabase (auth + tables + RLS) → point `lib/*` accessors at it; Razorpay live + server verify;

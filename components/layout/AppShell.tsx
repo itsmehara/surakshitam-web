@@ -4,6 +4,7 @@ import { Suspense, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { OfferBanner } from "@/components/layout/OfferBanner";
 import { FloatingContact } from "@/components/ui/FloatingContact";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { QuickViewModal } from "@/components/ui/QuickViewModal";
@@ -41,6 +42,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <OfferBanner />
       <Suspense fallback={<div className="h-[6.25rem] bg-cream lg:h-[6.75rem]" />}>
         <Header />
       </Suspense>

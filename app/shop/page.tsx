@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { products, categories } from "@/lib/catalog";
+import { concerns } from "@/lib/site";
 import type { Product } from "@/lib/types";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { cn } from "@/lib/cn";
@@ -35,15 +36,15 @@ function sortProducts(list: Product[], sort?: string): Product[] {
   }
 }
 
-type SearchParams = { category?: string; sort?: string };
+type SearchParams = { category?: string; sort?: string; concern?: string };
 
 export default function ShopPage({ searchParams }: { searchParams: SearchParams }) {
   const activeCategory = searchParams.category;
   const activeSort = searchParams.sort ?? "featured";
+  const activeConcern = searchParams.concern;
 
-  const filtered = activeCategory
-    ? products.filter((p) => p.category === activeCategory)
-    : products;
+  let filtered = activeCategory ? products.filter((p) => p.category === activeCategory) : products;
+  if (activeConcern) filtered = filtered.filter((p) => p.concerns?.includes(activeConcern));
   const list = sortProducts(filtered, activeSort);
 
   const chips = [{ slug: undefined, name: "All Products" }, ...categories];
@@ -52,15 +53,20 @@ export default function ShopPage({ searchParams }: { searchParams: SearchParams 
     const params = new URLSearchParams();
     const category = next.category ?? activeCategory;
     const sort = next.sort ?? activeSort;
+    const concern = "concern" in next ? next.concern : activeConcern;
     if (category) params.set("category", category);
     if (sort && sort !== "featured") params.set("sort", sort);
+    if (concern) params.set("concern", concern);
     const qs = params.toString();
     return qs ? `/shop?${qs}` : "/shop";
   }
 
-  const heading = activeCategory
-    ? categories.find((c) => c.slug === activeCategory)?.name ?? "Shop"
-    : "All Products";
+  const concernName = activeConcern ? concerns.find((c) => c.slug === activeConcern)?.name : undefined;
+  const heading = concernName
+    ? `${concernName} essentials`
+    : activeCategory
+      ? categories.find((c) => c.slug === activeCategory)?.name ?? "Shop"
+      : "All Products";
 
   return (
     <>
@@ -112,6 +118,30 @@ export default function ShopPage({ searchParams }: { searchParams: SearchParams 
               </Link>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Shop by concern */}
+      <div className="border-b border-forest/8 bg-cream">
+        <div className="container flex items-center gap-2 overflow-x-auto py-2.5" role="group" aria-label="Shop by concern">
+          <span className="hidden shrink-0 text-xs text-forest/50 sm:inline">Shop by concern</span>
+          {concerns.map((c) => {
+            const active = activeConcern === c.slug;
+            return (
+              <Link
+                key={c.slug}
+                href={href({ concern: active ? "" : c.slug })}
+                className={cn(
+                  "whitespace-nowrap rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                  active
+                    ? "border-moss bg-moss/15 text-moss"
+                    : "border-forest/12 text-forest/60 hover:border-forest/30",
+                )}
+              >
+                {c.name}
+              </Link>
+            );
+          })}
         </div>
       </div>
 

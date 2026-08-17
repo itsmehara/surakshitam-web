@@ -11,10 +11,13 @@ export function FeaturedProducts() {
       <div className="container">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-xl">
-            <p className="eyebrow">Featured</p>
+            <p className="eyebrow">Founder&rsquo;s favourites</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
               Everyday essentials to start with
             </h2>
+            <p className="mt-2 text-sm text-forest/60">
+              Hand-picked by us — the products we reach for most, and the ones we&rsquo;d recommend first.
+            </p>
           </div>
           <Link href="/shop" className="link-underline text-sm">
             Shop all <ArrowRight width={16} />

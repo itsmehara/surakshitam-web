@@ -530,6 +530,41 @@ export const products: Product[] = [
   },
 ];
 
+/**
+ * "Shop by concern" tags, applied here rather than inline on every product object above
+ * to keep the catalog literal easy to scan. See lib/site.ts `concerns` for the tag list.
+ */
+const CONCERN_TAGS: Record<string, string[]> = {
+  "p-dishwash-liquid": ["deep-clean", "daily-freshness"],
+  "p-dishwash-bar": ["deep-clean"],
+  "p-floor-cleaner": ["deep-clean", "daily-freshness"],
+  "p-washing-machine-liquid": ["deep-clean", "daily-freshness"],
+  "p-natural-pitambari": ["deep-clean"],
+  "p-shea-butter-soap": ["dry-skin"],
+  "p-neem-tulsi-soap": ["sensitive-skin", "deep-clean"],
+  "p-papaya-soap": ["daily-freshness"],
+  "p-beetroot-soap": ["dry-skin"],
+  "p-glycerine-soap": ["sensitive-skin"],
+  "p-triple-butter-soap": ["dry-skin"],
+  "p-rose-face-wash": ["sensitive-skin"],
+  "p-lavender-body-wash": ["dry-skin", "daily-freshness"],
+  "p-body-lotion": ["dry-skin"],
+  "p-face-cream": ["dry-skin"],
+  "p-herbal-bath-powder": ["sensitive-skin"],
+  "p-foot-cream": ["dry-skin"],
+  "p-face-pack": ["dry-skin"],
+  "p-aloe-vera-gel": ["sensitive-skin", "dry-skin"],
+  "p-strawberry-lip-balm": ["dry-skin"],
+  "p-herbal-shampoo": ["dandruff", "hair-fall"],
+  "p-herbal-hair-pack": ["hair-fall"],
+  "p-hair-oil": ["hair-fall", "dandruff"],
+  "p-rosemary-hair-spray": ["hair-fall", "frizz-control"],
+  "p-hair-serum": ["frizz-control"],
+};
+for (const p of products) {
+  if (CONCERN_TAGS[p.id]) p.concerns = CONCERN_TAGS[p.id];
+}
+
 /* ------------------------------- helpers ------------------------------- */
 
 export function getProductBySlug(slug: string): Product | undefined {
