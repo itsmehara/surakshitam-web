@@ -1,9 +1,20 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { site, footerNav } from "@/lib/site";
 import { Logo } from "@/components/ui/Logo";
 import { WhatsAppIcon, InstagramIcon, FacebookIcon, YouTubeIcon, ArrowRight } from "@/components/icons";
+import { isOffersNavEnabled } from "@/lib/site-settings";
 
 export function Footer() {
+  const [offersNavEnabled, setOffersNavEnabled] = useState(true);
+  useEffect(() => setOffersNavEnabled(isOffersNavEnabled()), []);
+
+  const cols = offersNavEnabled
+    ? footerNav
+    : footerNav.map((col) => ({ ...col, items: col.items.filter((item) => item.href !== "/offers") }));
+
   return (
     <footer className="bg-forest text-cream">
       <div className="container py-14 lg:py-20">
@@ -70,7 +81,7 @@ export function Footer() {
 
           {/* Link columns */}
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
-            {footerNav.map((col) => (
+            {cols.map((col) => (
               <div key={col.title}>
                 <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-sage">
                   {col.title}
