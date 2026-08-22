@@ -6,8 +6,9 @@ import { useEffect, useState } from "react";
 import { getOrder, type Order } from "@/lib/orders";
 import { getProfile } from "@/lib/profile";
 import { formatPrice } from "@/lib/format";
+import { formatWeight } from "@/lib/weight";
 import { LinkButton } from "@/components/ui/Button";
-import { CheckIcon, ArrowRight, WhatsAppIcon } from "@/components/icons";
+import { CheckIcon, ArrowRight, WhatsAppIcon, PhoneIcon, TruckIcon } from "@/components/icons";
 
 const NEXT_STEPS = ["Order received", "Packing", "Packed", "Shipped", "Delivered"];
 
@@ -86,12 +87,55 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
             <span className="text-forest/50">Payment ID: {order.paymentId}</span>
           </p>
         </div>
-        {order.courier && (
-          <div className="rounded-lg border border-forest/8 bg-white/60 p-5 sm:col-span-2">
-            <h2 className="font-serif text-lg font-semibold text-forest">Shipping</h2>
-            <p className="mt-2 text-sm text-forest/75">
+        <div className="rounded-lg border border-forest/8 bg-white/60 p-5 sm:col-span-2">
+          <h2 className="inline-flex items-center gap-1.5 font-serif text-lg font-semibold text-forest">
+            <TruckIcon width={18} /> Delivery
+          </h2>
+          <p className="mt-2 text-sm text-forest/75">
+            {order.shipping === 0 ? "Free delivery" : `${formatPrice(order.shipping)} delivery`}
+            {order.deliveryQuote?.distanceKm
+              ? ` · approx. ${order.deliveryQuote.distanceKm} km from our kitchen`
+              : ""}
+            {order.deliveryQuote?.area ? ` (${order.deliveryQuote.area})` : ""}
+            {order.weightGrams ? (
+              <>
+                <br />
+                Parcel weight: <span className="font-medium">≈ {formatWeight(order.weightGrams)}</span>{" "}
+                <span className="text-forest/50">(approximate)</span>
+              </>
+            ) : null}
+            {order.deliveryQuote && order.deliveryQuote.distanceSurcharge > 0 && (
+              <>
+                <br />
+                <span className="text-forest/55">
+                  Includes {formatPrice(order.deliveryQuote.distanceSurcharge)} distance charge beyond
+                  15 km.
+                </span>
+              </>
+            )}
+          </p>
+
+          {order.courier && (
+            <p className="mt-3 border-t border-forest/8 pt-3 text-sm text-forest/75">
               {order.courier === "Handed over to customer" ? (
                 "Handed over to you directly — no courier tracking for this order."
+              ) : order.deliveryMode === "bike" ? (
+                <>
+                  Out by bike with <span className="font-medium">{order.courier}</span>
+                  {order.rider?.name ? ` · ${order.rider.name}` : ""}
+                  {order.rider?.vehicleNumber ? ` · ${order.rider.vehicleNumber}` : ""}
+                  {order.rider?.phone && (
+                    <>
+                      <br />
+                      <a
+                        href={`tel:${order.rider.phone}`}
+                        className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-forest px-4 py-1.5 text-xs font-medium text-cream hover:bg-ink"
+                      >
+                        <PhoneIcon width={13} /> Call rider {order.rider.phone}
+                      </a>
+                    </>
+                  )}
+                </>
               ) : (
                 <>
                   Courier: <span className="font-medium">{order.courier}</span>
@@ -104,8 +148,8 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
                 </>
               )}
             </p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Items */}
@@ -130,7 +174,9 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
           ))}
         </ul>
         <div className="mt-3 flex justify-between border-t border-forest/10 pt-3 text-sm">
-          <span className="text-forest/70">Total (incl. {formatPrice(order.shipping)} shipping)</span>
+          <span className="text-forest/70">
+            Total (incl. {order.shipping === 0 ? "free" : formatPrice(order.shipping)} delivery)
+          </span>
           <span className="font-semibold text-forest">{formatPrice(order.total)}</span>
         </div>
       </div>

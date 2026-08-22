@@ -5,7 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart/CartContext";
+import { productImage } from "@/lib/catalog";
 import { formatPrice } from "@/lib/format";
+import { formatWeight } from "@/lib/weight";
+import { quoteDelivery } from "@/lib/delivery";
 import { RazorpayMockModal } from "./RazorpayMockModal";
 import {
   createOrder,
@@ -29,8 +32,6 @@ import { LinkButton } from "@/components/ui/Button";
 import { CartIcon, CheckIcon, ShieldIcon, ArrowRight } from "@/components/icons";
 import { cn } from "@/lib/cn";
 
-const FREE_SHIP = 59900;
-const SHIP_FEE = 4900;
 const STEPS = ["Contact", "Address", "Review", "Payment"] as const;
 
 const emptyAddress: Address = {
@@ -47,7 +48,7 @@ const emptyAddress: Address = {
 };
 
 export function Checkout() {
-  const { items, subtotal, clear } = useCart();
+  const { items, subtotal, clear, weightGrams } = useCart();
   const router = useRouter();
 
   const [step, setStep] = useState(0);
@@ -103,7 +104,10 @@ export function Checkout() {
     );
   }
 
-  const shipping = subtotal >= FREE_SHIP ? 0 : SHIP_FEE;
+  // Delivery is priced from the destination PIN code + parcel weight, so it
+  // recalculates as soon as the address step is filled in.
+  const deliveryQuote = quoteDelivery({ subtotal, weightGrams, pincode: address.postalCode });
+  const shipping = deliveryQuote.fee;
   const cartProductIds = items.flatMap(({ product, qty }) => Array(qty).fill(product.id));
   const comboMatches = getBundleDiscountForCart(cartProductIds);
   const comboDiscount = comboMatches.reduce((sum, m) => sum + m.discount, 0);
@@ -167,11 +171,20 @@ export function Checkout() {
         skuSnapshot: product.sku,
         priceSnapshot: product.price,
         qty,
-        image: product.image,
+        image: productImage(product),
         size: product.size,
       })),
       subtotal,
       shipping,
+      weightGrams,
+      deliveryQuote: {
+        zone: deliveryQuote.zone,
+        distanceKm: deliveryQuote.distanceKm,
+        area: deliveryQuote.area,
+        baseFee: deliveryQuote.baseFee,
+        distanceSurcharge: deliveryQuote.distanceSurcharge,
+        freeApplied: deliveryQuote.freeApplied,
+      },
       discount: discount + comboDiscount || undefined,
       offerCode: appliedOffer?.code,
       total,
@@ -362,7 +375,17 @@ export function Checkout() {
                   {items.map(({ product, qty }) => (
                     <li key={product.id} className="flex items-center gap-3 py-3">
                       <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-forest/8 bg-cream">
-                        <Image src={product.image} alt={product.name} fill sizes="56px" className="scale-[1.12] object-cover object-[50%_55%]" />
+                        <Image
+                          src={productImage(product)}
+                          alt={product.name}
+                          fill
+                          sizes="56px"
+                          className={
+                            product.thirdParty
+                              ? "object-contain p-1"
+                              : "scale-[1.12] object-cover object-[50%_55%]"
+                          }
+                        />
                       </div>
                       <div className="flex-1 text-sm">
                         <p className="font-medium text-forest">{product.name}</p>
@@ -503,9 +526,26 @@ export function Checkout() {
               <dd className="font-medium text-forest">{formatPrice(subtotal)}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-forest/70">Shipping</dt>
+              <dt className="text-forest/70">Parcel weight</dt>
+              <dd className="font-medium text-forest">≈ {formatWeight(weightGrams)}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-forest/70">
+                Delivery
+                {deliveryQuote.distanceKm > 0 && (
+                  <span className="text-forest/45"> · {deliveryQuote.distanceKm} km</span>
+                )}
+              </dt>
               <dd className="font-medium text-forest">{shipping === 0 ? "Free" : formatPrice(shipping)}</dd>
             </div>
+            {deliveryQuote.distanceSurcharge > 0 && (
+              <div className="flex justify-between text-xs">
+                <dt className="text-forest/55">
+                  incl. distance charge{deliveryQuote.baseFee > 0 ? " + base fee" : ""}
+                </dt>
+                <dd className="text-forest/55">{formatPrice(deliveryQuote.distanceSurcharge)}</dd>
+              </div>
+            )}
             {discount > 0 && (
               <div className="flex justify-between">
                 <dt className="text-moss">Offer ({appliedOffer?.code})</dt>
@@ -523,6 +563,16 @@ export function Checkout() {
               <dd className="font-semibold text-forest">{formatPrice(total)}</dd>
             </div>
           </dl>
+          <div className="mt-3 space-y-1">
+            {deliveryQuote.notes.map((n) => (
+              <p key={n} className="text-xs text-moss">
+                {n}
+              </p>
+            ))}
+            <p className="text-xs text-forest/45">
+              Weight is approximate. Estimated delivery: {deliveryQuote.etaText}.
+            </p>
+          </div>
           <Link href="/cart" className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-moss hover:text-forest">
             Edit cart <ArrowRight width={15} />
           </Link>

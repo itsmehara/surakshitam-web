@@ -14,7 +14,7 @@ export const categories: Category[] = [
     slug: "home-care",
     name: "Home Care",
     description:
-      "Everyday household cleaning — dishwash, floor and laundry care, thoughtfully formulated for daily use.",
+      "Everyday household cleaning — dishwash, floor and laundry care. Two shelves: bio-enzyme formulations that break down safely, and our general range.",
     image: "/products/dishwash-liquid.webp",
   },
   {
@@ -32,6 +32,14 @@ export const categories: Category[] = [
     description:
       "Shampoo, oils, packs and serums — herbal hair care for everyday routines.",
     image: "/products/herbal-shampoo.webp",
+  },
+  {
+    id: "cat-pantry",
+    slug: "pantry",
+    name: "Pantry & Foods",
+    description:
+      "Homemade noodles, snacks and kitchen staples from small food brands we trust. Stocked by us, made by them — every pack carries its own brand.",
+    image: "/products/partners/wheat-noodles.webp",
   },
 ];
 
@@ -528,6 +536,98 @@ export const products: Product[] = [
     stock: 16,
     isNew: true,
   },
+
+  /* --------------------------- PANTRY & FOODS ---------------------------
+   * Third-party stock: made by other small food brands, sold by us. Every one
+   * of these carries `thirdParty: true` and its own `brand`, which is what the
+   * storefront shows — no Surakshitam branding, wording or artwork is applied
+   * to them anywhere. DEMO BRANDS + DEMO PRICES — replace with the real
+   * suppliers' names, packs and MRPs before launch.
+   * -------------------------------------------------------------------- */
+  {
+    id: "p-wheat-noodles",
+    slug: "homemade-wheat-noodles",
+    name: "Homemade Wheat Noodles",
+    category: "pantry",
+    brand: "Amma's Kitchen",
+    thirdParty: true,
+    shortDescription: "Hand-cut wheat noodles, no maida",
+    description:
+      "Wheat noodles made in small home batches by Amma's Kitchen — hand-cut, sun-dried and packed without maida or added colour. Cooks in about five minutes.",
+    benefits: ["Whole-wheat base", "No added colour", "Cooks in ~5 minutes"],
+    keyIngredients: ["Whole wheat flour", "Edible salt"],
+    usage: "Boil in salted water for 4–5 minutes, drain, then toss with your seasoning.",
+    size: "250 g",
+    weightGrams: 260,
+    price: 9900,
+    mrp: 11900,
+    sku: "AK-PN-WNL-250",
+    image: "/products/partners/wheat-noodles.webp",
+    stock: 24,
+    isNew: true,
+  },
+  {
+    id: "p-millet-noodles",
+    slug: "millet-hakka-noodles",
+    name: "Millet Hakka Noodles",
+    category: "pantry",
+    brand: "Millet Mitra",
+    thirdParty: true,
+    shortDescription: "Millet-based noodles for everyday meals",
+    description:
+      "Hakka-style noodles from Millet Mitra, made on a millet base instead of refined flour. A quick weeknight base for stir-fries and lunchboxes.",
+    benefits: ["Millet-based", "No refined flour", "Quick to cook"],
+    keyIngredients: ["Little millet flour", "Wheat flour", "Edible salt"],
+    usage: "Boil for 5–6 minutes, rinse in cold water, then stir-fry with vegetables.",
+    size: "200 g",
+    weightGrams: 210,
+    price: 12900,
+    sku: "MM-PN-MNL-200",
+    image: "/products/partners/millet-noodles.webp",
+    stock: 18,
+    isNew: true,
+  },
+  {
+    id: "p-ragi-murukku",
+    slug: "roasted-ragi-murukku",
+    name: "Roasted Ragi Murukku",
+    category: "pantry",
+    brand: "Amma's Kitchen",
+    thirdParty: true,
+    shortDescription: "Crunchy ragi tea-time snack",
+    description:
+      "A crisp, lightly spiced ragi murukku from Amma's Kitchen — made in small batches for tea time and lunchboxes.",
+    benefits: ["Ragi (finger millet) base", "Small-batch made", "Everyday tea-time snack"],
+    keyIngredients: ["Ragi flour", "Rice flour", "Cumin", "Edible salt"],
+    usage: "Ready to eat. Reseal the pack and finish within a week of opening.",
+    size: "200 g",
+    weightGrams: 215,
+    price: 8900,
+    sku: "AK-PN-RMK-200",
+    image: "/products/partners/ragi-murukku.webp",
+    stock: 30,
+  },
+  {
+    id: "p-groundnut-oil",
+    slug: "wood-pressed-groundnut-oil",
+    name: "Wood-Pressed Groundnut Oil",
+    category: "pantry",
+    brand: "Ghani Fresh",
+    thirdParty: true,
+    shortDescription: "Cold, wood-pressed cooking oil",
+    description:
+      "Groundnut oil pressed in a wooden ghani by Ghani Fresh, filtered and bottled without refining — for everyday Indian cooking.",
+    benefits: ["Wood-pressed", "Unrefined", "Everyday cooking oil"],
+    keyIngredients: ["Groundnut"],
+    usage: "Use as your regular cooking oil. Store away from direct sunlight.",
+    size: "1 L",
+    weightGrams: 1020,
+    price: 39900,
+    mrp: 44900,
+    sku: "GF-PN-GNO-1L",
+    image: "/products/partners/groundnut-oil.webp",
+    stock: 12,
+  },
 ];
 
 /**
@@ -535,11 +635,11 @@ export const products: Product[] = [
  * to keep the catalog literal easy to scan. See lib/site.ts `concerns` for the tag list.
  */
 const CONCERN_TAGS: Record<string, string[]> = {
-  "p-dishwash-liquid": ["deep-clean", "daily-freshness"],
-  "p-dishwash-bar": ["deep-clean"],
-  "p-floor-cleaner": ["deep-clean", "daily-freshness"],
-  "p-washing-machine-liquid": ["deep-clean", "daily-freshness"],
-  "p-natural-pitambari": ["deep-clean"],
+  "p-dishwash-liquid": ["kitchen-grease", "deep-clean", "daily-freshness"],
+  "p-dishwash-bar": ["kitchen-grease", "deep-clean"],
+  "p-floor-cleaner": ["floors-surfaces", "deep-clean", "daily-freshness"],
+  "p-washing-machine-liquid": ["laundry", "deep-clean", "daily-freshness"],
+  "p-natural-pitambari": ["kitchen-grease", "floors-surfaces", "deep-clean"],
   "p-shea-butter-soap": ["dry-skin"],
   "p-neem-tulsi-soap": ["sensitive-skin", "deep-clean"],
   "p-papaya-soap": ["daily-freshness"],
@@ -565,6 +665,26 @@ for (const p of products) {
   if (CONCERN_TAGS[p.id]) p.concerns = CONCERN_TAGS[p.id];
 }
 
+/**
+ * Home care sits on two shelves. Bio-enzyme products are built on fermented
+ * fruit/vegetable-peel enzymes: they break down in water, so what goes down the
+ * drain feeds soil and waterways instead of loading them with harsh chemistry.
+ * Everything else is the general home-care range.
+ *
+ * DEMO CLASSIFICATION — the founders must confirm which SKUs are genuinely
+ * bio-enzyme formulations before this is published; the badge is a claim.
+ */
+const BIO_ENZYME_PRODUCTS = new Set<string>([
+  "p-dishwash-liquid",
+  "p-floor-cleaner",
+  "p-washing-machine-liquid",
+]);
+for (const p of products) {
+  if (p.category === "home-care") {
+    p.homeCareType = BIO_ENZYME_PRODUCTS.has(p.id) ? "bio-enzyme" : "general";
+  }
+}
+
 /* ------------------------------- helpers ------------------------------- */
 
 export function getProductBySlug(slug: string): Product | undefined {
@@ -583,6 +703,7 @@ export function searchProducts(query: string): Product[] {
   return products.filter((p) => {
     const haystack = [
       p.name,
+      p.brand ?? "",
       p.category.replace("-", " "),
       p.shortDescription,
       p.description,
@@ -608,4 +729,28 @@ export function getBestSellers(limit = 4): Product[] {
 
 export function getCategoryBySlug(slug: string): Category | undefined {
   return categories.find((c) => c.slug === slug);
+}
+
+/** Our own "photo coming soon" cover — carries the house palette. */
+export const HOUSE_PLACEHOLDER_IMAGE = "/products/placeholder.webp";
+/** Neutral, unbranded cover used for other companies' stock. */
+export const PARTNER_PLACEHOLDER_IMAGE = "/products/partners/placeholder.webp";
+
+/**
+ * The cover to render for a product. Third-party stock never falls back to the
+ * house placeholder — a Surakshitam-styled card behind someone else's noodles
+ * would read as our own product, so those get a plain, brandless cover instead.
+ */
+export function productImage(product: Pick<Product, "image" | "thirdParty">): string {
+  const src = product.image?.trim();
+  if (product.thirdParty) {
+    if (!src || src === HOUSE_PLACEHOLDER_IMAGE) return PARTNER_PLACEHOLDER_IMAGE;
+    return src;
+  }
+  return src || HOUSE_PLACEHOLDER_IMAGE;
+}
+
+/** Home-care products on one shelf — "bio-enzyme" or "general". */
+export function getHomeCareByType(type: "bio-enzyme" | "general"): Product[] {
+  return products.filter((p) => p.category === "home-care" && (p.homeCareType ?? "general") === type);
 }

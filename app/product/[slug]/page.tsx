@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { products, getProductBySlug, getProductsByCategory } from "@/lib/catalog";
+import { products, getProductBySlug, getProductsByCategory, productImage } from "@/lib/catalog";
+import { productWeightGrams, formatWeight } from "@/lib/weight";
+import { FREE_DELIVERY_HEADLINE, FREE_DELIVERY_SUBLINE } from "@/lib/delivery";
 import { formatPrice, discountPercent } from "@/lib/format";
 import { StarRating } from "@/components/ui/StarRating";
 import { AddToCartButton } from "@/components/ui/AddToCartButton";
@@ -24,7 +26,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
     openGraph: {
       title: `${product.name} · ${site.name}`,
       description: product.shortDescription,
-      images: [{ url: product.image }],
+      images: [{ url: productImage(product) }],
     },
   };
 }
@@ -33,6 +35,7 @@ const categoryLabel: Record<string, string> = {
   "home-care": "Home Care",
   "skin-care": "Skin Care",
   "hair-care": "Hair Care",
+  pantry: "Pantry & Foods",
 };
 
 export default function ProductPage({ params }: { params: { slug: string } }) {
@@ -41,6 +44,11 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 
   const discount = discountPercent(product.price, product.mrp);
   const outOfStock = product.stock <= 0;
+  const isBioEnzyme = product.homeCareType === "bio-enzyme";
+  // Resold stock is attributed to its own maker, never to us.
+  const partnerBrand = product.thirdParty ? product.brand : undefined;
+  const unitWeight = productWeightGrams(product);
+  const cover = productImage(product);
   const lowStock = product.stock > 0 && product.stock <= 10;
   const related = getProductsByCategory(product.category)
     .filter((p) => p.id !== product.id)
@@ -78,8 +86,8 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
     name: product.name,
     description: product.shortDescription,
     sku: product.sku,
-    image: product.image,
-    brand: { "@type": "Brand", name: site.name },
+    image: cover,
+    brand: { "@type": "Brand", name: partnerBrand ?? site.name },
     offers: {
       "@type": "Offer",
       priceCurrency: "INR",
@@ -109,20 +117,36 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-14">
           {/* Gallery */}
           <ProductGallery
-            images={product.images?.length ? product.images : [product.image]}
+            images={product.images?.length ? product.images : [cover]}
             name={product.name}
             discountLabel={discount ? `${discount}% off` : undefined}
           />
 
           {/* Details */}
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-moss">
-              {categoryLabel[product.category]}
+            <p
+              className={`text-xs font-semibold uppercase tracking-[0.16em] ${
+                partnerBrand ? "text-forest/55" : "text-moss"
+              }`}
+            >
+              {partnerBrand ?? categoryLabel[product.category]}
             </p>
             <h1 className="mt-2 font-serif text-3xl font-semibold text-forest sm:text-4xl">
               {product.name}
             </h1>
             <p className="mt-2 text-base text-forest/70">{product.shortDescription}</p>
+
+            {partnerBrand && (
+              <p className="mt-3 rounded-lg border border-forest/10 bg-white/70 px-3 py-2 text-xs leading-relaxed text-forest/65">
+                Made by <span className="font-medium text-forest">{partnerBrand}</span> — stocked and
+                delivered by {site.name}. This is a brand-partner product, not one of ours.
+              </p>
+            )}
+            {isBioEnzyme && (
+              <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-moss/12 px-3 py-1 text-xs font-medium text-moss">
+                <LeafIcon width={14} /> Bio-enzyme formulation — breaks down after use
+              </p>
+            )}
 
             {product.rating && (
               <div className="mt-4">
@@ -137,7 +161,10 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               )}
               <span className="text-sm text-forest/55">· {product.size}</span>
             </div>
-            <p className="mt-1 text-xs text-forest/45">Demo price — inclusive of all taxes (placeholder)</p>
+            <p className="mt-1 text-xs text-forest/45">
+              Demo price — inclusive of all taxes (placeholder) · approx. {formatWeight(unitWeight)} per
+              unit for delivery
+            </p>
 
             {/* Stock */}
             <div className="mt-5">
@@ -165,9 +192,19 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
             </div>
 
             {/* Assurances */}
-            <div className="mt-6 grid gap-3 rounded-lg border border-forest/8 bg-parchment/60 p-4 sm:grid-cols-2">
-              <Assurance icon={<TruckIcon width={18} />} text="Delivery in 2–5 business days (demo)" />
-              <Assurance icon={<LeafIcon width={18} />} text="Plant-forward, small-batch made" />
+            <div className="mt-6 rounded-lg border border-forest/8 bg-parchment/60 p-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Assurance icon={<TruckIcon width={18} />} text={FREE_DELIVERY_HEADLINE} />
+                <Assurance
+                  icon={<LeafIcon width={18} />}
+                  text={
+                    partnerBrand
+                      ? `Sourced from ${partnerBrand}, packed by us`
+                      : "Plant-forward, small-batch made"
+                  }
+                />
+              </div>
+              <p className="mt-2 text-xs text-forest/50">{FREE_DELIVERY_SUBLINE}</p>
             </div>
 
             {/* Accordions */}

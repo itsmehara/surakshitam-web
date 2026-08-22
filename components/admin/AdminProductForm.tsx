@@ -12,13 +12,20 @@ import {
   getStockHistory,
   type StockAuditEvent,
 } from "@/lib/catalog-store";
-import type { Product, CategorySlug } from "@/lib/types";
+import type { Product, CategorySlug, HomeCareType } from "@/lib/types";
+import { parseSizeToGrams } from "@/lib/weight";
 import { concerns } from "@/lib/site";
 
 const CATEGORIES: { slug: CategorySlug; label: string }[] = [
   { slug: "home-care", label: "Home Care" },
   { slug: "skin-care", label: "Skin Care" },
   { slug: "hair-care", label: "Hair Care" },
+  { slug: "pantry", label: "Pantry & Foods (brand partners)" },
+];
+
+const HOME_CARE_TYPES: { value: HomeCareType; label: string }[] = [
+  { value: "general", label: "General home care" },
+  { value: "bio-enzyme", label: "Bio-enzyme" },
 ];
 
 const linesToArray = (s: string) =>
@@ -130,6 +137,67 @@ export function AdminProductForm({ productId }: { productId?: string }) {
               <input value={p.size} onChange={(e) => set({ size: e.target.value })} className={`mt-1 ${field}`} />
             </div>
             <div>
+              <label className={labelCls}>Weight (g, approx.)</label>
+              <input
+                type="number"
+                min={0}
+                value={p.weightGrams ? String(p.weightGrams) : ""}
+                placeholder={String(parseSizeToGrams(p.size) ?? "")}
+                onChange={(e) =>
+                  set({ weightGrams: e.target.value ? Math.max(0, Math.round(Number(e.target.value))) : undefined })
+                }
+                className={`mt-1 ${field}`}
+              />
+              <p className="mt-1 text-xs text-forest/45">
+                Leave blank to derive it from the pack size. Used for cart weight and delivery
+                booking — always shown to customers as approximate.
+              </p>
+            </div>
+            {p.category === "home-care" && (
+              <div>
+                <label className={labelCls}>Home-care type</label>
+                <select
+                  value={p.homeCareType ?? "general"}
+                  onChange={(e) => set({ homeCareType: e.target.value as HomeCareType })}
+                  className={`mt-1 ${field}`}
+                >
+                  {HOME_CARE_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-forest/45">
+                  Bio-enzyme puts a badge on the product — only set it for formulations that really
+                  are enzyme-based.
+                </p>
+              </div>
+            )}
+            <div className="sm:col-span-2">
+              <label className="flex items-center gap-2 text-sm text-forest">
+                <input
+                  type="checkbox"
+                  checked={!!p.thirdParty}
+                  onChange={(e) => set({ thirdParty: e.target.checked || undefined })}
+                />
+                Brand-partner product (made by another company)
+              </label>
+              {p.thirdParty && (
+                <>
+                  <input
+                    value={p.brand ?? ""}
+                    onChange={(e) => set({ brand: e.target.value || undefined })}
+                    placeholder="Brand name, e.g. Amma's Kitchen"
+                    className={`mt-2 ${field}`}
+                  />
+                  <p className="mt-1 text-xs text-forest/45">
+                    The brand replaces our category label on cards and product pages, and the item
+                    falls back to a neutral, unbranded image — nothing implies we made it.
+                  </p>
+                </>
+              )}
+            </div>
+            <div>
               <label className={labelCls}>URL slug (auto if blank)</label>
               <input value={p.slug} onChange={(e) => set({ slug: e.target.value })} className={`mt-1 ${field}`} />
             </div>
@@ -213,7 +281,10 @@ export function AdminProductForm({ productId }: { productId?: string }) {
             </div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={p.image || "/products/placeholder.webp"}
+              src={
+                p.image ||
+                (p.thirdParty ? "/products/partners/placeholder.webp" : "/products/placeholder.webp")
+              }
               alt="Preview"
               className="h-24 w-24 shrink-0 rounded-lg border border-forest/10 bg-parchment object-cover"
             />

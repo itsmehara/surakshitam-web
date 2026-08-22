@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useReducer, useState } from "react";
 import { getProductById } from "@/lib/catalog";
+import { parcelWeightGrams } from "@/lib/weight";
 import { getSession } from "@/lib/auth";
 import { logEvent } from "@/lib/audit";
 import type { Product } from "@/lib/types";
@@ -61,6 +62,12 @@ interface CartContextValue {
   items: CartItem[];
   count: number;
   subtotal: number; // paise
+  /**
+   * Approximate parcel weight in grams — recalculated on every add/remove so
+   * the courier/bike booking always has a figure to work with. Includes one
+   * packaging allowance; see lib/weight.ts.
+   */
+  weightGrams: number;
   add: (id: string, qty?: number) => void;
   setQty: (id: string, qty: number) => void;
   remove: (id: string) => void;
@@ -120,10 +127,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const value: CartContextValue = useMemo(() => {
     const count = items.reduce((n, i) => n + i.qty, 0);
     const subtotal = items.reduce((n, i) => n + i.product.price * i.qty, 0);
+    const weightGrams = parcelWeightGrams(items);
     return {
       items,
       count,
       subtotal,
+      weightGrams,
       add: (id, qty) => {
         dispatch({ type: "add", id, qty });
         setDrawerOpen(true);

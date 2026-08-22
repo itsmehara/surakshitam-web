@@ -7,6 +7,7 @@
 import { getAdminSession } from "./admin";
 import { logEvent } from "./audit";
 import { decrementStockForOrder } from "./catalog-store";
+import type { DeliveryMode, DeliveryZone } from "./delivery";
 
 export type PaymentStatus = "PAID" | "FAILED" | "PENDING";
 export type FulfillmentStatus =
@@ -26,8 +27,8 @@ export const FULFILLMENT_LABEL: Record<FulfillmentStatus, string> = {
   DELIVERED: "Delivered",
 };
 
-/** Courier options offered when marking an order Shipped. "Handed over to
- *  customer" covers local/self-delivery, where no tracking number applies. */
+/** Courier options offered when an order ships by parcel service rather than by
+ *  bike. "Handed over to customer" covers a doorstep handover with no tracking. */
 export const COURIER_OPTIONS = [
   "Handed over to customer",
   "Delhivery",
@@ -79,9 +80,45 @@ export interface Order {
   fulfillmentStatus: FulfillmentStatus;
   /** Owning customer id (10-digit mobile). Absent = legacy/guest; matched by phone. */
   userId?: string;
-  /** Set when marked Shipped — which courier, and (if applicable) their tracking number. */
+  /** Set when marked Shipped — which courier/partner, and their tracking number. */
   courier?: string;
   trackingNumber?: string;
+
+  /** Approximate parcel weight at order time, in grams (see lib/weight.ts). */
+  weightGrams?: number;
+  /** How delivery was priced — kept so the charge can be explained later. */
+  deliveryQuote?: {
+    zone: DeliveryZone;
+    distanceKm: number;
+    area?: string;
+    baseFee: number;
+    distanceSurcharge: number;
+    freeApplied: boolean;
+  };
+  /** How the parcel actually went out. Most city orders go by bike. */
+  deliveryMode?: DeliveryMode;
+  /**
+   * The person carrying the parcel. Their number is shown to the customer so
+   * they can call about the drop. PRODUCTION: route this through a masked-number
+   * service (Exotel/Knowlarity) rather than exposing a personal mobile.
+   */
+  rider?: { name: string; phone: string; vehicleNumber?: string };
+  /** The partner's own live-tracking page (Rapido/Uber trip link), if provided. */
+  liveTrackingUrl?: string;
+  /** Set when the rider picks the parcel up — the clock the ETA counts from. */
+  dispatchedAt?: string;
+  /** ETA in minutes quoted at dispatch. */
+  etaMinutes?: number;
+}
+
+/** Everything captured when an order is marked Shipped. */
+export interface ShippingDetails {
+  courier?: string;
+  trackingNumber?: string;
+  deliveryMode?: DeliveryMode;
+  rider?: { name: string; phone: string; vehicleNumber?: string };
+  liveTrackingUrl?: string;
+  etaMinutes?: number;
 }
 
 /** Last-10-digits form used to match a customer to their orders. */
@@ -143,7 +180,7 @@ export const FULFILLMENT_FLOW: FulfillmentStatus[] = [
 export function updateOrderStatus(
   orderNumber: string,
   status: FulfillmentStatus,
-  shipping?: { courier?: string; trackingNumber?: string },
+  shipping?: ShippingDetails,
 ): void {
   const all = readOrders();
   let from: FulfillmentStatus | undefined;
@@ -155,6 +192,12 @@ export function updateOrderStatus(
       fulfillmentStatus: status,
       ...(shipping?.courier !== undefined ? { courier: shipping.courier } : {}),
       ...(shipping?.trackingNumber !== undefined ? { trackingNumber: shipping.trackingNumber } : {}),
+      ...(shipping?.deliveryMode !== undefined ? { deliveryMode: shipping.deliveryMode } : {}),
+      ...(shipping?.rider !== undefined ? { rider: shipping.rider } : {}),
+      ...(shipping?.liveTrackingUrl !== undefined ? { liveTrackingUrl: shipping.liveTrackingUrl } : {}),
+      ...(shipping?.etaMinutes !== undefined ? { etaMinutes: shipping.etaMinutes } : {}),
+      // The dispatch clock starts once, when the parcel actually leaves.
+      ...(status === "SHIPPED" && !o.dispatchedAt ? { dispatchedAt: new Date().toISOString() } : {}),
     };
   });
   writeOrders(next);

@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { primaryNav, site } from "@/lib/site";
 import { isOffersNavEnabled } from "@/lib/site-settings";
 import { useCart } from "@/lib/cart/CartContext";
@@ -19,20 +19,54 @@ import {
   PhoneIcon,
   WhatsAppIcon,
   HeartIcon,
+  ChevronDown,
 } from "@/components/icons";
 import { cn } from "@/lib/cn";
+
+const accountMenuItem =
+  "block px-4 py-2.5 text-sm text-forest transition-colors hover:bg-parchment";
 
 export function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get("category");
   const { count, openCart } = useCart();
   const { count: wishlistCount } = useWishlist();
-  const { isLoggedIn: authed, user } = useAuth();
+  const { isLoggedIn: authed, user, signOut } = useAuth();
   const accountHref = authed ? "/account" : "/login?next=/account";
   const firstName = user?.name?.trim().split(/\s+/)[0] ?? "";
+
+  // Signing out lives inside this menu rather than on a visible button, so it
+  // takes a deliberate two-step action and can't be hit by accident.
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!accountMenuOpen) return;
+    const onPointerDown = (e: MouseEvent | TouchEvent) => {
+      if (!accountMenuRef.current?.contains(e.target as Node)) setAccountMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setAccountMenuOpen(false);
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [accountMenuOpen]);
+
+  // Close the menu whenever the route changes (a menu link was followed).
+  useEffect(() => setAccountMenuOpen(false), [pathname]);
+
+  function handleSignOut() {
+    setAccountMenuOpen(false);
+    setOpen(false);
+    signOut();
+    router.push("/");
+  }
 
   // "Offers" nav item is admin-toggleable (default on) — see AdminOffers.tsx.
   const [offersNavEnabled, setOffersNavEnabled] = useState(true);
@@ -156,16 +190,65 @@ export function Header() {
             >
               <SearchIcon />
             </Link>
-            <Link
-              href={accountHref}
-              aria-label={authed ? `Account — ${firstName || "signed in"}` : "Sign in"}
-              className="hidden h-10 items-center gap-2 rounded-full px-2.5 text-forest transition-colors hover:bg-forest/5 sm:flex"
-            >
-              <UserIcon />
-              {authed && firstName && (
-                <span className="max-w-[8rem] truncate text-sm font-medium">{firstName}</span>
-              )}
-            </Link>
+            {authed ? (
+              <div className="relative hidden sm:block" ref={accountMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setAccountMenuOpen((v) => !v)}
+                  aria-haspopup="menu"
+                  aria-expanded={accountMenuOpen}
+                  aria-label={`Account menu — ${firstName || "signed in"}`}
+                  className="flex h-10 items-center gap-2 rounded-full px-2.5 text-forest transition-colors hover:bg-forest/5"
+                >
+                  <UserIcon />
+                  {firstName && (
+                    <span className="max-w-[8rem] truncate text-sm font-medium">{firstName}</span>
+                  )}
+                  <ChevronDown
+                    width={14}
+                    className={cn("transition-transform", accountMenuOpen && "rotate-180")}
+                  />
+                </button>
+                {accountMenuOpen && (
+                  <div
+                    role="menu"
+                    className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-lg border border-forest/10 bg-cream shadow-card"
+                  >
+                    <div className="border-b border-forest/8 px-4 py-3">
+                      <p className="text-xs text-forest/50">Signed in as</p>
+                      <p className="truncate text-sm font-medium text-forest">
+                        {user?.name || user?.mobile}
+                      </p>
+                    </div>
+                    <Link href="/account" role="menuitem" className={accountMenuItem}>
+                      My account &amp; orders
+                    </Link>
+                    <Link href="/wishlist" role="menuitem" className={accountMenuItem}>
+                      Wishlist{wishlistCount > 0 ? ` (${wishlistCount})` : ""}
+                    </Link>
+                    <Link href="/track-order" role="menuitem" className={accountMenuItem}>
+                      Track an order
+                    </Link>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={handleSignOut}
+                      className="block w-full border-t border-forest/8 px-4 py-2.5 text-left text-sm font-medium text-clay transition-colors hover:bg-clay/8"
+                    >
+                      Log out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                href={accountHref}
+                aria-label="Sign in"
+                className="hidden h-10 items-center gap-2 rounded-full px-2.5 text-forest transition-colors hover:bg-forest/5 sm:flex"
+              >
+                <UserIcon />
+              </Link>
+            )}
             <Link
               href="/wishlist"
               aria-label={`Wishlist, ${wishlistCount} item${wishlistCount === 1 ? "" : "s"}`}
@@ -271,6 +354,15 @@ export function Header() {
               <UserIcon width={18} />{" "}
               {authed ? `${firstName ? firstName + " · " : ""}Account & Orders` : "Sign in / Sign up"}
             </Link>
+            {authed && (
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="self-start text-xs font-medium text-forest/50 underline underline-offset-2 hover:text-clay"
+              >
+                Log out
+              </button>
+            )}
           </div>
         </div>
       </div>

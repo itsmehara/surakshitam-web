@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getOrders, type Order } from "@/lib/orders";
 import { printShippingLabels } from "@/lib/print-label";
+import { formatWeight } from "@/lib/weight";
 
 interface PackingLine {
   productId: string;
@@ -51,6 +52,8 @@ export function AdminPacking() {
   const pendingOrders = orders.filter(
     (o) => o.fulfillmentStatus === "CONFIRMED" || o.fulfillmentStatus === "PACKING",
   );
+  // Total weight waiting to go out — what you'd quote a bike partner for the run.
+  const totalWeight = pendingOrders.reduce((sum, o) => sum + (o.weightGrams ?? 0), 0);
 
   return (
     <div className="container py-10">
@@ -59,7 +62,8 @@ export function AdminPacking() {
           <h1 className="font-serif text-2xl font-semibold text-forest sm:text-3xl">Packing list</h1>
           <p className="mt-1 text-sm text-forest/60">
             Units to prepare today, aggregated across {pendingOrders.length} order
-            {pendingOrders.length === 1 ? "" : "s"} awaiting packing.
+            {pendingOrders.length === 1 ? "" : "s"} awaiting packing
+            {totalWeight > 0 ? ` · approx. ${formatWeight(totalWeight)} to dispatch` : ""}.
           </p>
         </div>
         {pendingOrders.length > 0 && (

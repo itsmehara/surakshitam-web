@@ -21,6 +21,8 @@ import {
   type FulfillmentStatus,
 } from "./orders";
 import { seedEvents, type AuditEvent } from "./audit";
+import { parcelWeightGrams } from "./weight";
+import { quoteDelivery, BIKE_PARTNERS } from "./delivery";
 import { saveAdminAccount } from "./admin";
 
 /** name, phone, city, state, postal code — enough variety for realistic, distinct orders. */
@@ -70,6 +72,9 @@ function evt(partial: Omit<AuditEvent, "id" | "userAgent"> & { userAgent?: strin
   };
 }
 
+/** Stand-in rider names for the seeded bike deliveries. */
+const RIDER_NAMES = ["Ramesh K", "Naveen T", "Shaik Imran", "Praveen R", "Satish M"];
+
 const p = (idx: number) => products[idx];
 
 function makeOrder(opts: {
@@ -80,7 +85,13 @@ function makeOrder(opts: {
   items: { product: (typeof products)[number]; qty: number }[];
 }): Order {
   const subtotal = opts.items.reduce((n, i) => n + i.product.price * i.qty, 0);
-  const shipping = subtotal >= 59900 ? 0 : 4900;
+  const weightGrams = parcelWeightGrams(opts.items);
+  const quote = quoteDelivery({
+    subtotal,
+    weightGrams,
+    pincode: opts.address.postalCode,
+  });
+  const shipping = quote.fee;
   return {
     orderNumber: generateOrderNumber(),
     createdAt: at(opts.daysAgo, opts.hour, 10),
@@ -96,6 +107,15 @@ function makeOrder(opts: {
     })),
     subtotal,
     shipping,
+    weightGrams,
+    deliveryQuote: {
+      zone: quote.zone,
+      distanceKm: quote.distanceKm,
+      area: quote.area,
+      baseFee: quote.baseFee,
+      distanceSurcharge: quote.distanceSurcharge,
+      freeApplied: quote.freeApplied,
+    },
     total: subtotal + shipping,
     address: opts.address,
     paymentStatus: "PAID",
@@ -226,7 +246,14 @@ export function seedDemoActivity(): { events: number; orders: number } {
   );
   updateOrderStatus(order1.orderNumber, "PACKING");
   updateOrderStatus(order1.orderNumber, "PACKED");
-  updateOrderStatus(order1.orderNumber, "SHIPPED", { courier: "Delhivery", trackingNumber: "DL487213560IN" });
+  // Most city orders go out on a bike, so the flagship demo order shows that
+  // path — rider details and all — rather than a courier consignment.
+  updateOrderStatus(order1.orderNumber, "SHIPPED", {
+    deliveryMode: "bike",
+    courier: "Rapido",
+    rider: { name: "Ramesh K", phone: "9701234567", vehicleNumber: "TS09 EK 4412" },
+    etaMinutes: 35,
+  });
   updateOrderStatus(order1.orderNumber, "DELIVERED");
   events.push(
     evt({
@@ -586,10 +613,28 @@ export function seedDemoActivity(): { events: number; orders: number } {
     for (let s = 0; s < steps; s++) {
       const status = FLOW[s];
       if (status === "SHIPPED") {
-        updateOrderStatus(order.orderNumber, status, {
-          courier: COURIER_OPTIONS[(idx + s) % COURIER_OPTIONS.length],
-          trackingNumber: `TRK${1000000 + idx * 37 + s}`,
-        });
+        // Two out of three go by bike — that's the real mix for city orders.
+        const byBike = idx % 3 !== 2;
+        updateOrderStatus(
+          order.orderNumber,
+          status,
+          byBike
+            ? {
+                deliveryMode: "bike",
+                courier: BIKE_PARTNERS[idx % BIKE_PARTNERS.length],
+                rider: {
+                  name: RIDER_NAMES[idx % RIDER_NAMES.length],
+                  phone: `97012${String(10000 + idx).slice(-5)}`,
+                  vehicleNumber: `TS09 ${String.fromCharCode(65 + (idx % 26))}K ${1000 + idx}`,
+                },
+                etaMinutes: 25 + (idx % 4) * 10,
+              }
+            : {
+                deliveryMode: "courier",
+                courier: COURIER_OPTIONS[(idx + s) % COURIER_OPTIONS.length],
+                trackingNumber: `TRK${1000000 + idx * 37 + s}`,
+              },
+        );
       } else {
         updateOrderStatus(order.orderNumber, status);
       }

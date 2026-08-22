@@ -7,6 +7,7 @@
 import { site } from "./site";
 import type { Order } from "./orders";
 import { formatPrice } from "./format";
+import { formatWeight } from "./weight";
 
 function escapeHtml(v: string | number): string {
   return String(v).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c] as string);
@@ -46,11 +47,16 @@ export function printShippingLabels(orders: Order[]): void {
       <div class="section">
         <p class="eyebrow">Items</p>
         <p class="items">${escapeHtml(itemsLine)}</p>
+        ${
+          o.weightGrams
+            ? `<p class="items">Weight: approx. ${escapeHtml(formatWeight(o.weightGrams))}</p>`
+            : ""
+        }
         <p class="total">Order total: ${escapeHtml(formatPrice(o.total))}</p>
       </div>
       ${
         o.courier
-          ? `<div class="section"><p class="eyebrow">Courier</p><p class="items">${escapeHtml(o.courier)}${o.trackingNumber ? ` · ${escapeHtml(o.trackingNumber)}` : ""}</p></div>`
+          ? `<div class="section"><p class="eyebrow">${o.deliveryMode === "bike" ? "Bike delivery" : "Courier"}</p><p class="items">${escapeHtml(o.courier)}${o.rider?.name ? ` · ${escapeHtml(o.rider.name)}` : ""}${o.rider?.phone ? ` · ${escapeHtml(o.rider.phone)}` : ""}${o.trackingNumber ? ` · ${escapeHtml(o.trackingNumber)}` : ""}</p></div>`
           : ""
       }
     </div>`;

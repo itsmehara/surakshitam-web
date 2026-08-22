@@ -33,10 +33,19 @@ const policies: Record<string, Policy> = {
         ],
       },
       {
-        heading: "Shipping charges",
+        heading: "Delivery charges",
         paragraphs: [
-          "A flat shipping charge of ₹49 applies to orders below ₹599. Orders of ₹599 and above ship free, anywhere we currently serve in India.",
+          "Inside Hyderabad, orders of ₹699 and above are delivered free. Below that, a flat ₹49 delivery charge applies.",
+          "Our kitchen is in Nagole. Addresses more than 15 km away carry a distance charge of ₹8 per kilometre beyond that 15 km, whether or not the free-delivery offer applies — the offer waives the base fee, not the extra distance.",
+          "Outside Hyderabad, parcels go by courier and are charged on weight: ₹79 up to 1 kg, then ₹40 per additional kilogram. The free-delivery offer applies within the city only.",
           "Any applicable taxes are shown at checkout.",
+        ],
+      },
+      {
+        heading: "How your order travels",
+        paragraphs: [
+          "Most city orders go out on a bike with a delivery partner such as Rapido or Uber, usually the same day. Once dispatched you'll see the rider's name and number on the Track Order page, along with a live map when the rider shares their location.",
+          "Parcel weights shown in the cart and on your order are approximate — they're an estimate used to book the delivery, not a billed measurement.",
         ],
       },
       {

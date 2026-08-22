@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getOrder, FULFILLMENT_FLOW, FULFILLMENT_LABEL, type Order } from "@/lib/orders";
 import { formatPrice } from "@/lib/format";
+import { formatWeight } from "@/lib/weight";
 import { printShippingLabels } from "@/lib/print-label";
 import { OrderStatusControl } from "./OrderStatusControl";
 
@@ -128,9 +129,28 @@ export function AdminOrderDetail({ orderNumber }: { orderNumber: string }) {
             <span>{formatPrice(order.subtotal)}</span>
           </div>
           <div className="flex justify-between text-forest/70">
-            <span>Shipping</span>
+            <span>
+              Delivery
+              {order.deliveryQuote?.distanceKm ? ` · ${order.deliveryQuote.distanceKm} km` : ""}
+            </span>
             <span>{order.shipping === 0 ? "Free" : formatPrice(order.shipping)}</span>
           </div>
+          {order.weightGrams ? (
+            <div className="flex justify-between text-forest/50">
+              <span>Parcel weight (approx.)</span>
+              <span>≈ {formatWeight(order.weightGrams)}</span>
+            </div>
+          ) : null}
+          {order.rider?.name && (
+            <div className="flex justify-between text-forest/50">
+              <span>Rider</span>
+              <span>
+                {order.rider.name}
+                {order.rider.phone ? ` · ${order.rider.phone}` : ""}
+                {order.rider.vehicleNumber ? ` · ${order.rider.vehicleNumber}` : ""}
+              </span>
+            </div>
+          )}
           {!!order.discount && (
             <div className="flex justify-between text-moss">
               <span>Offer{order.offerCode ? ` (${order.offerCode})` : ""}</span>

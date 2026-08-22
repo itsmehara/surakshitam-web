@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getOrder, getOrders, type Order, type FulfillmentStatus } from "@/lib/orders";
 import { formatPrice } from "@/lib/format";
+import { formatWeight } from "@/lib/weight";
 import { PageIntro } from "@/components/ui/PageIntro";
-import { CheckIcon } from "@/components/icons";
+import { LiveDeliveryMap } from "@/components/tracking/LiveDeliveryMap";
+import { CheckIcon, PhoneIcon, TruckIcon } from "@/components/icons";
 
 const STEPS = ["Order placed", "Preparing", "Packed", "Shipped", "Delivered"];
 const STATUS_INDEX: Record<FulfillmentStatus, number> = {
@@ -91,7 +93,48 @@ export default function TrackOrderPage() {
               })}
             </ol>
 
-            {order.courier && (
+            {/* Bike delivery — the rider, a way to reach them, and a live map. */}
+            {order.deliveryMode === "bike" && current >= 3 && (
+              <div className="mt-6 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-parchment/60 px-4 py-3">
+                  <div className="text-sm text-forest/80">
+                    <p className="inline-flex items-center gap-1.5 font-medium text-forest">
+                      <TruckIcon width={16} /> Out for delivery by bike
+                      {order.courier ? ` · ${order.courier}` : ""}
+                    </p>
+                    <p className="mt-0.5 text-forest/65">
+                      {order.rider?.name ?? "Rider"}
+                      {order.rider?.vehicleNumber ? ` · ${order.rider.vehicleNumber}` : ""}
+                      {order.weightGrams ? ` · approx. ${formatWeight(order.weightGrams)}` : ""}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    {order.rider?.phone && (
+                      <a
+                        href={`tel:${order.rider.phone}`}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-forest px-4 py-2 text-sm font-medium text-cream hover:bg-ink"
+                      >
+                        <PhoneIcon width={14} /> Call rider
+                      </a>
+                    )}
+                    {order.liveTrackingUrl && (
+                      <a
+                        href={order.liveTrackingUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-full border border-forest/20 px-4 py-2 text-sm font-medium text-forest hover:bg-forest/5"
+                      >
+                        Open partner tracking
+                      </a>
+                    )}
+                  </div>
+                </div>
+                <LiveDeliveryMap order={order} />
+              </div>
+            )}
+
+            {/* Courier / handover */}
+            {order.deliveryMode !== "bike" && order.courier && (
               <div className="mt-6 rounded-lg bg-parchment/50 px-4 py-3 text-sm text-forest/80">
                 {order.courier === "Handed over to customer" ? (
                   "Handed over to you directly — no courier tracking for this order."
@@ -109,7 +152,13 @@ export default function TrackOrderPage() {
               </div>
             )}
 
-            <p className="mt-6 text-xs text-forest/45">
+            {order.weightGrams ? (
+              <p className="mt-4 text-xs text-forest/50">
+                Parcel weight ≈ {formatWeight(order.weightGrams)} (approximate).
+              </p>
+            ) : null}
+
+            <p className="mt-2 text-xs text-forest/45">
               Demo tracking — status updates would be driven by the admin/operations system.
             </p>
             <Link href={`/order/${order.orderNumber}`} className="mt-3 inline-block text-sm font-medium text-moss">

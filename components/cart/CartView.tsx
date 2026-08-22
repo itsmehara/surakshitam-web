@@ -2,16 +2,25 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart/CartContext";
+import { productImage } from "@/lib/catalog";
 import { formatPrice } from "@/lib/format";
-import { CartIcon, CloseIcon, ArrowRight } from "@/components/icons";
+import { formatWeight } from "@/lib/weight";
+import { quoteDelivery, FREE_DELIVERY_MIN, LOCAL_RADIUS_KM } from "@/lib/delivery";
+import { getSavedAddress } from "@/lib/orders";
+import { CartIcon, CloseIcon, ArrowRight, TruckIcon } from "@/components/icons";
 import { LinkButton } from "@/components/ui/Button";
 
-const FREE_SHIP = 59900;
-const SHIP_FEE = 4900;
-
 export function CartView() {
-  const { items, subtotal, setQty, remove, clear } = useCart();
+  const { items, subtotal, setQty, remove, clear, weightGrams } = useCart();
+  // Delivery is priced from the destination PIN code. We prefill from the saved
+  // address so returning customers see their real charge without retyping it.
+  const [pincode, setPincode] = useState("");
+  useEffect(() => {
+    const saved = getSavedAddress();
+    if (saved?.postalCode) setPincode(saved.postalCode);
+  }, []);
 
   if (items.length === 0) {
     return (
@@ -32,7 +41,8 @@ export function CartView() {
     );
   }
 
-  const shipping = subtotal >= FREE_SHIP ? 0 : SHIP_FEE;
+  const quote = quoteDelivery({ subtotal, weightGrams, pincode });
+  const shipping = quote.fee;
   const total = subtotal + shipping;
 
   return (
@@ -58,11 +68,15 @@ export function CartView() {
                 className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-forest/8 bg-cream sm:h-28 sm:w-28"
               >
                 <Image
-                  src={product.image}
+                  src={productImage(product)}
                   alt={product.name}
                   fill
                   sizes="112px"
-                  className="scale-[1.12] object-cover object-[50%_55%]"
+                  className={
+                    product.thirdParty
+                      ? "object-contain p-1"
+                      : "scale-[1.12] object-cover object-[50%_55%]"
+                  }
                 />
               </Link>
               <div className="flex flex-1 flex-col">
@@ -126,22 +140,57 @@ export function CartView() {
               <dd className="font-medium text-forest">{formatPrice(subtotal)}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-forest/70">Shipping</dt>
+              <dt className="text-forest/70">Parcel weight</dt>
+              <dd className="font-medium text-forest">≈ {formatWeight(weightGrams)}</dd>
+            </div>
+            <p className="-mt-1 text-xs text-forest/45">
+              Weight is approximate — it updates as you add items, and is used only to book the
+              delivery.
+            </p>
+            <div className="flex justify-between">
+              <dt className="text-forest/70">
+                Delivery
+                {quote.distanceKm > 0 && (
+                  <span className="text-forest/45"> · {quote.distanceKm} km</span>
+                )}
+              </dt>
               <dd className="font-medium text-forest">
                 {shipping === 0 ? "Free" : formatPrice(shipping)}
               </dd>
             </div>
-            {shipping > 0 && (
-              <p className="text-xs text-moss">
-                Add {formatPrice(FREE_SHIP - subtotal)} more for free delivery.
+            {quote.notes.map((n) => (
+              <p key={n} className="text-xs text-moss">
+                {n}
               </p>
-            )}
+            ))}
             <div className="flex justify-between border-t border-forest/10 pt-3 text-base">
               <dt className="font-semibold text-forest">Total</dt>
               <dd className="font-semibold text-forest">{formatPrice(total)}</dd>
             </div>
           </dl>
           <p className="mt-1 text-xs text-forest/45">Taxes included where applicable (demo).</p>
+
+          {/* PIN-code check — distance decides whether a surcharge applies. */}
+          <div className="mt-4 rounded-lg border border-forest/10 bg-white/60 p-3">
+            <label className="flex items-center gap-1.5 text-xs font-medium text-forest">
+              <TruckIcon width={15} /> Check delivery for your PIN code
+            </label>
+            <div className="mt-2 flex gap-2">
+              <input
+                inputMode="numeric"
+                value={pincode}
+                onChange={(e) => setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="6-digit PIN"
+                aria-label="Delivery PIN code"
+                className="w-32 rounded-full border border-forest/15 bg-white px-3 py-1.5 text-sm focus:border-moss focus:outline-none"
+              />
+              <p className="flex-1 self-center text-xs text-forest/60">
+                {pincode.length === 6
+                  ? `${quote.area ? quote.area + " · " : ""}${quote.etaText}`
+                  : `Free over ₹${FREE_DELIVERY_MIN / 100} within ${LOCAL_RADIUS_KM} km of our kitchen`}
+              </p>
+            </div>
+          </div>
 
           <Link
             href="/checkout"

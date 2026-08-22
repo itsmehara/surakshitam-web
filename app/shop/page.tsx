@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { products, categories } from "@/lib/catalog";
-import { concerns } from "@/lib/site";
+import { concernsForCategory } from "@/lib/site";
 import type { Product } from "@/lib/types";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { cn } from "@/lib/cn";
@@ -36,14 +36,30 @@ function sortProducts(list: Product[], sort?: string): Product[] {
   }
 }
 
-type SearchParams = { category?: string; sort?: string; concern?: string };
+type SearchParams = { category?: string; sort?: string; concern?: string; shelf?: string };
+
+/** Home Care's two shelves — see lib/catalog.ts for how products are classified. */
+const homeCareShelves = [
+  { slug: "bio-enzyme", name: "Bio-Enzyme" },
+  { slug: "general", name: "General Home Care" },
+] as const;
 
 export default function ShopPage({ searchParams }: { searchParams: SearchParams }) {
   const activeCategory = searchParams.category;
   const activeSort = searchParams.sort ?? "featured";
-  const activeConcern = searchParams.concern;
+  const activeShelf = activeCategory === "home-care" ? searchParams.shelf : undefined;
+
+  // Only offer concerns that belong to the shelf being browsed — Home Care must
+  // never show skin/hair filters like "Dry Skin" or "Dandruff".
+  const availableConcerns = concernsForCategory(activeCategory);
+  const activeConcern = availableConcerns.some((c) => c.slug === searchParams.concern)
+    ? searchParams.concern
+    : undefined;
 
   let filtered = activeCategory ? products.filter((p) => p.category === activeCategory) : products;
+  if (activeShelf) {
+    filtered = filtered.filter((p) => (p.homeCareType ?? "general") === activeShelf);
+  }
   if (activeConcern) filtered = filtered.filter((p) => p.concerns?.includes(activeConcern));
   const list = sortProducts(filtered, activeSort);
 
@@ -51,17 +67,23 @@ export default function ShopPage({ searchParams }: { searchParams: SearchParams 
 
   function href(next: Partial<SearchParams>) {
     const params = new URLSearchParams();
-    const category = next.category ?? activeCategory;
+    const category = "category" in next ? next.category : activeCategory;
     const sort = next.sort ?? activeSort;
-    const concern = "concern" in next ? next.concern : activeConcern;
+    // Switching category drops filters that don't exist on the new shelf.
+    const categoryChanged = "category" in next && next.category !== activeCategory;
+    const concern = categoryChanged ? undefined : "concern" in next ? next.concern : activeConcern;
+    const shelf = categoryChanged ? undefined : "shelf" in next ? next.shelf : activeShelf;
     if (category) params.set("category", category);
     if (sort && sort !== "featured") params.set("sort", sort);
     if (concern) params.set("concern", concern);
+    if (shelf) params.set("shelf", shelf);
     const qs = params.toString();
     return qs ? `/shop?${qs}` : "/shop";
   }
 
-  const concernName = activeConcern ? concerns.find((c) => c.slug === activeConcern)?.name : undefined;
+  const concernName = activeConcern
+    ? availableConcerns.find((c) => c.slug === activeConcern)?.name
+    : undefined;
   const heading = concernName
     ? `${concernName} essentials`
     : activeCategory
@@ -76,6 +98,14 @@ export default function ShopPage({ searchParams }: { searchParams: SearchParams 
           <h1 className="font-serif text-lg font-semibold text-forest">{heading}</h1>
           <p className="text-xs text-forest/55">{list.length} products · demo pricing</p>
         </div>
+        {activeCategory === "pantry" && (
+          <div className="container pb-2.5">
+            <p className="text-xs leading-relaxed text-forest/60">
+              Pantry &amp; Foods are made by other small brands — we stock and deliver them, we don&apos;t
+              make them. Each pack is listed under its own brand name.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Sticky filter + sort bar */}
@@ -121,11 +151,53 @@ export default function ShopPage({ searchParams }: { searchParams: SearchParams 
         </div>
       </div>
 
-      {/* Shop by concern */}
+      {/* Home Care shelves — bio-enzyme vs the general range */}
+      {activeCategory === "home-care" && (
+        <div className="border-b border-forest/8 bg-cream">
+          <div className="container flex flex-wrap items-center gap-2 py-2.5" role="group" aria-label="Home care type">
+            <span className="hidden shrink-0 text-xs text-forest/50 sm:inline">Type</span>
+            <Link
+              href={href({ shelf: "" })}
+              className={cn(
+                "whitespace-nowrap rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                !activeShelf
+                  ? "border-forest bg-forest text-cream"
+                  : "border-forest/12 text-forest/60 hover:border-forest/30",
+              )}
+            >
+              All home care
+            </Link>
+            {homeCareShelves.map((shelf) => {
+              const active = activeShelf === shelf.slug;
+              return (
+                <Link
+                  key={shelf.slug}
+                  href={href({ shelf: active ? "" : shelf.slug })}
+                  className={cn(
+                    "whitespace-nowrap rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                    active
+                      ? "border-moss bg-moss/15 text-moss"
+                      : "border-forest/12 text-forest/60 hover:border-forest/30",
+                  )}
+                >
+                  {shelf.name}
+                </Link>
+              );
+            })}
+            <p className="basis-full text-xs leading-relaxed text-forest/55 sm:basis-auto sm:border-l sm:border-forest/10 sm:pl-3">
+              Bio-enzyme cleaners are built on fermented plant peels — they break down after use, so
+              what goes down the drain feeds the soil instead of harming it.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Shop by concern — only the tags that apply to this shelf */}
+      {availableConcerns.length > 0 && (
       <div className="border-b border-forest/8 bg-cream">
         <div className="container flex items-center gap-2 overflow-x-auto py-2.5" role="group" aria-label="Shop by concern">
           <span className="hidden shrink-0 text-xs text-forest/50 sm:inline">Shop by concern</span>
-          {concerns.map((c) => {
+          {availableConcerns.map((c) => {
             const active = activeConcern === c.slug;
             return (
               <Link
@@ -144,6 +216,7 @@ export default function ShopPage({ searchParams }: { searchParams: SearchParams 
           })}
         </div>
       </div>
+      )}
 
       <div className="container py-4">
         {list.length === 0 ? (

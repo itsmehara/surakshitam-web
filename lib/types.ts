@@ -5,7 +5,13 @@
  * smallest currency unit) to avoid floating-point errors.
  */
 
-export type CategorySlug = "home-care" | "skin-care" | "hair-care";
+export type CategorySlug = "home-care" | "skin-care" | "hair-care" | "pantry";
+
+/**
+ * Home care splits into two shelves: bio-enzyme formulations (fermented plant
+ * waste — biodegradable, safe for drains and soil) and the general range.
+ */
+export type HomeCareType = "bio-enzyme" | "general";
 
 export interface Category {
   id: string;
@@ -31,6 +37,12 @@ export interface Product {
   /** How to use — demo content, founder verification recommended. */
   usage: string;
   size: string;
+  /**
+   * Approximate shipped weight of one unit, in grams. Optional — when absent it
+   * is derived from `size` (see lib/weight.ts). Always presented to customers
+   * as approximate.
+   */
+  weightGrams?: number;
   /** Selling price in paise. DEMO PRICE — REPLACE. */
   price: number;
   /** MRP in paise, if discounted. DEMO PRICE — REPLACE. */
@@ -49,6 +61,17 @@ export interface Product {
   isNew?: boolean;
   /** Customer-concern tags (see lib/site.ts `concerns`) for "shop by concern" browsing. */
   concerns?: string[];
+  /** Home-care only: which shelf this belongs to. Defaults to "general". */
+  homeCareType?: HomeCareType;
+  /**
+   * Set for stock we resell rather than make — other companies' food and pantry
+   * goods. The brand is shown instead of our own so nothing implies these were
+   * made by Surakshitam, and they fall back to a neutral, unbranded placeholder
+   * image (see lib/catalog.ts `productImage`).
+   */
+  brand?: string;
+  /** True for third-party/resold stock. Drives the "Brand partner" labelling. */
+  thirdParty?: boolean;
 }
 
 export type IngredientGroup =

@@ -4,14 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect } from "react";
 import { useCart } from "@/lib/cart/CartContext";
+import { productImage } from "@/lib/catalog";
 import { formatPrice } from "@/lib/format";
+import { formatWeight } from "@/lib/weight";
+import { FREE_DELIVERY_MIN } from "@/lib/delivery";
 import { CartIcon, CloseIcon } from "@/components/icons";
 import { cn } from "@/lib/cn";
 
-const FREE_SHIP = 59900; // paise
-
 export function CartDrawer() {
-  const { items, count, subtotal, setQty, remove, drawerOpen, closeCart } = useCart();
+  const { items, count, subtotal, setQty, remove, drawerOpen, closeCart, weightGrams } = useCart();
 
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? "hidden" : "";
@@ -23,7 +24,7 @@ export function CartDrawer() {
     };
   }, [drawerOpen, closeCart]);
 
-  const remaining = Math.max(0, FREE_SHIP - subtotal);
+  const remaining = Math.max(0, FREE_DELIVERY_MIN - subtotal);
 
   return (
     <div
@@ -79,8 +80,8 @@ export function CartDrawer() {
             {/* free-shipping hint */}
             <p className="bg-moss/10 px-5 py-2.5 text-center text-xs text-moss">
               {remaining > 0
-                ? `Add ${formatPrice(remaining)} more for free delivery`
-                : "You've unlocked free delivery 🎉"}
+                ? `Add ${formatPrice(remaining)} more for free delivery in the city`
+                : "You've unlocked free delivery in the city 🎉"}
             </p>
 
             <ul className="flex-1 divide-y divide-forest/8 overflow-y-auto px-5">
@@ -92,11 +93,15 @@ export function CartDrawer() {
                     className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-forest/8 bg-cream"
                   >
                     <Image
-                      src={product.image}
+                      src={productImage(product)}
                       alt={product.name}
                       fill
                       sizes="80px"
-                      className="scale-[1.12] object-cover object-[50%_55%]"
+                      className={
+                        product.thirdParty
+                          ? "object-contain p-1"
+                          : "scale-[1.12] object-cover object-[50%_55%]"
+                      }
                     />
                   </Link>
                   <div className="flex flex-1 flex-col">

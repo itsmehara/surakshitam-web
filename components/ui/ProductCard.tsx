@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/lib/types";
+import { productImage } from "@/lib/catalog";
 import { formatPrice, discountPercent } from "@/lib/format";
 import { StarRating } from "./StarRating";
 import { AddToCartButton } from "./AddToCartButton";
@@ -11,12 +12,17 @@ const categoryLabel: Record<Product["category"], string> = {
   "home-care": "Home Care",
   "skin-care": "Skin Care",
   "hair-care": "Hair Care",
+  pantry: "Pantry & Foods",
 };
 
 export function ProductCard({ product, priority }: { product: Product; priority?: boolean }) {
   const discount = discountPercent(product.price, product.mrp);
   const lowStock = product.stock > 0 && product.stock <= 10;
   const outOfStock = product.stock <= 0;
+  const isBioEnzyme = product.homeCareType === "bio-enzyme";
+  // Other companies' stock is never shown in our own house styling: the brand
+  // replaces the category eyebrow, and the pack sits on a plain, uncropped tile.
+  const partnerBrand = product.thirdParty ? product.brand : undefined;
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-lg border border-forest/8 bg-white/60 shadow-soft transition-shadow duration-300 hover:shadow-card">
@@ -37,14 +43,23 @@ export function ProductCard({ product, priority }: { product: Product; priority?
                 {discount}% off
               </span>
             )}
+            {isBioEnzyme && (
+              <span className="rounded-full bg-moss/90 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-cream">
+                Bio-Enzyme
+              </span>
+            )}
           </div>
           <Image
-            src={product.image}
+            src={productImage(product)}
             alt={product.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px"
             priority={priority}
-            className="scale-[1.16] object-cover object-[50%_60%] transition-transform duration-500 ease-smooth group-hover:scale-[1.24]"
+            className={
+              partnerBrand
+                ? "object-contain p-2 transition-transform duration-500 ease-smooth group-hover:scale-[1.04]"
+                : "scale-[1.16] object-cover object-[50%_60%] transition-transform duration-500 ease-smooth group-hover:scale-[1.24]"
+            }
           />
         </Link>
         <QuickViewButton productId={product.id} />
@@ -52,8 +67,12 @@ export function ProductCard({ product, priority }: { product: Product; priority?
       </div>
 
       <div className="flex flex-1 flex-col p-3">
-        <p className="text-[0.66rem] font-semibold uppercase tracking-[0.12em] text-moss">
-          {categoryLabel[product.category]}
+        <p
+          className={`text-[0.66rem] font-semibold uppercase tracking-[0.12em] ${
+            partnerBrand ? "text-forest/55" : "text-moss"
+          }`}
+        >
+          {partnerBrand ?? categoryLabel[product.category]}
         </p>
         <h3 className="mt-0.5 font-serif text-[0.95rem] font-semibold leading-snug text-forest">
           <Link href={`/product/${product.slug}`} className="after:absolute">
@@ -61,6 +80,9 @@ export function ProductCard({ product, priority }: { product: Product; priority?
           </Link>
         </h3>
         <p className="mt-0.5 line-clamp-1 text-xs text-forest/55">{product.shortDescription}</p>
+        {partnerBrand && (
+          <p className="mt-0.5 text-[0.65rem] text-forest/40">Brand partner · sold by us</p>
+        )}
 
         {product.rating && (
           <StarRating rating={product.rating} count={product.reviewCount} className="mt-1.5" size={13} />

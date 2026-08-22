@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect } from "react";
 import { useCart } from "@/lib/cart/CartContext";
-import { getProductById } from "@/lib/catalog";
+import { getProductById, productImage } from "@/lib/catalog";
 import { formatPrice, discountPercent } from "@/lib/format";
 import { StarRating } from "./StarRating";
 import { AddToCartButton } from "./AddToCartButton";
@@ -58,17 +58,25 @@ export function QuickViewModal() {
               </span>
             )}
             <Image
-              src={product.image}
+              src={productImage(product)}
               alt={product.name}
               fill
               sizes="(max-width: 640px) 100vw, 320px"
-              className="scale-[1.1] object-cover object-[50%_55%]"
+              className={
+                product.thirdParty
+                  ? "object-contain p-2"
+                  : "scale-[1.1] object-cover object-[50%_55%]"
+              }
             />
           </div>
 
           <div className="flex flex-col p-5 sm:p-6">
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-moss">
-              {product.category.replace("-", " ")}
+            <p
+              className={`text-[0.7rem] font-semibold uppercase tracking-[0.14em] ${
+                product.thirdParty ? "text-forest/55" : "text-moss"
+              }`}
+            >
+              {(product.thirdParty && product.brand) || product.category.replace("-", " ")}
             </p>
             <h2 className="mt-1 font-serif text-xl font-semibold text-forest">{product.name}</h2>
             <p className="mt-1 text-sm text-forest/65">{product.shortDescription}</p>

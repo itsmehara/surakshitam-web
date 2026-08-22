@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getProfile, saveProfile, defaultProfile, type Profile } from "@/lib/profile";
 import { updateSessionIdentity, hasCustomerPassword, setCustomerPassword, verifyCustomerPassword } from "@/lib/auth";
@@ -19,8 +18,7 @@ const statusLabel: Record<Order["fulfillmentStatus"], string> = {
 };
 
 export function AccountView() {
-  const router = useRouter();
-  const { user, ready, signOut: authSignOut, refresh } = useAuth();
+  const { user, ready, refresh } = useAuth();
   const [profile, setProfile] = useState<Profile>(defaultProfile);
   const [draft, setDraft] = useState<Profile>(defaultProfile);
   const [editing, setEditing] = useState(false);
@@ -77,11 +75,6 @@ export function AccountView() {
     setEditing(false);
   }
 
-  function signOut() {
-    authSignOut();
-    router.push("/");
-  }
-
   if (!ready) {
     return <div className="container py-24 text-center text-forest/50">Loading…</div>;
   }
@@ -124,13 +117,11 @@ export function AccountView() {
               <p className="mt-0.5 text-xs text-forest/50">Customer ID: {profile.customerId}</p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={signOut}
-            className="rounded-full border border-forest/20 px-4 py-2 text-sm font-medium text-forest hover:bg-forest/5"
-          >
-            Log out
-          </button>
+          {/* Logging out lives in the account menu behind the header's user icon
+              (and in the mobile drawer) so it can't be tapped by mistake here. */}
+          <p className="hidden max-w-[11rem] text-right text-xs leading-relaxed text-forest/45 sm:block">
+            To sign out, open the account menu beside your name at the top right.
+          </p>
         </div>
       </section>
 

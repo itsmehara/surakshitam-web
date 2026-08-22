@@ -6,6 +6,11 @@ import { useSearchParams } from "next/navigation";
 import { getLiveOffers, type Offer } from "@/lib/offers";
 import { getEnabledBundles, type Bundle } from "@/lib/bundles";
 import { formatPrice } from "@/lib/format";
+import {
+  FREE_DELIVERY_HEADLINE,
+  FREE_DELIVERY_SUBLINE,
+  FREE_DELIVERY_MIN,
+} from "@/lib/delivery";
 import { ComboCard } from "@/components/ui/ComboCard";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { cn } from "@/lib/cn";
@@ -41,6 +46,34 @@ function OfferCard({ offer }: { offer: Offer }) {
         >
           {copied ? "Copied!" : offer.code}
         </button>
+        <Link
+          href="/shop"
+          className="rounded-full bg-forest px-4 py-2 text-sm font-medium text-cream hover:bg-ink"
+        >
+          Shop
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The standing free-delivery promise. Not an admin coupon — it's a shipping
+ * policy (see lib/delivery.ts), so it's always on and needs no code.
+ */
+function FreeDeliveryCard() {
+  return (
+    <div className="flex flex-col justify-between rounded-lg border-2 border-cream bg-moss/25 p-5 shadow-soft">
+      <div>
+        <p className="text-[0.65rem] font-bold uppercase tracking-wide text-moss">Always on</p>
+        <p className="mt-1 text-2xl font-extrabold leading-tight text-moss">FREE DELIVERY</p>
+        <p className="mt-1 text-sm text-forest/70">{FREE_DELIVERY_HEADLINE}</p>
+        <p className="mt-1 text-xs text-forest/50">{FREE_DELIVERY_SUBLINE}</p>
+      </div>
+      <div className="mt-4 flex items-center gap-2">
+        <span className="flex-1 rounded-full border-2 border-dashed border-moss/50 bg-white/70 px-4 py-2 text-center font-mono text-sm font-bold tracking-wide text-moss">
+          NO CODE NEEDED
+        </span>
         <Link
           href="/shop"
           className="rounded-full bg-forest px-4 py-2 text-sm font-medium text-cream hover:bg-ink"
@@ -91,28 +124,27 @@ function OffersPageInner() {
                 tab === t ? "bg-forest text-cream" : "text-forest/65 hover:text-forest",
               )}
             >
-              {t === "offers" ? `Offers (${offers.length})` : `Combos (${bundles.length})`}
+              {t === "offers" ? `Offers (${offers.length + 1})` : `Combos (${bundles.length})`}
             </button>
           ))}
         </div>
 
         <div className="mt-6">
           {tab === "offers" ? (
-            offers.length === 0 ? (
-              <div className="py-16 text-center">
-                <p className="font-serif text-xl text-forest">No offers live right now</p>
-                <p className="mt-2 text-sm text-forest/60">Check back soon for a discount code.</p>
-                <Link href="/shop" className="mt-4 inline-block text-sm font-medium text-moss">
-                  Browse products
-                </Link>
-              </div>
-            ) : (
+            <>
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <FreeDeliveryCard />
                 {offers.map((o) => (
                   <OfferCard key={o.id} offer={o} />
                 ))}
               </div>
-            )
+              {offers.length === 0 && (
+                <p className="mt-6 text-sm text-forest/60">
+                  No discount codes are live right now — but every city order over ₹
+                  {FREE_DELIVERY_MIN / 100} still ships free.
+                </p>
+              )}
+            </>
           ) : bundles.length === 0 ? (
             <div className="py-16 text-center">
               <p className="font-serif text-xl text-forest">No combos live right now</p>
