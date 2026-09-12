@@ -521,8 +521,8 @@ products/[id],reports,team,activity,dev/notifications}`,
     `components/home/HeroSlideshow.tsx` replaces `Hero` on `app/page.tsx` (v1 `Hero.tsx` is kept
     untouched for side-by-side demos). Five banners from `public/banners/` (homepage range → skin →
     hair → home → ingredients; 1672×941 webp, ~1.3 MB total, `masters/` PNGs deliberately NOT
-    copied in) crossfade every 5 s; every slide drifts continuously (zoom + pan, infinite-alternate `.sn-drift-a/b/c` in globals.css — no one-shot Ken-Burns that ends and freezes),
-    dots + prev/next, pause on hover (no hidden-tab guard — embedded previews report hidden even when shown), static frame under
+    copied in) crossfade every 3.8 s; every slide drifts continuously (zoom + pan, infinite-alternate `.sn-drift-a/b/c` in globals.css — no one-shot Ken-Burns that ends and freezes),
+    dots + prev/next, pauses only while the cursor is over the controls — a whole-hero hover pause read as "stuck" (no hidden-tab guard — embedded previews report hidden even when shown), static frame under
     reduced-motion. Copy sits on the left over a light left→right scrim (the banners are bright
     cream, so the Green Energy Solutions dark scrim would fight them); headline/CTA change per slide
     using the lines from the banner pack README. Height is ~80 svh, **not** 100 — the featured

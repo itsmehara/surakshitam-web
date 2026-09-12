@@ -20,8 +20,9 @@ import { ArrowRight, ChevronDown, LeafIcon, BeakerIcon, RecycleIcon } from "@/co
  * the v1 hero.
  *
  * Motion: crossfade every HOLD_MS; every slide drifts continuously (zoom +
- * pan, `.sn-drift-*` in globals.css) so the picture is never frozen; pauses
- * on hover; a single static frame when the visitor asks for reduced motion.
+ * pan, `.sn-drift-*` in globals.css) so the picture is never frozen. It does
+ * NOT pause when the mouse rests on the photo — that read as "stuck" — only
+ * while the cursor is over the dots/arrows. Static frame under reduced motion.
  */
 
 interface Slide {
@@ -76,7 +77,7 @@ const SLIDES: Slide[] = [
   },
 ];
 
-const HOLD_MS = 5000; // time a slide sits before the next crossfade
+const HOLD_MS = 3800; // time a slide sits before the next crossfade — short enough that a viewer never wonders if it's stuck
 const FADE_MS = 1200; // crossfade duration — long enough to feel like a dissolve, not a cut
 const DRIFT = ["sn-drift-a", "sn-drift-b", "sn-drift-c"]; // rotate so neighbours move differently
 
@@ -118,8 +119,6 @@ export function HeroSlideshow() {
   return (
     <section
       className="relative overflow-hidden bg-[#F1F3E6] text-forest"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
       aria-roledescription="carousel"
       aria-label="Surakshitam Naturals highlights"
     >
@@ -198,7 +197,11 @@ export function HeroSlideshow() {
         </div>
 
         {/* ---- slide controls ---- */}
-        <div className="absolute bottom-6 left-0 right-0 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div
+          className="absolute bottom-6 left-0 right-0 flex items-center justify-between px-4 sm:px-6 lg:px-8"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+        >
           <div className="flex items-center gap-2" role="tablist" aria-label="Choose slide">
             {SLIDES.map((s, i) => (
               <button
