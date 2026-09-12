@@ -147,3 +147,14 @@
 }
 .sn-face { backface-visibility: hidden; }
 .sn-face-back { transform: rotateY(180deg); }
+
+/* v2 hero slideshow: slow push-in on the active slide (Ken Burns). The class is
+   applied only to the visible slide, so each change restarts from scale(1). */
+@keyframes sn-kenburns {
+  from { transform: scale(1); }
+  to   { transform: scale(1.08); }
+}
+.sn-kenburns { animation: sn-kenburns 9s ease-out forwards; }
+@media (prefers-reduced-motion: reduce) {
+  .sn-kenburns { animation: none; }
+}

@@ -517,6 +517,21 @@ products/[id],reports,team,activity,dev/notifications}`,
     grid height, exactly as on the hero; the shop header stays compact (products still near the top).
     Zero cost when off-screen or with reduced motion — the solver already guards both.
 
+44. **v2 homepage: full-bleed banner slideshow hero (branch `v2/full-screen-hero`, 12 Sep 2026).**
+    `components/home/HeroSlideshow.tsx` replaces `Hero` on `app/page.tsx` (v1 `Hero.tsx` is kept
+    untouched for side-by-side demos). Five banners from `public/banners/` (homepage range → skin →
+    hair → home → ingredients; 1672×941 webp, ~1.3 MB total, `masters/` PNGs deliberately NOT
+    copied in) crossfade every 6.5 s with a 9 s Ken-Burns push-in (`.sn-kenburns` in globals.css),
+    dots + prev/next, pause on hover, no cycling in a hidden tab, static frame under
+    reduced-motion. Copy sits on the left over a light left→right scrim (the banners are bright
+    cream, so the Green Energy Solutions dark scrim would fight them); headline/CTA change per slide
+    using the lines from the banner pack README. Height is ~80 svh, **not** 100 — the featured
+    strip peeks in so visitors know to scroll, plus an "Explore" hint. Leaves + the falling-fruit
+    solver run over the photo (`FallingBotanicals` + `FallingFruitPhysics` directly, without the
+    `BotanicalBackdrop` tile/washes, which would muddy a photo). The four shelf cards moved out of
+    the hero into `components/home/CategoryStrip.tsx`, a one-row strip directly beneath it.
+    Mobile note from the pack: subjects are centre-right, so `object-position: center right`.
+
 ---
 
 ## 7. Status by phase (see ROADMAP.md)
