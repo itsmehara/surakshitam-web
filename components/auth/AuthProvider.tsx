@@ -5,16 +5,20 @@ import {
   getSession,
   loginWithOtp,
   loginWithPassword,
+  register as doRegister,
   logout as doLogout,
   type CustomerSession,
+  type AuthResult,
 } from "@/lib/auth";
+import type { RegisterInput } from "@/lib/users";
 
 interface AuthValue {
   user: CustomerSession | null;
   isLoggedIn: boolean;
   ready: boolean;
-  loginOtp: (mobile: string, otp: string, name?: string) => boolean;
-  loginPassword: (username: string, password: string) => boolean;
+  loginOtp: (mobile: string, otp: string, name?: string) => AuthResult;
+  loginPassword: (username: string, password: string) => AuthResult;
+  register: (input: RegisterInput) => AuthResult;
   signOut: () => void;
   refresh: () => void;
 }
@@ -40,18 +44,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loginOtp = useCallback(
     (mobile: string, otp: string, name?: string) => {
-      const ok = loginWithOtp(mobile, otp, name);
-      if (ok) refresh();
-      return ok;
+      const r = loginWithOtp(mobile, otp, name);
+      if (r.ok) refresh();
+      return r;
     },
     [refresh],
   );
 
   const loginPassword = useCallback(
     (username: string, password: string) => {
-      const ok = loginWithPassword(username, password);
-      if (ok) refresh();
-      return ok;
+      const r = loginWithPassword(username, password);
+      if (r.ok) refresh();
+      return r;
+    },
+    [refresh],
+  );
+
+  const register = useCallback(
+    (input: RegisterInput) => {
+      const r = doRegister(input);
+      if (r.ok) refresh();
+      return r;
     },
     [refresh],
   );
@@ -62,8 +75,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [refresh]);
 
   const value = useMemo<AuthValue>(
-    () => ({ user, isLoggedIn: user !== null, ready, loginOtp, loginPassword, signOut, refresh }),
-    [user, ready, loginOtp, loginPassword, signOut, refresh],
+    () => ({ user, isLoggedIn: user !== null, ready, loginOtp, loginPassword, register, signOut, refresh }),
+    [user, ready, loginOtp, loginPassword, register, signOut, refresh],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

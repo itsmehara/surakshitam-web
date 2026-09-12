@@ -7,6 +7,7 @@ import { seedDemoActivity } from "@/lib/demo-seed";
 const typeLabel: Record<AuditEvent["type"], string> = {
   page_view: "Viewed page",
   login: "Signed in",
+  register: "Registered account",
   logout: "Signed out",
   cart_add: "Added to cart",
   cart_remove: "Removed from cart",

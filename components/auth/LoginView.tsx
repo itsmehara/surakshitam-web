@@ -3,19 +3,34 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { requestOtp, DEMO_OTP } from "@/lib/auth";
+import { requestOtp, isRegisteredMobile, DEMO_OTP } from "@/lib/auth";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { RegisterForm } from "@/components/auth/RegisterForm";
 import { Logo } from "@/components/ui/Logo";
 
-type Method = "otp" | "password";
+type Method = "otp" | "password" | "register";
+const METHODS: { id: Method; label: string }[] = [
+  { id: "otp", label: "Mobile OTP" },
+  { id: "password", label: "Password" },
+  { id: "register", label: "Register new" },
+];
 
-export function LoginView() {
+/**
+ * One sign-in card with three tabs — Mobile OTP / Password / Register new.
+ * `/register` renders this same card with the Register tab pre-selected, and
+ * `?method=` does the same from any link (e.g. `/login?method=register`).
+ */
+export function LoginView({ initialMethod }: { initialMethod?: Method } = {}) {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") || "/account";
   const { loginOtp, loginPassword } = useAuth();
 
-  const [method, setMethod] = useState<Method>("otp");
+  const fromQuery = params.get("method");
+  const startMethod: Method =
+    initialMethod ??
+    (METHODS.some((m) => m.id === fromQuery) ? (fromQuery as Method) : "otp");
+  const [method, setMethod] = useState<Method>(startMethod);
   const [step, setStep] = useState<"mobile" | "otp">("mobile");
   const [mobile, setMobile] = useState("");
   const [name, setName] = useState("");
@@ -23,6 +38,7 @@ export function LoginView() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isNew, setIsNew] = useState(false);
 
   function sendOtp(e: React.FormEvent) {
     e.preventDefault();
@@ -31,6 +47,15 @@ export function LoginView() {
       setError("Enter a valid 10-digit mobile number.");
       return;
     }
+    const unknown = !isRegisteredMobile(mobile);
+    if (unknown && !name.trim()) {
+      setIsNew(true);
+      setError(
+        "This number isn't registered yet. Add your name to create an account, or use the Register new tab.",
+      );
+      return;
+    }
+    setIsNew(unknown);
     requestOtp(mobile);
     setOtp(DEMO_OTP);
     setStep("otp");
@@ -39,15 +64,17 @@ export function LoginView() {
   function verifyOtp(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    if (loginOtp(mobile, otp, name)) router.push(next);
-    else setError("Invalid code. Use a 4–6 digit OTP (demo: 1234).");
+    const r = loginOtp(mobile, otp, name);
+    if (r.ok) router.push(next);
+    else setError(r.error);
   }
 
   function verifyPassword(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    if (loginPassword(username, password)) router.push(next);
-    else setError("Incorrect username or password.");
+    const r = loginPassword(username, password);
+    if (r.ok) router.push(next);
+    else setError(r.error);
   }
 
   const inputCls =
@@ -58,29 +85,48 @@ export function LoginView() {
     <div className="container flex min-h-[70vh] items-center justify-center py-16">
       <div className="w-full max-w-sm rounded-lg border border-forest/8 bg-white/70 p-8 shadow-soft">
         <Logo />
-        <h1 className="mt-6 font-serif text-2xl font-semibold text-forest">Sign in / Sign up</h1>
+        <h1 className="mt-6 font-serif text-2xl font-semibold text-forest">
+          {method === "register" ? "Create your account" : "Sign in"}
+        </h1>
+        <p className="mt-1 text-sm text-forest/60">
+          {method === "register"
+            ? "Takes a minute — your mobile is your login."
+            : "New here? Pick Register new to create an account."}
+        </p>
 
         {/* Method tabs */}
-        <div className="mt-4 inline-flex rounded-full border border-forest/15 bg-white/60 p-1">
-          {(["otp", "password"] as Method[]).map((m) => (
+        <div
+          role="tablist"
+          aria-label="Sign-in method"
+          className="mt-4 flex w-full rounded-full border border-forest/15 bg-white/60 p-1"
+        >
+          {METHODS.map((m) => (
             <button
-              key={m}
+              key={m.id}
               type="button"
+              role="tab"
+              aria-selected={method === m.id}
               onClick={() => {
-                setMethod(m);
+                setMethod(m.id);
                 setError("");
                 setStep("mobile");
               }}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                method === m ? "bg-forest text-cream" : "text-forest/65 hover:text-forest"
+              className={`flex-1 whitespace-nowrap rounded-full px-2 py-1.5 text-sm font-medium transition-colors ${
+                method === m.id
+                  ? "bg-forest text-cream"
+                  : "text-forest/65 hover:text-forest"
               }`}
             >
-              {m === "otp" ? "Mobile OTP" : "Password"}
+              {m.label}
             </button>
           ))}
         </div>
 
-        {method === "otp" ? (
+        {method === "register" ? (
+          <div className="mt-6">
+            <RegisterForm next={next} inputCls={inputCls} labelCls={labelCls} />
+          </div>
+        ) : method === "otp" ? (
           step === "mobile" ? (
             <form onSubmit={sendOtp} className="mt-6 space-y-3">
               <div>
@@ -95,18 +141,34 @@ export function LoginView() {
               </div>
               <div>
                 <label className={labelCls}>
-                  Name <span className="text-forest/40">(new customers)</span>
+                  Name{" "}
+                  <span className="text-forest/40">(new customers only)</span>
                 </label>
-                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className={inputCls} />
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your name"
+                  className={`${inputCls} ${isNew && !name.trim() ? "border-clay" : ""}`}
+                />
               </div>
               {error && <p className="text-sm text-clay">{error}</p>}
-              <button type="submit" className="w-full rounded-full bg-forest px-5 py-3 text-sm font-medium text-cream hover:bg-ink">
+              <button
+                type="submit"
+                className="w-full rounded-full bg-forest px-5 py-3 text-sm font-medium text-cream hover:bg-ink"
+              >
                 Send OTP
               </button>
             </form>
           ) : (
             <form onSubmit={verifyOtp} className="mt-6 space-y-3">
-              <p className="text-sm text-forest/60">Enter the code sent to {mobile}.</p>
+              <p className="text-sm text-forest/60">
+                Enter the code sent to {mobile}.
+                {isNew && (
+                  <span className="mt-1 block text-moss">
+                    We&apos;ll create your account as {name.trim()}.
+                  </span>
+                )}
+              </p>
               <div>
                 <label className={labelCls}>One-time code</label>
                 <input
@@ -118,7 +180,10 @@ export function LoginView() {
                 />
               </div>
               {error && <p className="text-sm text-clay">{error}</p>}
-              <button type="submit" className="w-full rounded-full bg-forest px-5 py-3 text-sm font-medium text-cream hover:bg-ink">
+              <button
+                type="submit"
+                className="w-full rounded-full bg-forest px-5 py-3 text-sm font-medium text-cream hover:bg-ink"
+              >
                 Verify &amp; sign in
               </button>
               <button
@@ -137,7 +202,12 @@ export function LoginView() {
           <form onSubmit={verifyPassword} className="mt-6 space-y-3">
             <div>
               <label className={labelCls}>Username / email / mobile</label>
-              <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="e.g. bhavesh" className={inputCls} />
+              <input
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="e.g. bhavesh"
+                className={inputCls}
+              />
             </div>
             <div>
               <label className={labelCls}>Password</label>
@@ -150,7 +220,10 @@ export function LoginView() {
               />
             </div>
             {error && <p className="text-sm text-clay">{error}</p>}
-            <button type="submit" className="w-full rounded-full bg-forest px-5 py-3 text-sm font-medium text-cream hover:bg-ink">
+            <button
+              type="submit"
+              className="w-full rounded-full bg-forest px-5 py-3 text-sm font-medium text-cream hover:bg-ink"
+            >
               Sign in
             </button>
           </form>
@@ -159,11 +232,18 @@ export function LoginView() {
         <p className="mt-4 rounded-lg bg-parchment px-3 py-2 text-xs text-forest/60">
           {method === "otp" ? (
             <>
-              Demo: OTP is simulated — use <b>{DEMO_OTP}</b> (any 4–6 digits work).
+              Demo: OTP is simulated — use <b>{DEMO_OTP}</b> (any 4–6 digits
+              work).
+            </>
+          ) : method === "register" ? (
+            <>
+              Demo: OTP is simulated — use <b>{DEMO_OTP}</b>. Accounts are
+              stored in this browser only.
             </>
           ) : (
             <>
               Demo account — username <b>bhavesh</b>, password <b>demo123</b>.
+              Registered customers sign in with their mobile or email.
             </>
           )}
         </p>

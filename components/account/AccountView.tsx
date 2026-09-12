@@ -148,7 +148,11 @@ export function AccountView() {
           {editing ? (
             <div className="mt-5 space-y-4">
               <PField label="Full name" value={draft.name} onChange={(v) => setDraft({ ...draft, name: v })} />
-              <PField label="Mobile" value={draft.mobile} onChange={(v) => setDraft({ ...draft, mobile: v })} />
+              <div className="text-sm">
+                <span className="mb-1 block font-medium text-forest">Mobile</span>
+                <p className="rounded-lg border border-forest/10 bg-parchment/60 px-4 py-2.5 text-forest/70">{draft.mobile}</p>
+                <p className="mt-1 text-xs text-forest/45">Your mobile is your login ID and can&apos;t be changed here.</p>
+              </div>
               <PField label="Email" value={draft.email} onChange={(v) => setDraft({ ...draft, email: v })} />
               <PField label="Address" value={draft.address} onChange={(v) => setDraft({ ...draft, address: v })} textarea />
               <div className="flex gap-2 pt-1">

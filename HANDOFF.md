@@ -38,10 +38,16 @@ Inter). `next/image`. Design system "Botanical Laboratory": cream/forest/moss/cl
 ---
 
 ## 3. Demo credentials
-- **Customer:** mobile + OTP. Any 10-digit mobile; OTP `1234` (any 4–6 digits accepted). Use mobile
-  `9849116181` (with blank name) to appear as the seeded **Bhavesh Allapati**. Also password login:
-  username `bhavesh`, password `demo123`. Customers can also **set/change their own password** from
-  Account → Security (self-service, separate from the seeded demo credential — see decision #19).
+- **Customer:** customers **self-register** (12 Sep 2026 — decision #42). Three entry points:
+  `/login` is one card with three tabs — **Mobile OTP / Password / Register new**:
+  - **Register new** — name + mobile (+ optional email/password), then OTP `1234` to confirm the
+    number. `/register` opens the same card on this tab (so is `/login?method=register`).
+  - **Mobile OTP** — a registered mobile signs straight in; an unknown mobile registers on the spot
+    if a name is given (otherwise it points you to add a name / use the Register new tab).
+  - **Password** — mobile, email or username + password.
+  Seeded demo customer: mobile `9849116181` / username `bhavesh` / password `demo123` (**Bhavesh
+  Allapati**, `SN-CU-00001`). Every new customer gets the next `SN-CU-xxxxx`. Duplicate mobile/email is
+  refused. Customers set/change their own password from Account → Security (per account now).
 - **Founders (admin):** at **`/studio`** — `srikanthnaturals` or `supriyanaturals`, password `demo123`.
   Any signed-in founder can add/edit/remove admin accounts from **`/studio/team`** (see decision #20).
 
@@ -56,11 +62,11 @@ All client-side. Each maps to a Supabase table in production.
 - `sn-admin-team-v1` — admin roster overlay `{overrides:{username:AdminAccount}, removed:[username]}`
   on top of the two seed founder accounts (mirrors `sn-catalog-v1`'s pattern). Managed at
   `/studio/team`.
-- `sn-profile-v1` — customer profile `{customerId, name, mobile, email, address}`. `customerId` is a
-  friendly account number like `SN-CU-00001`, generated once (see decision #18).
+- `sn-users-v1` — **customer account registry** `[{id(=mobile), customerId, name, mobile, email,
+  address, username?, password?, createdAt}]` (decision #42). Seeded with Bhavesh on first use; the
+  old `sn-profile-v1` / `sn-customer-pw-v1` stores are imported once and removed. `password` is
+  mock-obfuscated, **not a real hash** (decision #19).
 - `sn-customer-seq-v1` — counter backing the next `customerId`.
-- `sn-customer-pw-v1` — customer's self-service password (mock-obfuscated, **not a real hash** — see
-  decision #19), set from Account → Security.
 - `sn-address-v1` — checkout address.
 - `sn-orders-v1` — orders array (each has `userId`, price snapshots, `fulfillmentStatus`).
 - `sn-notifications-v1` — WhatsApp messages `{audience:'customer'|'admin', to, template, message, archived}`.
@@ -99,10 +105,17 @@ All client-side. Each maps to a Supabase table in production.
 - `payments.ts` — `PaymentProvider` + `mockPaymentProvider` (Razorpay swap point).
 - `notifications.ts` — WhatsApp templates + `mockNotificationProvider`; `audience`/`to` per message;
   archive (never delete); `customerOrderStatus()` for status updates.
-- `auth.ts` — customer auth: `loginWithOtp`, `loginWithPassword`, session, `DEMO_OTP`;
+- `users.ts` — **customer account registry** (decision #42): `getAccounts`, `findAccount` (mobile /
+  email / username), `registerAccount` (validation + uniqueness), `updateAccount`, `hasPassword` /
+  `setPassword` / `verifyPassword`. This file *is* the Supabase Auth swap point.
+- `auth.ts` — customer auth on top of `users.ts`: `register`, `loginWithOtp` (auto-registers an unknown
+  mobile when a name is given), `loginWithPassword`, `isRegisteredMobile`, session, `DEMO_OTP`. All
+  login/register calls return `AuthResult = {ok} | {ok:false, error}` so the UI shows the real reason.
   `updateSessionIdentity()` keeps the live session's name/email in sync after a profile edit (see
-  decision #21); `hasCustomerPassword`/`setCustomerPassword`/`verifyCustomerPassword` for
-  self-service password (decision #19).
+  decision #21); `hasCustomerPassword`/`setCustomerPassword`/`verifyCustomerPassword` act on the
+  signed-in account (decision #19).
+- `profile.ts` — now a thin view over the signed-in account in `users.ts` (`getProfile`/`saveProfile`
+  keep their signatures; mobile is immutable because it is the id). Guests get an empty profile.
 - `admin.ts` — founder auth; **`ADMIN_BASE = "/studio"`**; `getAdminAccounts()` (merged seed +
   `sn-admin-team-v1` roster), `saveAdminAccount`/`removeAdminAccount` (Team page), `getAdminSession`
   (now strict — decision #17).
@@ -193,7 +206,9 @@ All client-side. Each maps to a Supabase table in production.
 
 **components/**
 - `auth/AuthProvider.tsx` — **`useAuth()` context** (user, isLoggedIn, loginOtp, loginPassword,
-  signOut, ready); cross-tab sync. `auth/LoginView.tsx` — tabbed OTP/password login.
+  register, signOut, ready); cross-tab sync. `auth/LoginView.tsx` — one card, three tabs (Mobile OTP /
+  Password / Register new; `initialMethod` prop or `?method=` pre-selects). `auth/RegisterForm.tsx` —
+  the Register tab's form (details → OTP → account), embedded in the card, not a separate page design.
 - `layout/AppShell.tsx` — renders storefront chrome for customer routes; **hides it on `/studio`**;
   logs `page_view` per navigation. `layout/Header.tsx` — shows **first name next to the account icon
   when logged in**. `layout/Footer.tsx` — address/email/socials (incl. YouTube); no admin link.
@@ -315,13 +330,11 @@ products/[id],reports,team,activity,dev/notifications}`,
     customers wanted something that reads like a "real" account number. Generated once via a
     localStorage counter (`sn-customer-seq-v1`) and shown read-only on the account page; not
     editable.
-19. **Customer self-service password lives alongside the profile, not per-account** — this
-    prototype keeps **one customer profile per browser** (see `profile.ts`), so a password set in
-    Account → Security is checked against whichever profile is currently active on that device, not
-    a real multi-user password table. `loginWithPassword` checks the original seeded demo
-    credential first, then this self-service password. Storage uses `obfuscate()` (base64), which is
-    **explicitly not a real hash** — called out in code comments; production moves this entirely to
-    Supabase Auth (server-side, hashed, never touches client code).
+19. **Customer self-service password** — set from Account → Security. Originally stored per-browser
+    alongside a single profile; since decision #42 it is stored **per account** in `sn-users-v1`.
+    Storage uses `obfuscate()` (base64), which is **explicitly not a real hash** — called out in code
+    comments; production moves this entirely to Supabase Auth (server-side, hashed, never touches
+    client code).
 20. **No separate "Super Admin" role — any signed-in founder manages the whole team** from
     `/studio/team`, including adding new admins, and editing/removing others (can't remove yourself
     or the last remaining account). Matches reality: Srikanth and Supriya are equal co-founders
@@ -484,6 +497,26 @@ products/[id],reports,team,activity,dev/notifications}`,
     on it, applied identically to the desktop nav and mobile drawer. Deliberately did **not** make
     this a broader "site settings" page — one checkbox didn't warrant new IA.
 
+42. **Customers self-register; accounts are a real multi-user registry (12 Sep 2026).** The
+    prototype previously had one hard-coded demo credential and one profile per browser, so a
+    second person on the same device overwrote the first. `lib/users.ts` now holds any number of
+    accounts keyed by mobile (`sn-users-v1`), with `/register` (name + mobile, optional email and
+    password, OTP confirmation), OTP login that auto-registers an unknown number when a name is
+    supplied, and password login by mobile/email/username. Mobile is immutable (it is the id and
+    the order-matching key); duplicate mobile/email is refused; the seeded Bhavesh account still
+    works unchanged and existing per-browser profiles/passwords are migrated on first load. This
+    was done so the founders can verify a real sign-up flow before the v2 (backend) build, where
+    `users.ts` maps 1:1 onto Supabase Auth + a `customers` table. Registration is the third tab of
+    the sign-in card rather than a separate page — one place to look, and the tab order (OTP /
+    Password / Register new) reads as "existing customer first".
+
+43. **Falling-fruit physics also runs behind the Shop shelf (12 Sep 2026).** `app/shop/page.tsx`
+    wraps the product grid in a `relative overflow-hidden` section with `<BotanicalBackdrop />`
+    behind it — the same leaves + reetha/amla/lemon solver as the homepage hero. It sits *behind*
+    the cards, so the fruit is seen in the side margins and card gaps and piles up at 82% of the
+    grid height, exactly as on the hero; the shop header stays compact (products still near the top).
+    Zero cost when off-screen or with reduced motion — the solver already guards both.
+
 ---
 
 ## 7. Status by phase (see ROADMAP.md)
@@ -583,6 +616,7 @@ a fresh session doesn't have to rediscover them.
 
 | # | What needs deciding | Where it lives |
 |---|---|---|
+| 0 | **Hosting / backend platform** — VPS (Hostinger KVM 2) vs serverless (Cloudflare / Azure / AWS), and SQLite-family vs DynamoDB/Cosmos. Research complete 2026-09-12; decision pending with Hara + founders before Phase 6. | `surakshitam-docs/docs/hosting/HOSTING-RESEARCH-2026-09-12.md` §15 |
 | 1 | **Every price** is demo. | `lib/catalog.ts` — comment at line ~38 |
 | 2 | **8 products show `referenceStatus: packaging-concept`** — the pack in the photo is a concept, not the real pack. Either shoot the real pack or accept the concept. | `product-image-manifest.json` |
 | 3 | The **9 reel-set products** (aloe/charcoal/coffee/goat-milk/honey/manjista/red-wine/sandal soaps + henna) carry demo price, size, copy **and ingredient lists**. | `lib/catalog.ts` |
@@ -602,6 +636,8 @@ a fresh session doesn't have to rediscover them.
   outside the PINs listed.
 
 ## 10. Remaining work — recommended order
+
+> **Hosting direction changed 2026-09-12:** Phase 6 is **not Supabase**. Two candidate directions, decision pending: (a) own backend on a VPS — Hostinger KVM 2 Mumbai, ₹9,051/yr with coupon; (b) **serverless go-live** — Cloudflare Workers + D1 (₹524/mo flat) or Azure Container Apps + Cosmos (₹31 → ₹520/mo) or AWS Lambda + DynamoDB (₹114/mo now); Hara leans AWS/Azure, analysis favours Cloudflare or Azure. Database: Postgres not mandatory — SQLite family via Drizzle behind a repository layer recommended. **Full record: `surakshitam-docs/docs/hosting/HOSTING-RESEARCH-2026-09-12.md`** (+ two HTML comparison pages beside it). Backup scripts (Postgres flavour) in `surakshitam-backend/ops/`.
 **Phases 1–5 and post-Phase-5 rounds 1–6 are complete** (see §7). Next up:
 
 1. **Founder sign-off on §8** — cheapest possible step, and it unblocks real content everywhere.

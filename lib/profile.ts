@@ -1,8 +1,17 @@
-/** Customer profile — prototype persistence in localStorage (client-only). */
+/**
+ * Customer profile — a view over the signed-in customer's account record.
+ *
+ * Earlier this was a single per-browser profile. It now reads/writes the
+ * current session's entry in the account registry (`users.ts`), so each
+ * registered customer has their own name/email/address. `getProfile()` for a
+ * guest returns an empty profile (nothing is pre-filled from someone else).
+ */
+
+import { getAccount, updateAccount, normalizeId } from "./users";
 
 export interface Profile {
-  /** Friendly customer-facing account number, e.g. "SN-CU-00001". Generated once,
-   *  shown on the account page. Distinct from `mobile`, which is the login/order key. */
+  /** Friendly customer-facing account number, e.g. "SN-CU-00001". Distinct from
+   *  `mobile`, which is the login/order key. */
   customerId: string;
   name: string;
   mobile: string;
@@ -10,49 +19,36 @@ export interface Profile {
   address: string;
 }
 
-const KEY = "sn-profile-v1";
-const SEQ_KEY = "sn-customer-seq-v1";
+const SESSION_KEY = "sn-auth-v1";
 
 export const defaultProfile: Profile = {
-  customerId: "SN-CU-00001",
-  name: "Bhavesh Allapati",
-  mobile: "+91 98491 16181",
-  email: "Srikanth.Alapati@yahoo.com",
-  address: "Nagole, Hyderabad, Telangana, 500068",
+  customerId: "",
+  name: "",
+  mobile: "",
+  email: "",
+  address: "",
 };
 
-/** Reserves and formats the next customer number (e.g. "SN-CU-00002"). */
-function nextCustomerId(): string {
+function currentUserId(): string | null {
+  if (typeof window === "undefined") return null;
   try {
-    const seq = Number(localStorage.getItem(SEQ_KEY) || "1") + 1;
-    localStorage.setItem(SEQ_KEY, String(seq));
-    return `SN-CU-${String(seq).padStart(5, "0")}`;
+    const raw = localStorage.getItem(SESSION_KEY);
+    return raw ? normalizeId((JSON.parse(raw) as { id: string }).id) : null;
   } catch {
-    return `SN-CU-${Date.now().toString().slice(-5)}`;
+    return null;
   }
 }
 
 export function getProfile(): Profile {
-  if (typeof window === "undefined") return defaultProfile;
-  try {
-    const raw = localStorage.getItem(KEY);
-    const parsed = raw ? (JSON.parse(raw) as Partial<Profile>) : {};
-    const merged = { ...defaultProfile, ...parsed };
-    // Self-heal: any profile saved before customerId existed gets one now.
-    if (!parsed.customerId) {
-      merged.customerId = raw ? nextCustomerId() : defaultProfile.customerId;
-      saveProfile(merged);
-    }
-    return merged;
-  } catch {
-    return defaultProfile;
-  }
+  const id = currentUserId();
+  const a = id ? getAccount(id) : null;
+  if (!a) return defaultProfile;
+  return { customerId: a.customerId, name: a.name, mobile: a.mobile, email: a.email, address: a.address };
 }
 
+/** Saves editable fields to the signed-in account. Mobile is the id and is not changed here. */
 export function saveProfile(profile: Profile): void {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(profile));
-  } catch {
-    /* ignore */
-  }
+  const id = currentUserId();
+  if (!id) return;
+  updateAccount(id, { name: profile.name, email: profile.email, address: profile.address });
 }

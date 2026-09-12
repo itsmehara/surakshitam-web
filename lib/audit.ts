@@ -14,6 +14,7 @@
 export type AuditType =
   | "page_view"
   | "login"
+  | "register"
   | "logout"
   | "cart_add"
   | "cart_remove"
