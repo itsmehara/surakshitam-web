@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ingredients, DEFAULT_INGREDIENT_GROUPS } from "@/lib/ingredients";
-import { PageIntro } from "@/components/ui/PageIntro";
+import { BannerIntro } from "@/components/ui/BannerIntro";
 import { LinkButton } from "@/components/ui/Button";
 import {
   IngredientLibrary,
@@ -46,13 +46,15 @@ const avoidList = [
 export default function IngredientsPage() {
   return (
     <>
-      <PageIntro
+      <BannerIntro
+        src="/banners/ingredients-botanicals-butters-natural-cleansers-responsive.webp"
+        alt="Plant butters, herbs, essential oils and natural cleansers used across the range"
         eyebrow="Ingredients"
         title="What we use, and why"
         intro="Good products start with knowing what goes into them. Here is the library of plant-forward ingredients behind our range — grouped, with a plain-language note on why we choose each. Descriptions are general and non-medical, for the prototype."
       >
         <IngredientCounts seed={seed} />
-      </PageIntro>
+      </BannerIntro>
 
       {/* How we choose */}
       <section className="border-b border-forest/8 bg-cream py-14 sm:py-16">

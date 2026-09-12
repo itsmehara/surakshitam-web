@@ -531,6 +531,10 @@ products/[id],reports,team,activity,dev/notifications}`,
     `BotanicalBackdrop` tile/washes, which would muddy a photo). The four shelf cards moved out of
     the hero into `components/home/CategoryStrip.tsx`, a one-row strip directly beneath it.
     Mobile note from the pack: subjects are centre-right, so `object-position: center right`.
+    **Ingredients and Learn** use the same look with a single fixed banner via
+    `components/ui/BannerIntro.tsx` (~55 svh, drift + physics + scrim; Ingredients → the ingredients
+    banner, Learn → the Hyderabad workspace banner). `PageIntro` (v1 botanical wash) stays on the
+    other pages. Remaining unused banners: our-story, personal-care, and the three product heroes.
 
 ---
 

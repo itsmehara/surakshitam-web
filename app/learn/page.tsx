@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { articles } from "@/lib/articles";
-import { PageIntro } from "@/components/ui/PageIntro";
+import { BannerIntro } from "@/components/ui/BannerIntro";
 import { ArrowRight } from "@/components/icons";
 
 export const metadata: Metadata = {
@@ -15,7 +15,10 @@ export default function LearnPage() {
 
   return (
     <>
-      <PageIntro
+      <BannerIntro
+        src="/banners/our-story-hyderabad-small-batch-workspace-responsive.webp"
+        alt="Small-batch workspace in Hyderabad — herbs, oils and soaps being made by hand"
+        drift="sn-drift-c"
         eyebrow="Learn"
         title="Care guides & ingredient stories"
         intro="Short, useful reads on ingredients, product care and how our formulations come together. Demo articles shown for the prototype."
