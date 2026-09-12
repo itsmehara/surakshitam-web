@@ -2,12 +2,16 @@
  * Surakshitam Naturals — storefront (shopping + cart + checkout) screenshots, MOBILE.
  * Produces ./SurakshitamNaturals-Screenshots/Mobile-Shopping-Cart/<NNN>-<section>-<feature>.png
  *
- * Same feature list as capture-storefront-desktop.mjs (see that file's header comment, now incl.
- * offers/combos/wishlist/FAQs/shop-by-concern/floating-offers-modal), at
+ * Same feature list as capture-storefront-desktop.mjs (see that file's header comment), at
  * a "regular" phone viewport (360×780 — matches common Android widths and iPhone
  * mini/SE, not an oversized modern iPhone). Home/Our-Story/Ingredients/Learn already get
  * multiple scrolled shots via gallery(); every other single-shot screen gets 2 shots (top +
  * scrolled) via twoShotMobile() since a phone screen shows much less at once than desktop.
+ *
+ * The menu differs from desktop and is captured accordingly: there is no hover
+ * drop-down here, so the slide-out drawer is shot twice — once at the top showing
+ * Shop with its category shelves listed inline, and once scrolled to the bottom
+ * where the account links and Log out sit.
  *
  * Exports `run(browser)` so it can be called standalone or from capture-all.mjs.
  *
@@ -26,67 +30,81 @@ import {
   gallery,
   assertServerUp,
   twoShotMobile,
+  fillPincode,
   log,
 } from "./screenshot-utils.mjs";
+import {
+  storefrontSeedScript,
+  CART_FREE_DELIVERY,
+  ORDER_BIKE,
+  ORDER_COURIER,
+} from "./screenshot-seed.mjs";
 
 const BASE = process.env.BASE || "http://localhost:3000";
 const ROOT = "./SurakshitamNaturals-Screenshots/Mobile-Shopping-Cart";
 const VIEWPORT = { width: 360, height: 780 }; // "regular" phone size — common Android width, iPhone mini/SE range
 const PAGE_WAIT = 15000;
 
-const CART = [{ id: "p-shea-butter-soap", qty: 1 }, { id: "p-hair-oil", qty: 2 }, { id: "p-dishwash-liquid", qty: 1 }];
-const PROFILE = { name: "Bhavesh Allapati", mobile: "+91 98491 16181", email: "srikanth.alapati@yahoo.com", address: "Nagole, Hyderabad, Telangana – 500068" };
-const AUTH = { id: "9849116181", mobile: "+91 98491 16181", name: "Bhavesh Allapati", email: "srikanth.alapati@yahoo.com", method: "otp", loggedInAt: "2026-08-16T11:00:00.000Z" };
-const ADDR = { fullName: "Bhavesh Allapati", phone: "9849116181", altPhone: "", line1: "Nagole", line2: "", landmark: "", city: "Hyderabad", state: "Telangana", postalCode: "500068", type: "Home" };
-const ORDER = [{ orderNumber: "SURK-2026-482913", createdAt: "2026-08-16T11:13:09.373Z", userId: "9849116181", items: [{ productId: "p-shea-butter-soap", slug: "shea-butter-soap", nameSnapshot: "Shea Butter Soap", skuSnapshot: "SN-SC-SHS-100", priceSnapshot: 14900, qty: 1, image: "/products/shea-butter-soap.webp", size: "100 g" }, { productId: "p-hair-oil", slug: "hair-oil", nameSnapshot: "Hair Oil", skuSnapshot: "SN-HR-OIL-100", priceSnapshot: 24900, qty: 2, image: "/products/hair-oil.webp", size: "100 ml" }], subtotal: 64700, shipping: 0, total: 64700, address: { fullName: "Bhavesh Allapati", phone: "9849116181", line1: "Nagole", city: "Hyderabad", state: "Telangana", postalCode: "500068", type: "Home" }, paymentStatus: "PAID", paymentId: "pay_demo_a1b2c3d4e5", fulfillmentStatus: "PACKED", courier: "Delhivery", trackingNumber: "DL4821093765" }];
-// Post-Phase-5 round 5/6 features: offers, combos, wishlist — seeded so /offers, the homepage
-// promo carousel/banner/floating button, and /wishlist all show real content instead of empty states.
-const OFFERS = [{ id: "off_demo1", code: "WELCOME10", description: "10% off your first order", type: "percent", value: 10, startDate: "2026-08-01", endDate: "2026-12-31", enabled: true }];
-const BUNDLES = [{ id: "bundle_demo1", slug: "daily-essentials-kit", name: "Daily Essentials Kit", description: "Our shea butter soap, hair oil and dishwash liquid, together at a special price.", image: "", productIds: ["p-shea-butter-soap", "p-hair-oil", "p-dishwash-liquid"], price: 55000, enabled: true }];
-const WISHLIST = ["p-rose-face-wash", "p-hair-serum"];
-
-function seedScript({ customer = false } = {}) {
-  return `try{
-    localStorage.setItem('sn-cart-v1', ${JSON.stringify(JSON.stringify(CART))});
-    localStorage.setItem('sn-profile-v1', ${JSON.stringify(JSON.stringify(PROFILE))});
-    localStorage.setItem('sn-address-v1', ${JSON.stringify(JSON.stringify(ADDR))});
-    localStorage.setItem('sn-orders-v1', ${JSON.stringify(JSON.stringify(ORDER))});
-    localStorage.setItem('sn-offers-v1', ${JSON.stringify(JSON.stringify(OFFERS))});
-    localStorage.setItem('sn-bundles-v1', ${JSON.stringify(JSON.stringify(BUNDLES))});
-    localStorage.setItem('sn-wishlist-v1', ${JSON.stringify(JSON.stringify(WISHLIST))});
-    localStorage.setItem('sn-visitor-v1', 'v_demo12ab');
-    ${customer ? `localStorage.setItem('sn-auth-v1', ${JSON.stringify(JSON.stringify(AUTH))});` : `localStorage.removeItem('sn-auth-v1');`}
-  }catch(e){}`;
-}
-
 export async function run(browser) {
   await assertServerUp(browser, BASE);
   mkdir(ROOT);
   const shot = makeShotter(ROOT);
 
-  const custCtx = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
-  await custCtx.addInitScript(seedScript({ customer: true }));
+  const mobileCtx = { viewport: VIEWPORT, deviceScaleFactor: 1, isMobile: true, hasTouch: true };
+
+  const custCtx = await browser.newContext(mobileCtx);
+  await custCtx.addInitScript(storefrontSeedScript({ customer: true }));
   const cp = await custCtx.newPage();
 
-  const guestCtx = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
-  await guestCtx.addInitScript(seedScript({ customer: false }));
+  const guestCtx = await browser.newContext(mobileCtx);
+  await guestCtx.addInitScript(storefrontSeedScript({ customer: false }));
   const gp = await guestCtx.newPage();
+
+  // Separate context for the "over ₹699" cart — the seed re-runs on every
+  // navigation, so a bigger cart written mid-run would just be overwritten.
+  const bigCartCtx = await browser.newContext(mobileCtx);
+  await bigCartCtx.addInitScript(storefrontSeedScript({ customer: true, cart: CART_FREE_DELIVERY }));
+  const bp = await bigCartCtx.newPage();
+
+  log("menu — slide-out drawer (top + scrolled)");
+  await gotoAndWait(cp, BASE, "/", PAGE_WAIT);
+  await cp.click('button[aria-label*="open menu" i]').catch(() => {});
+  await cp.waitForTimeout(500);
+  await shot(cp, "menu-drawer-shop-shelves");
+  // The drawer scrolls inside itself, not the page. On a taller phone everything
+  // fits in one screen, so only take the second shot when there's actually more
+  // to see — otherwise it's a duplicate image for the founder to wade through.
+  const drawerScrolls = await cp.evaluate(() => {
+    const drawer = document.querySelector('nav[aria-label="Mobile"]');
+    if (!drawer || drawer.scrollHeight <= drawer.clientHeight + 8) return false;
+    drawer.scrollTop = drawer.scrollHeight;
+    return true;
+  });
+  if (drawerScrolls) {
+    await cp.waitForTimeout(500);
+    await shot(cp, "menu-drawer-scrolled");
+  } else {
+    log("  … drawer fits on one screen — skipping the scrolled duplicate");
+  }
+  await cp.keyboard.press("Escape").catch(() => {});
 
   log("home (12 shots, scrolled)");
   await gallery(cp, BASE, "/", shot, "home", 12, { waitAfterLoad: PAGE_WAIT });
-  await cp.click('button[aria-label*="menu" i]').catch(() => {});
-  await cp.waitForTimeout(300);
-  await shot(cp, "home-mobile-menu");
-  await cp.keyboard.press("Escape").catch(() => {});
 
   log("shop");
   await twoShotMobile(cp, BASE, "/shop", shot, "shop-catalogue-grid", PAGE_WAIT);
   await twoShotMobile(cp, BASE, "/shop?category=home-care", shot, "shop-category-filter", PAGE_WAIT);
+  await gotoAndWait(cp, BASE, "/shop?category=home-care&shelf=bio-enzyme", PAGE_WAIT);
+  await shot(cp, "shop-home-care-bio-enzyme");
   await twoShotMobile(cp, BASE, "/product/shea-butter-soap", shot, "shop-product-detail", PAGE_WAIT);
 
   log("skin & hair care");
   await twoShotMobile(cp, BASE, "/shop?category=skin-care", shot, "skincare-category", PAGE_WAIT);
   await twoShotMobile(cp, BASE, "/shop?category=hair-care", shot, "haircare-category", PAGE_WAIT);
+
+  log("partner brands");
+  await twoShotMobile(cp, BASE, "/shop?category=partner-brands", shot, "partner-brands-category", PAGE_WAIT);
+  await twoShotMobile(cp, BASE, "/product/homemade-wheat-noodles", shot, "partner-brands-product-detail", PAGE_WAIT);
 
   log("offers & combos");
   await twoShotMobile(cp, BASE, "/offers", shot, "offers-tab", PAGE_WAIT);
@@ -121,6 +139,8 @@ export async function run(browser) {
 
   log("search");
   await twoShotMobile(cp, BASE, "/search?q=soap", shot, "search-results", PAGE_WAIT);
+  await gotoAndWait(cp, BASE, "/search?q=noodles", PAGE_WAIT);
+  await shot(cp, "search-partner-brand");
 
   log("account");
   await twoShotMobile(gp, BASE, "/login?next=/account", shot, "account-login-otp", PAGE_WAIT);
@@ -135,6 +155,13 @@ export async function run(browser) {
 
   log("cart & checkout");
   await twoShotMobile(cp, BASE, "/cart", shot, "cart-page", PAGE_WAIT);
+  // A PIN past the 15 km radius, so the distance charge is actually visible.
+  await fillPincode(cp, "500049");
+  await shot(cp, "cart-delivery-distance-charge");
+
+  log("cart — free delivery unlocked (over ₹699)");
+  await twoShotMobile(bp, BASE, "/cart", shot, "cart-free-delivery-unlocked", PAGE_WAIT);
+
   await gotoAndWait(cp, BASE, "/checkout", PAGE_WAIT);
   await shot(cp, "checkout-contact");
   await cp.evaluate(() => document.querySelectorAll("input").forEach((i) => { if (!i.value) { if (i.type === "email") i.value = "bhavesh@example.com"; else if (i.type === "tel") i.value = "9849116181"; } }));
@@ -149,8 +176,22 @@ export async function run(browser) {
   await clickText(cp, "button", /pay .*secur|pay ₹/i);
   await cp.waitForTimeout(1200);
   await shot(cp, "checkout-payment-modal");
-  await twoShotMobile(cp, BASE, "/order/SURK-2026-482913", shot, "checkout-order-confirmation", PAGE_WAIT);
-  await twoShotMobile(cp, BASE, "/track-order", shot, "checkout-order-tracking", PAGE_WAIT);
+  await twoShotMobile(cp, BASE, `/order/${ORDER_COURIER}`, shot, "checkout-order-confirmation", PAGE_WAIT);
+
+  log("delivery tracking — bike, rider & live map");
+  // The tracker prefills the most recent order but only renders it once the
+  // form is submitted, so the shot has to click Track first.
+  await gotoAndWait(cp, BASE, "/track-order", PAGE_WAIT);
+  await clickText(cp, "button", /^track$/i);
+  await cp.waitForTimeout(1500);
+  await shot(cp, "tracking-bike-rider-card");
+  await cp.evaluate(() => window.scrollTo(0, Math.round(document.body.scrollHeight * 0.5)));
+  await cp.waitForTimeout(800);
+  await shot(cp, "tracking-live-map");
+  await twoShotMobile(cp, BASE, `/order/${ORDER_BIKE}`, shot, "tracking-order-with-rider", PAGE_WAIT);
+
+  log("rider location sheet");
+  await twoShotMobile(cp, BASE, `/rider/${ORDER_BIKE}`, shot, "delivery-rider-sheet", PAGE_WAIT);
 
   log("contact");
   await twoShotMobile(cp, BASE, "/contact", shot, "contact-page", PAGE_WAIT);
@@ -161,6 +202,7 @@ export async function run(browser) {
 
   await custCtx.close();
   await guestCtx.close();
+  await bigCartCtx.close();
   log("DONE → " + ROOT);
 }
 

@@ -16,6 +16,7 @@ const typeLabel: Record<AuditEvent["type"], string> = {
   profile_update: "Updated profile",
   report_export: "Exported report",
   team_update: "Updated admin team",
+  ingredient_update: "Updated ingredient library",
   unauthorized_access: "Unauthorized /studio attempt",
 };
 
@@ -91,6 +92,8 @@ function eventDetail(e: AuditEvent): string {
       return [e.meta?.report, e.meta?.format].filter(Boolean).join(" · ");
     case "team_update":
       return [e.meta?.action, e.meta?.target].filter(Boolean).join(" · ");
+    case "ingredient_update":
+      return [e.meta?.ingredient, e.meta?.action].filter(Boolean).join(" · ");
     case "unauthorized_access":
       return `Tried to open ${e.path ?? "/studio"}`;
     default:

@@ -1,9 +1,12 @@
 import { cn } from "@/lib/cn";
+import { FallingBotanicals } from "./FallingBotanicals";
+import { FallingFruitPhysics } from "./FallingFruitPhysics";
 
 /**
  * Soft botanical wash inspired by the Surakshitam Naturals business card:
  * a pale green-cream field with a repeating leaf / sprig / lemon-slice motif,
- * plus a few scattered lemons for warmth. Purely decorative and restrained.
+ * plus a few scattered lemons for warmth, and neem/tulsi leaves and petals
+ * drifting down on a breeze. Purely decorative and restrained.
  */
 export function BotanicalBackdrop({ className }: { className?: string }) {
   return (
@@ -69,6 +72,8 @@ export function BotanicalBackdrop({ className }: { className?: string }) {
           <Lemon x={180} y={520} r={24} rot={14} />
         </g>
       </svg>
+      <FallingBotanicals />
+      <FallingFruitPhysics />
     </div>
   );
 }

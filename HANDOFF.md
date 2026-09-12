@@ -76,6 +76,12 @@ All client-side. Each maps to a Supabase table in production.
   so the active-offer banner reappears on the next visit (decision #34).
 - `sn-offers-nav-enabled-v1` — whether the "Offers" header/footer nav link is shown; absence of
   the key (fresh browser) means **enabled**, admin-toggleable from the Offers tab (decision #41).
+- `sn-ingredients-v1` — admin ingredient-library overlay `{overrides:{slug:Ingredient}, hidden:[slug],
+  custom:[Ingredient], groups:[string]}`, mirroring `sn-catalog-v1`'s pattern. Managed at Studio →
+  Products → Ingredients. A matching `sn-ingredients-changed` window event lets open pages re-read it.
+- `sn-rider-track-v1` / `sn-rider-ping` — last known rider position per order `{lat, lng, at}`,
+  written by the rider's own browser from `/rider/[orderNumber]`. A ping older than 90s is treated as
+  stale and the UI falls back to an estimated position.
 
 ---
 
@@ -224,7 +230,30 @@ All client-side. Each maps to a Supabase table in production.
 products/[id],reports,team,activity,dev/notifications}`,
 `account`, `login`, `cart`, `checkout`, `order/[orderNumber]`, `track-order`, `shop`,
 `product/[slug]`, `ingredients`, `learn/{page,[slug]}`, `our-story`, `contact`, `policies/[slug]`,
-`search`, `not-found.tsx`. `next.config.mjs` — `images.unoptimized` gated on `SCREENSHOTS=1`.
+`search`, `wishlist`, `offers`, `combos` (redirects), `faqs`, `rider/[orderNumber]`,
+`studio/ingredients` (redirects into Products), `studio/ingredients/{new,[slug]}`, `not-found.tsx`.
+`next.config.mjs` — `images.unoptimized` gated on `SCREENSHOTS=1`.
+
+**Added in round 6** (see §7):
+- `lib/weight.ts` — `parseSizeToGrams`, `productWeightGrams`, `parcelWeightGrams` (adds a 120 g
+  packaging tare), `formatWeight`, `billableWeightGrams`. Weight is derived from the pack size when
+  a product has no explicit `weightGrams`, so it degrades gracefully.
+- `lib/delivery.ts` — `quoteDelivery()` plus the constants that encode the founders' rules
+  (`FREE_DELIVERY_MIN` ₹699, `LOCAL_RADIUS_KM` 15, `LOCAL_DELIVERY_FEE` ₹49, `PER_KM_BEYOND_RADIUS`
+  ₹8), `STORE_ORIGIN` (Nagole), a Hyderabad PIN table, and `BIKE_PARTNERS`. **An incomplete PIN
+  quotes the local best case, not outstation** — quoting the worst case while someone is still
+  typing reads as a price rise.
+- `lib/rider-tracking.ts` — `pushRiderPing`, `getRiderPing`, `isPingFresh` (90 s), `subscribeRiderPings`,
+  `haversineKm`.
+- `lib/ingredient-store.ts` — admin overlay for the ingredient glossary, mirroring `catalog-store.ts`.
+  `renameIngredientGroup` cascades across entries so a rename can't orphan anything.
+- `components/ui/PromoTile.tsx` — the single promo card shared by the carousel and the offers pop-up,
+  so the two cannot drift apart.
+- `components/home/CategoryCards.tsx` — the four shelf cards in the hero.
+- `components/ui/FallingBotanicals.tsx` — CSS-only botanicals; `components/ui/FallingFruitPhysics.tsx`
+  — the 8-body solver. Both `aria-hidden`, `pointer-events-none`, off-screen-paused, and silenced by
+  the global `prefers-reduced-motion` rule.
+- `scripts/screenshot-seed.mjs` — the shared storefront seed used by both capture passes.
 
 ---
 
@@ -512,6 +541,34 @@ products/[id],reports,team,activity,dev/notifications}`,
   discount at checkout, no cart/order schema changes needed); **shop-by-concern navigation**
   (`concerns` tag array on `Product`, admin-editable, `/shop?concern=X` filter alongside the
   existing category chips).
+- **Post-Phase-5 round 6: founder change requests + brand look (2026-08-22 → 2026-09-04)** ✅ —
+  a long batch driven by Srikanth's feedback and by the arrival of real product photography.
+  **Storefront logic:** category-aware "shop by concern" (Home Care no longer showed skin/hair tags);
+  automatic **parcel weight** on every cart change (`lib/weight.ts`, always labelled approximate);
+  **delivery pricing rules** (`lib/delivery.ts` — free over ₹699 in-city, ₹49 below, ₹8/km beyond
+  15 km from the Nagole kitchen, weight-based courier outstation, distance from a Hyderabad PIN
+  table); an always-on **free-delivery offer**; **bike delivery as the default dispatch mode** with
+  rider name/mobile/vehicle/ETA captured at dispatch and three tracking paths (partner trip link,
+  our own rider link using browser Geolocation with no app install, or an estimate from dispatch
+  time — labelled as such); **sign-out moved into the header user-icon menu**; Home Care split into
+  **Bio-Enzyme / General** shelves; a **Partner Brands** shelf for resold goods (renamed from
+  `pantry`) that deliberately shows the partner's brand and never ours.
+  **Catalog & content:** all Surakshitam product imagery replaced from
+  `public/surakshitam-product-images/` driven by `product-image-manifest.json`; the **9 photographed
+  but unlisted reel-set products** added (catalog now 42 — 38 own-brand + 4 partner); the
+  **ingredient library grown 16 → 34** by auditing every `keyIngredients` string, and made
+  **admin-editable** (`lib/ingredient-store.ts`, Studio → Products → Ingredients).
+  **Look & feel:** the offers carousel **moved off the homepage to `/offers`**; carousel and pop-up
+  unified onto **one shared card** (`components/ui/PromoTile.tsx`) whose square image panel gives
+  0% crop at every breakpoint; the top offer strip **switched off entirely** (`SHOW_OFFER_BANNER`
+  / `SHOW_COUPON_BANNER` — kept as a future feature, not deleted); **falling botanicals** — a
+  CSS-only wind-drift layer (1.5 KB gzipped, 0 KB JS) plus a hand-written 8-body physics layer for
+  reetha/amla/lemon halves; and the homepage hero rebuilt as **copy left, four shelf cards right in
+  a staggered 2×2**, which absorbed and deleted the old `Categories.tsx` section.
+  **Housekeeping:** three image `masters/` folders (168 MB) moved out of `public/` into
+  `surakshitam-docs/source-assets/` — inside the web root they would have shipped to production and
+  been publicly downloadable; `public/` went 46 MB → 19 MB.
+
 - **Phase 6 Production hardening** ❌ — Supabase (Postgres + auth), real Razorpay + WhatsApp Business
   API (server secrets, idempotent webhooks), image uploads (Supabase Storage), Instagram Graph token,
   CMS, rate-limiting/2FA/security headers/monitoring/backups, cookie-consent banner + privacy
@@ -519,35 +576,70 @@ products/[id],reports,team,activity,dev/notifications}`,
 
 ---
 
-## 8. Remaining work — recommended order
-**Phase 5 and post-Phase-5 rounds 1-5 are complete** (see §7 for what each round shipped). Next up:
+## 8. Open decisions — these need Srikanth & Supriya, not code
+Nothing below is a bug. Each is a **claim, a price or a photograph that only the founders can
+confirm**, and each is currently sitting in the codebase as a marked placeholder. Collected here so
+a fresh session doesn't have to rediscover them.
 
-**Phase 6 to go live (backend swaps):**
-Supabase (auth + tables + RLS) → point `lib/*` accessors at it; Razorpay live + server verify;
-WhatsApp Business API; Supabase Storage uploads; consent banner; hosting on Vercel; then real content
-(founder photos, verified copy/prices/claims, real reviews) and legal/GST/shipping.
+| # | What needs deciding | Where it lives |
+|---|---|---|
+| 1 | **Every price** is demo. | `lib/catalog.ts` — comment at line ~38 |
+| 2 | **8 products show `referenceStatus: packaging-concept`** — the pack in the photo is a concept, not the real pack. Either shoot the real pack or accept the concept. | `product-image-manifest.json` |
+| 3 | The **9 reel-set products** (aloe/charcoal/coffee/goat-milk/honey/manjista/red-wine/sandal soaps + henna) carry demo price, size, copy **and ingredient lists**. | `lib/catalog.ts` |
+| 4 | **Which home-care SKUs are genuinely bio-enzyme** — 3 are tagged, and the badge is a product claim. | `lib/catalog.ts#BIO_ENZYME_PRODUCTS` |
+| 5 | **Partner-brand names and prices are invented placeholders**, with unbranded sample artwork. Real brands need real permission. | `lib/catalog.ts` category `partner-brands` |
+| 6 | **"Plant-based" is used in 28 places, but honey, goat milk and beeswax are animal-derived.** Either the wording changes or those products do. | site-wide copy |
+| 7 | Reviews, editorial articles, the Our Story quote and policy timelines are all **flagged demo content**. | `lib/reviews.ts`, `lib/articles.ts`, `app/our-story/page.tsx:176`, `app/policies/` |
+| 8 | **Category card photography** — the current square group shots get their sides trimmed by the 4:5 hero crop. Purpose-made 4:5 images (products in the upper ~70%, calm lower third for the text overlay) were agreed but not yet generated. | `public/category-groups/` |
 
----
+## 9. Known risks carried knowingly
+- **Rider mobile numbers are shown in full** on the customer's tracking page, and the rider link
+  carries **no expiry or signature** — anyone with the URL can post a position. Both need a signed,
+  expiring token before go-live.
+- **Admin and customer passwords sit in localStorage in plain or mock-obfuscated form.** Demo-only,
+  flagged in code; replaced wholesale by Supabase auth in Phase 6.
+- Distance is a **PIN-code lookup table**, not a maps API, so delivery pricing is approximate
+  outside the PINs listed.
 
-## 9. Deliverables already produced
+## 10. Remaining work — recommended order
+**Phases 1–5 and post-Phase-5 rounds 1–6 are complete** (see §7). Next up:
+
+1. **Founder sign-off on §8** — cheapest possible step, and it unblocks real content everywhere.
+2. **Fresh category-card images** (§8 #8), then the slide/background image set.
+3. **Phase 6 backend swaps:** Supabase (auth + tables + RLS) → point `lib/*` accessors at it;
+   Razorpay live + server-side verification; WhatsApp Business API; Supabase Storage for image
+   uploads; signed rider tokens; cookie-consent banner; hosting on Vercel.
+4. **Legal/GST/shipping** and the COMPLIANCE.md checklist.
+
+Razorpay and WhatsApp both need **Srikanth to open real third-party accounts first** — they cannot
+be "really" integrated before that exists.
+
+## 11. Deliverables already produced
 - Screenshots for founder review: `outputs/SurakshitamNaturals-Screenshots/`, one folder each for
   Desktop-Shopping-Cart / Desktop-Admin-Portal / Mobile-Shopping-Cart / Mobile-Admin-Portal.
   Regenerate all four via `node scripts/capture-all.mjs` (needs `SCREENSHOTS=1 npm run dev` +
   Playwright), or run one script standalone, e.g. `node scripts/capture-storefront-desktop.mjs`.
-  The older single `capture-screenshots.mjs` (56 shots / 12 folders) is superseded by this 4-script
-  setup and no longer maintained.
-  **Updated for round 5/6 features** — the storefront scripts now also seed a sample offer and
-  combo (and a wishlist for the customer context) and capture `/offers` (both tabs), `/wishlist`,
-  `/faqs`, `?concern=` filtering, and the homepage floating-Offers-button modal; the admin scripts
-  capture the Products page's Offers and Combos tabs. Increases the shot count in every folder.
+  Shared seed data for both storefront passes lives in `scripts/screenshot-seed.mjs`; the burnt-in
+  label is positioned by `WATERMARK_BOTTOM` in `scripts/screenshot-utils.mjs`.
+  **The screenshots are stale** — they predate round 6, so none of the new delivery, tracking,
+  ingredient-admin, partner-brand or hero work appears in them. The user runs these, not Claude.
+- `status.html` + `REGISTRY.md` in the parent folder — the founder-facing status page and the
+  developer lookup table. Regenerate both together after a round of changes.
 
-## 10. Housekeeping
+## 12. Housekeeping
 - Switch dev back to plain `npm run dev` (drop `SCREENSHOTS=1`) for normal work.
 - `outputs/_trash-old-loose-screenshots/` can be emptied.
+- `scripts/capture-screenshots.mjs` is the **superseded** single-script capture (56 shots / 12
+  folders), replaced by the 4-script setup. Dead — safe to delete.
+- **5 `scripts/*.mjs.bak` files** are edit leftovers. Safe to delete.
+- **24 files in `public/products/*.webp` (1.8 MB) are the old pre-photography renders** and are no
+  longer referenced. Awaiting a delete decision.
+- `surakshitam-backend/` and `surakshitam-docs/` are **still not git repositories** — only
+  `surakshitam-web/` is initialised, and it currently has ~92 uncommitted files.
 
 ---
 
-## 11. Tech stack — plain-language guide, alternatives & switch cost (written for a Python reader)
+## 13. Tech stack — plain-language guide, alternatives & switch cost (written for a Python reader)
 
 You don't need to become a web developer to make decisions about this project. Here's what it's
 built on, why, and what your other options are — with honest time estimates.

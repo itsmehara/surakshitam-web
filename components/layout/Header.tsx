@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { primaryNav, site } from "@/lib/site";
+import { primaryNav, site, type NavItem } from "@/lib/site";
 import { isOffersNavEnabled } from "@/lib/site-settings";
 import { useCart } from "@/lib/cart/CartContext";
 import { useWishlist } from "@/lib/wishlist/WishlistContext";
@@ -58,8 +58,29 @@ export function Header() {
     };
   }, [accountMenuOpen]);
 
-  // Close the menu whenever the route changes (a menu link was followed).
-  useEffect(() => setAccountMenuOpen(false), [pathname]);
+  // Which primary-nav dropdown is open (by label), if any.
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const navRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!openMenu) return;
+    const onPointerDown = (e: MouseEvent | TouchEvent) => {
+      if (!navRef.current?.contains(e.target as Node)) setOpenMenu(null);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpenMenu(null);
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [openMenu]);
+
+  // Close both menus whenever the route changes (a menu link was followed).
+  useEffect(() => {
+    setAccountMenuOpen(false);
+    setOpenMenu(null);
+  }, [pathname]);
 
   function handleSignOut() {
     setAccountMenuOpen(false);
@@ -85,6 +106,10 @@ export function Header() {
     }
     return pathname === path || pathname.startsWith(path + "/");
   };
+
+  /** A parent is active when it, or anything inside it, matches. */
+  const isBranchActive = (item: NavItem) =>
+    isActive(item.href) || !!item.children?.some((c) => isActive(c.href));
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -155,28 +180,112 @@ export function Header() {
 
           <Logo className="lg:mr-4" />
 
-          {/* Desktop nav */}
-          <nav className="hidden items-center gap-x-4 lg:flex xl:gap-x-6" aria-label="Primary">
+          {/* Desktop nav — `whitespace-nowrap` so a label can never break
+              mid-word if the list grows again. */}
+          <nav
+            ref={navRef}
+            className="hidden items-center gap-x-4 lg:flex xl:gap-x-6"
+            aria-label="Primary"
+          >
             {nav.map((item) => {
-              const active = isActive(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "group relative text-sm transition-colors",
-                    active ? "font-semibold text-forest" : "text-forest/70 hover:text-forest",
-                  )}
-                >
-                  {item.label}
-                  <span
+              const active = isBranchActive(item);
+
+              if (!item.children?.length) {
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
                     className={cn(
-                      "absolute -bottom-1.5 left-0 h-0.5 w-full origin-left rounded-full bg-moss transition-transform duration-300 ease-smooth",
-                      active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
+                      "group relative whitespace-nowrap text-sm transition-colors",
+                      active ? "font-semibold text-forest" : "text-forest/70 hover:text-forest",
                     )}
-                  />
-                </Link>
+                  >
+                    {item.label}
+                    <span
+                      className={cn(
+                        "absolute -bottom-1.5 left-0 h-0.5 w-full origin-left rounded-full bg-moss transition-transform duration-300 ease-smooth",
+                        active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
+                      )}
+                    />
+                  </Link>
+                );
+              }
+
+              const open = openMenu === item.label;
+              return (
+                <div
+                  key={item.href}
+                  className="relative"
+                  onMouseEnter={() => setOpenMenu(item.label)}
+                  onMouseLeave={() => setOpenMenu(null)}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenMenu(open ? null : item.label)}
+                    aria-haspopup="menu"
+                    aria-expanded={open}
+                    className={cn(
+                      "group relative inline-flex items-center gap-1 whitespace-nowrap py-1 text-sm transition-colors",
+                      active ? "font-semibold text-forest" : "text-forest/70 hover:text-forest",
+                    )}
+                  >
+                    {item.label}
+                    <ChevronDown
+                      width={13}
+                      className={cn("transition-transform duration-200", open && "rotate-180")}
+                    />
+                    <span
+                      className={cn(
+                        "absolute -bottom-0.5 left-0 h-0.5 w-full origin-left rounded-full bg-moss transition-transform duration-300 ease-smooth",
+                        active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
+                      )}
+                    />
+                  </button>
+
+                  {open && (
+                    <div
+                      role="menu"
+                      aria-label={item.label}
+                      className="absolute left-1/2 top-full z-50 w-72 -translate-x-1/2 pt-3"
+                    >
+                      <div className="overflow-hidden rounded-lg border border-forest/10 bg-cream shadow-card">
+                        {item.children.map((child) => {
+                          const childActive = isActive(child.href);
+                          return (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              role="menuitem"
+                              onClick={() => setOpenMenu(null)}
+                              aria-current={childActive ? "page" : undefined}
+                              className={cn(
+                                "block border-b border-forest/6 px-4 py-2.5 transition-colors last:border-b-0",
+                                childActive ? "bg-parchment" : "hover:bg-parchment",
+                              )}
+                            >
+                              <span
+                                className={cn(
+                                  "block text-sm",
+                                  childActive
+                                    ? "font-semibold text-moss"
+                                    : "font-medium text-forest",
+                                )}
+                              >
+                                {child.label}
+                              </span>
+                              {child.description && (
+                                <span className="mt-0.5 block text-xs text-forest/55">
+                                  {child.description}
+                                </span>
+                              )}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
               );
             })}
           </nav>
@@ -313,28 +422,55 @@ export function Header() {
               <CloseIcon />
             </button>
           </div>
-          <nav className="flex flex-col px-3 py-4" aria-label="Mobile">
+          {/* The drawer has vertical room, so nested items are listed inline
+              rather than hidden behind another tap. */}
+          <nav className="flex flex-col overflow-y-auto px-3 py-4" aria-label="Mobile">
             {nav.map((item) => {
               const active = isActive(item.href);
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "flex items-center justify-between rounded-lg px-4 py-3.5 font-serif text-lg transition-colors",
-                    active
-                      ? "bg-parchment font-semibold text-moss"
-                      : "text-forest hover:bg-parchment",
-                  )}
-                >
-                  {item.label}
-                  <ArrowRight
-                    width={18}
-                    className={cn(active ? "text-moss" : "text-moss/60")}
-                  />
-                </Link>
+                <div key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "flex items-center justify-between rounded-lg px-4 py-3.5 font-serif text-lg transition-colors",
+                      active
+                        ? "bg-parchment font-semibold text-moss"
+                        : "text-forest hover:bg-parchment",
+                    )}
+                  >
+                    {item.label}
+                    <ArrowRight width={18} className={cn(active ? "text-moss" : "text-moss/60")} />
+                  </Link>
+
+                  {item.children?.length ? (
+                    <div className="mb-1 ml-4 border-l border-forest/10 pl-3">
+                      {item.children
+                        // "All Products" is what the parent link already does.
+                        .filter((child) => child.href !== item.href)
+                        .map((child) => {
+                          const childActive = isActive(child.href);
+                          return (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              onClick={() => setOpen(false)}
+                              aria-current={childActive ? "page" : undefined}
+                              className={cn(
+                                "block rounded-lg px-3 py-2.5 text-sm transition-colors",
+                                childActive
+                                  ? "font-semibold text-moss"
+                                  : "text-forest/75 hover:bg-parchment hover:text-forest",
+                              )}
+                            >
+                              {child.label}
+                            </Link>
+                          );
+                        })}
+                    </div>
+                  ) : null}
+                </div>
               );
             })}
           </nav>

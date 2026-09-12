@@ -17,11 +17,18 @@ import { NotFoundView } from "@/components/ui/NotFoundView";
 import { MenuIcon, CloseIcon, UserIcon } from "@/components/icons";
 import { cn } from "@/lib/cn";
 
-const NAV = [
+/**
+ * `alsoMatches` covers routes that belong to a nav section but don't live under
+ * its path. The ingredient library is a tab inside Products, yet its add/edit
+ * forms are top-level routes (`/studio/ingredients/...`) — without this, Products
+ * silently un-highlights the moment you open one, and the header stops telling
+ * you where you are.
+ */
+const NAV: { label: string; href: string; alsoMatches?: string[] }[] = [
   { label: "Dashboard", href: ADMIN_BASE },
   { label: "Orders", href: `${ADMIN_BASE}/orders` },
   { label: "Packing", href: `${ADMIN_BASE}/packing` },
-  { label: "Products", href: `${ADMIN_BASE}/products` },
+  { label: "Products", href: `${ADMIN_BASE}/products`, alsoMatches: [`${ADMIN_BASE}/ingredients`] },
   { label: "Reports", href: `${ADMIN_BASE}/reports` },
   { label: "Team", href: `${ADMIN_BASE}/team` },
   { label: "Activity", href: `${ADMIN_BASE}/activity` },
@@ -61,6 +68,13 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, customer, authed, pathname]);
+
+  /** Which nav section the current route belongs to. */
+  const isNavActive = (item: (typeof NAV)[number]) =>
+    item.href === ADMIN_BASE
+      ? pathname === ADMIN_BASE
+      : pathname.startsWith(item.href) ||
+        (item.alsoMatches ?? []).some((prefix) => pathname.startsWith(prefix));
 
   // Close the mobile drawer / account dropdown on navigation.
   useEffect(() => {
@@ -108,7 +122,7 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
             {/* Desktop nav */}
             <nav className="hidden items-center gap-1 lg:flex" aria-label="Admin">
               {NAV.map((n) => {
-                const active = n.href === ADMIN_BASE ? pathname === ADMIN_BASE : pathname.startsWith(n.href);
+                const active = isNavActive(n);
                 return (
                   <Link
                     key={n.href}
@@ -190,7 +204,7 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
             </div>
             <nav className="flex flex-col px-3 py-4" aria-label="Admin mobile">
               {NAV.map((n) => {
-                const active = n.href === ADMIN_BASE ? pathname === ADMIN_BASE : pathname.startsWith(n.href);
+                const active = isNavActive(n);
                 return (
                   <Link
                     key={n.href}

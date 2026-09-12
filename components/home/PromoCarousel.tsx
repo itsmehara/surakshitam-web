@@ -1,18 +1,11 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import {
-  getHomePromotions,
-  promoCardContent,
-  PROMO_TONE_BG,
-  PROMO_TONE_TEXT,
-  type PromoSlide,
-} from "@/lib/promotions";
+import { getHomePromotions, type PromoSlide } from "@/lib/promotions";
 import { isOffersNavEnabled } from "@/lib/site-settings";
+import { PromoTile } from "@/components/ui/PromoTile";
 import { cn } from "@/lib/cn";
-import { ChevronDown, PauseIcon, PlayIconSolid, ArrowRight } from "@/components/icons";
+import { ChevronDown, PauseIcon, PlayIconSolid } from "@/components/icons";
 
 const HOLD_MS = 4000; // pause between moves
 const MOVE_MS = 1800; // how long the slide itself takes to glide across
@@ -149,55 +142,15 @@ export function PromoCarousel() {
                 transition: transitionOn ? `transform ${MOVE_MS}ms cubic-bezier(0.65,0,0.35,1)` : "none",
               }}
             >
-              {tripled.map((slide, i) => {
-                const c = promoCardContent(slide);
-                return (
-                  <div key={`${slide.id}-${i}`} className="shrink-0 px-1 sm:px-1.5" style={{ width: `${100 / tripled.length}%` }}>
-                    <Link
-                      href={c.href}
-                      className={cn(
-                        "flex h-32 items-stretch gap-0 overflow-hidden rounded-lg border-2 shadow-soft transition-transform hover:-translate-y-0.5 sm:h-40",
-                        PROMO_TONE_BG[c.tone],
-                      )}
-                    >
-                      {/* Image fills its whole column edge-to-edge — no dead space around it. */}
-                      <div className="relative h-full w-[42%] shrink-0 overflow-hidden bg-white/70">
-                        <Image
-                          src={c.image}
-                          alt=""
-                          fill
-                          sizes="160px"
-                          className="scale-[1.1] object-cover object-[50%_55%]"
-                        />
-                      </div>
-
-                      {/* Text column also stretches the full card height; justify-between
-                          spreads the three lines edge-to-edge instead of clumping at the top
-                          and leaving a blank strip below. */}
-                      <div className="relative flex min-w-0 flex-1 flex-col justify-between p-2.5 sm:p-3">
-                        <p className={cn("text-[0.62rem] font-bold uppercase tracking-wide", PROMO_TONE_TEXT[c.tone])}>
-                          {c.eyebrow}
-                        </p>
-                        <p
-                          className={cn(
-                            "text-2xl font-extrabold leading-[1.05] sm:text-3xl",
-                            PROMO_TONE_TEXT[c.tone],
-                          )}
-                        >
-                          {c.big}
-                        </p>
-                        <p className="line-clamp-2 pr-4 text-xs font-bold leading-snug text-forest/80 sm:text-sm">
-                          {c.title}
-                        </p>
-                        <ArrowRight
-                          width={13}
-                          className="absolute bottom-2.5 right-2.5 shrink-0 text-forest/40 sm:bottom-3 sm:right-3"
-                        />
-                      </div>
-                    </Link>
-                  </div>
-                );
-              })}
+              {tripled.map((slide, i) => (
+                <div
+                  key={`${slide.id}-${i}`}
+                  className="shrink-0 px-1 sm:px-1.5"
+                  style={{ width: `${100 / tripled.length}%` }}
+                >
+                  <PromoTile slide={slide} heightClass="h-44 sm:h-36" />
+                </div>
+              ))}
             </div>
           </div>
 

@@ -159,7 +159,7 @@ export default function OrderPage({ params }: { params: { orderNumber: string } 
           {order.items.map((it) => (
             <li key={it.productId} className="flex items-center gap-3 py-3">
               <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-forest/8 bg-cream">
-                <Image src={it.image} alt={it.nameSnapshot} fill sizes="56px" className="scale-[1.12] object-cover object-[50%_55%]" />
+                <Image src={it.image} alt={it.nameSnapshot} fill sizes="56px" className="object-cover" />
               </div>
               <div className="flex-1 text-sm">
                 <Link href={`/product/${it.slug}`} className="font-medium text-forest hover:text-moss">

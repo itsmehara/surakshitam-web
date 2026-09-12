@@ -44,8 +44,16 @@ const homeCareShelves = [
   { slug: "general", name: "General Home Care" },
 ] as const;
 
+/**
+ * Slugs that have been renamed. Old links (bookmarks, shared URLs, the odd
+ * WhatsApp forward) keep working instead of landing on an empty shelf.
+ */
+const CATEGORY_ALIASES: Record<string, string> = { pantry: "partner-brands" };
+
 export default function ShopPage({ searchParams }: { searchParams: SearchParams }) {
-  const activeCategory = searchParams.category;
+  const activeCategory = searchParams.category
+    ? CATEGORY_ALIASES[searchParams.category] ?? searchParams.category
+    : undefined;
   const activeSort = searchParams.sort ?? "featured";
   const activeShelf = activeCategory === "home-care" ? searchParams.shelf : undefined;
 
@@ -98,11 +106,11 @@ export default function ShopPage({ searchParams }: { searchParams: SearchParams 
           <h1 className="font-serif text-lg font-semibold text-forest">{heading}</h1>
           <p className="text-xs text-forest/55">{list.length} products · demo pricing</p>
         </div>
-        {activeCategory === "pantry" && (
+        {activeCategory === "partner-brands" && (
           <div className="container pb-2.5">
             <p className="text-xs leading-relaxed text-forest/60">
-              Pantry &amp; Foods are made by other small brands — we stock and deliver them, we don&apos;t
-              make them. Each pack is listed under its own brand name.
+              Partner Brands are made by other small companies — we stock and deliver them, we
+              don&apos;t make them. Each product is listed under its own brand name.
             </p>
           </div>
         )}

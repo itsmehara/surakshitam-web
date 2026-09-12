@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   getAdminProducts,
@@ -15,25 +16,40 @@ import { formatPrice } from "@/lib/format";
 import type { Product } from "@/lib/types";
 import { AdminOffers } from "./AdminOffers";
 import { AdminCombos } from "./AdminCombos";
+import { AdminIngredients } from "./AdminIngredients";
 
 const LOW_STOCK = 10;
 type Filter = "all" | "live" | "hidden";
-type Tab = "catalog" | "offers" | "combos";
+type Tab = "catalog" | "offers" | "combos" | "ingredients";
 
-const TAB_LABEL: Record<Tab, string> = { catalog: "Catalog", offers: "Offers", combos: "Combos" };
+const TABS: Tab[] = ["catalog", "offers", "combos", "ingredients"];
+const TAB_LABEL: Record<Tab, string> = {
+  catalog: "Catalog",
+  offers: "Offers",
+  combos: "Combos",
+  ingredients: "Ingredients",
+};
 const TAB_HEADING: Record<Tab, string> = {
   catalog: "Products & inventory",
   offers: "Offers",
   combos: "Combos",
+  ingredients: "Ingredient library",
 };
 const TAB_SUBTITLE: Record<Tab, string> = {
   catalog: "Add products, edit details & images, and keep stock up to date.",
   offers: "Discount codes customers can apply at checkout.",
   combos: "Bundle products together at a special price.",
+  ingredients: "Add, edit and group the ingredients shown on the public Ingredients page.",
 };
 
 export function AdminProducts() {
-  const [tab, setTab] = useState<Tab>("catalog");
+  // `?tab=` makes each tab linkable — the ingredient form needs somewhere to
+  // send you back to, and it should be the tab you left from.
+  const searchParams = useSearchParams();
+  const requestedTab = searchParams.get("tab") as Tab | null;
+  const [tab, setTab] = useState<Tab>(
+    requestedTab && TABS.includes(requestedTab) ? requestedTab : "catalog",
+  );
   const [items, setItems] = useState<Product[]>([]);
   const [hiddenIds, setHiddenIds] = useState<string[]>([]);
   const [query, setQuery] = useState("");
@@ -102,10 +118,18 @@ export function AdminProducts() {
             + Add product
           </Link>
         )}
+        {tab === "ingredients" && (
+          <Link
+            href="/studio/ingredients/new"
+            className="rounded-full bg-forest px-5 py-2.5 text-sm font-medium text-cream hover:bg-ink"
+          >
+            + Add ingredient
+          </Link>
+        )}
       </div>
 
       <div className="mt-5 inline-flex rounded-full border border-forest/15 bg-white/60 p-1">
-        {(["catalog", "offers", "combos"] as Tab[]).map((t) => (
+        {TABS.map((t) => (
           <button
             key={t}
             type="button"
@@ -126,6 +150,10 @@ export function AdminProducts() {
       ) : tab === "combos" ? (
         <div className="mt-6">
           <AdminCombos />
+        </div>
+      ) : tab === "ingredients" ? (
+        <div className="mt-6">
+          <AdminIngredients />
         </div>
       ) : (
         <>

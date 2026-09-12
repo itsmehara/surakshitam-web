@@ -190,6 +190,44 @@ export async function seedSampleActivity(page, base) {
   await settle(page);
 }
 
+/**
+ * Opens a menu/dropdown, shoots it, then closes it again.
+ *
+ * Menu-open states never appear in a plain page screenshot — you only see them
+ * by interacting — so they need capturing deliberately. Skips with a warning
+ * rather than throwing if the trigger isn't on the page, so one missing control
+ * can't abort a whole run.
+ */
+export async function openMenuAndShot(page, selector, shot, name, waitMs = 450) {
+  const trigger = await page.$(selector);
+  if (!trigger) {
+    log(`  ⚠ nothing matched ${selector} — skipping "${name}"`);
+    return false;
+  }
+  await trigger.click().catch(() => {});
+  await page.waitForTimeout(waitMs);
+  await shot(page, name);
+  await page.keyboard.press("Escape").catch(() => {});
+  await page.waitForTimeout(200);
+  return true;
+}
+
+/**
+ * Types a PIN code into the cart's delivery check and waits for the quote to
+ * re-render — used to capture both a nearby drop and one past the 15 km mark,
+ * where the distance charge kicks in.
+ */
+export async function fillPincode(page, value) {
+  const input = await page.$('input[aria-label="Delivery PIN code"]');
+  if (!input) {
+    log(`  ⚠ no delivery PIN field on this page — skipping PIN ${value}`);
+    return false;
+  }
+  await input.fill(value).catch(() => {});
+  await page.waitForTimeout(700);
+  return true;
+}
+
 export async function clickText(page, selector, re) {
   for (const el of await page.$$(selector)) {
     const text = (await el.innerText()).trim();
@@ -201,15 +239,31 @@ export async function clickText(page, selector, re) {
   return false;
 }
 
-/** Adds/updates a fixed watermark box (bottom-right) in the live page, labelled with `name`. */
+/**
+ * How far the label sits above the bottom edge: 12% of the viewport height plus
+ * the original 20px inset.
+ *
+ * It used to sit flush at the bottom, where it was the first thing lost as soon
+ * as the image was viewed at anything less than full size — a PDF page scaled to
+ * fit, a phone gallery, a thumbnail. Since the whole point of the label is to
+ * tell a non-technical reader which feature they're looking at, it has to
+ * survive exactly those conditions. Lifting it clear of the bottom edge keeps it
+ * inside the part of the frame people actually see.
+ *
+ * Bottom-LEFT is deliberate: the storefront's floating WhatsApp/Instagram/Offers
+ * buttons live bottom-right, so this corner stays clear at any height.
+ */
+export const WATERMARK_BOTTOM = "calc(12vh + 20px)";
+
+/** Adds/updates a fixed watermark box (bottom-left) in the live page, labelled with `name`. */
 async function paintWatermark(page, name) {
-  await page.evaluate((label) => {
+  await page.evaluate(({ label, bottom }) => {
     const old = document.getElementById("__sn_watermark__");
     if (old) old.remove();
     const box = document.createElement("div");
     box.id = "__sn_watermark__";
     box.style.cssText = [
-      "position:fixed", "left:20px", "bottom:20px", "z-index:2147483647",
+      "position:fixed", "left:20px", `bottom:${bottom}`, "z-index:2147483647",
       "background:rgba(255,255,255,0.62)", "border:2px solid #0c140c",
       "border-radius:14px", "padding:10px 16px",
       "font-family:Arial,Helvetica,sans-serif", "font-weight:900",
@@ -219,7 +273,7 @@ async function paintWatermark(page, name) {
     ].join(";");
     box.textContent = label.split("-").join("\n");
     document.body.appendChild(box);
-  }, name);
+  }, { label: name, bottom: WATERMARK_BOTTOM });
 }
 
 async function removeWatermark(page) {

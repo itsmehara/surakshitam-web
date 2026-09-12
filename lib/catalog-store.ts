@@ -98,6 +98,18 @@ function write(state: CatalogState) {
   }
 }
 
+/**
+ * Category slugs that have been renamed. Products saved by an admin before the
+ * rename keep their old slug in localStorage, so normalise on read rather than
+ * leaving them stranded in a category that no longer exists.
+ */
+const CATEGORY_MIGRATIONS: Record<string, CategorySlug> = { pantry: "partner-brands" };
+
+function migrateProduct(product: Product): Product {
+  const renamed = CATEGORY_MIGRATIONS[product.category as string];
+  return renamed ? { ...product, category: renamed } : product;
+}
+
 /** True if the id is a brand-new admin product (not part of the seed catalog). */
 export function isCustomProduct(id: string): boolean {
   return !seedProducts.some((p) => p.id === id);
@@ -112,7 +124,7 @@ export function getAdminProducts(opts?: { includeHidden?: boolean }): Product[] 
   const { overrides, hidden } = read();
   const map = new Map<string, Product>();
   for (const p of seedProducts) map.set(p.id, p);
-  for (const [id, p] of Object.entries(overrides)) map.set(id, p);
+  for (const [id, p] of Object.entries(overrides)) map.set(id, migrateProduct(p));
   if (!opts?.includeHidden) for (const id of hidden) map.delete(id);
   return [...map.values()];
 }

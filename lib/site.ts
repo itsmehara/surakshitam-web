@@ -1,3 +1,4 @@
+import { categories } from "./catalog";
 import type { CategorySlug } from "./types";
 
 /**
@@ -33,19 +34,56 @@ export const site = {
   },
 } as const;
 
+/**
+ * Short menu blurbs, kept separate from the category descriptions in
+ * `catalog.ts` — those are written for the homepage cards and are far too long
+ * for a dropdown row.
+ */
+export const categoryBlurbs: Partial<Record<CategorySlug, string>> = {
+  "home-care": "Bio-enzyme & everyday cleaning",
+  "skin-care": "Soaps, cleansers & creams",
+  "hair-care": "Shampoo, oils, packs & serums",
+  "partner-brands": "Foods & goods from other makers",
+};
+
 export type NavItem = {
   label: string;
   href: string;
+  /** One line shown beside the label inside a dropdown. Ignored at top level. */
+  description?: string;
+  /** Nested items — renders as a dropdown on desktop, indented in the drawer. */
+  children?: NavItem[];
 };
 
-/** Primary navigation kept deliberately simple (per IA spec). */
+/**
+ * Primary navigation.
+ *
+ * The category shelves live *inside* Shop rather than beside it. Flat category
+ * links read fine with three of them and broke the header at four ("Partner
+ * Brands" pushed the row past the 1200px container at every screen width, so
+ * labels wrapped mid-word). Nesting them fixes that permanently: the shelf list
+ * is generated from `categories`, so adding a fifth or sixth costs the header
+ * nothing at all.
+ *
+ * What stays at the top level is what isn't a shelf — the commercial page
+ * (Offers) and the three brand pages people actually navigate to directly.
+ */
 export const primaryNav: NavItem[] = [
-  { label: "Shop", href: "/shop" },
+  {
+    label: "Shop",
+    href: "/shop",
+    children: [
+      { label: "All Products", href: "/shop", description: "The full range" },
+      // Built from the catalogue so a new shelf appears here on its own.
+      ...categories.map((c) => ({
+        label: c.name,
+        href: `/shop?category=${c.slug}`,
+        description: categoryBlurbs[c.slug] ?? "",
+      })),
+      { label: "Best Sellers", href: "/shop?sort=best-selling", description: "What people reorder" },
+    ],
+  },
   { label: "Offers", href: "/offers" },
-  { label: "Home Care", href: "/shop?category=home-care" },
-  { label: "Skin Care", href: "/shop?category=skin-care" },
-  { label: "Hair Care", href: "/shop?category=hair-care" },
-  { label: "Pantry", href: "/shop?category=pantry" },
   { label: "Our Story", href: "/our-story" },
   { label: "Ingredients", href: "/ingredients" },
   { label: "Learn", href: "/learn" },
@@ -95,7 +133,7 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
       { label: "Home Care", href: "/shop?category=home-care" },
       { label: "Skin Care", href: "/shop?category=skin-care" },
       { label: "Hair Care", href: "/shop?category=hair-care" },
-      { label: "Pantry & Foods", href: "/shop?category=pantry" },
+      { label: "Partner Brands", href: "/shop?category=partner-brands" },
       { label: "Best Sellers", href: "/shop?sort=best-selling" },
     ],
   },

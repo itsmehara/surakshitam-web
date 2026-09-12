@@ -35,7 +35,7 @@ const categoryLabel: Record<string, string> = {
   "home-care": "Home Care",
   "skin-care": "Skin Care",
   "hair-care": "Hair Care",
-  pantry: "Pantry & Foods",
+  "partner-brands": "Partner Brands",
 };
 
 export default function ProductPage({ params }: { params: { slug: string } }) {

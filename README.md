@@ -53,7 +53,18 @@ node scripts/capture-admin-mobile.mjs
 ```
 
 Every image is numbered, framed, and watermarked (`001-<section>-<feature>.png`, ...) — the
-watermark text always matches the filename. Shared logic lives in `scripts/screenshot-utils.mjs`.
+watermark text always matches the filename. Shared logic lives in `scripts/screenshot-utils.mjs`,
+and the storefront demo data (cart, orders, offers, wishlist) in `scripts/screenshot-seed.mjs` —
+one copy shared by both storefront passes, so desktop and mobile can't drift apart.
+
+Interaction-only states are captured deliberately, since they never appear in a plain page
+screenshot: the **Shop drop-down** and the **account drop-down** on desktop, the **slide-out
+drawer** on mobile, and the admin **dispatch form** in both bike and courier modes.
+
+Two of the seeded values are computed at capture time rather than hard-coded, because the screens
+are time-sensitive: the bike order's `dispatchedAt` (so the ETA is mid-countdown) and the rider's
+location ping (so tracking reads as **live** rather than stale — anything over 90s old is treated
+as an estimate; see `lib/rider-tracking.ts`).
 The watermark is drawn as a real DOM element in the browser before each screenshot (not composited
 afterwards with sharp/SVG) — some prebuilt sharp/libvips binaries silently drop SVG `<text>` when
 fontconfig isn't linked in, so text is rendered by Chromium itself instead, which always works. The

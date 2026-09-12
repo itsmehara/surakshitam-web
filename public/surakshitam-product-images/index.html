@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Surakshitam Naturals Complete Product Image Gallery</title>
+  <style>
+    :root { color-scheme: light; font-family: Inter, system-ui, sans-serif; background:#f5f1e7; color:#173c29; }
+    body { margin:0; padding:40px; }
+    header { max-width:900px; margin:0 auto 36px; }
+    h1 { font-family:Georgia,serif; font-weight:500; margin:0 0 8px; }
+    p { color:#536356; line-height:1.6; }
+    main { max-width:1400px; margin:auto; display:grid; gap:34px; }
+    section { background:#fffdf8; border:1px solid #dfe5d9; border-radius:20px; padding:22px; box-shadow:0 14px 40px #23452a12; }
+    h2 { margin:0 0 16px; font:500 24px Georgia,serif; }
+    .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+    figure { margin:0; }
+    img { width:100%; display:block; border-radius:14px; background:#f7f2e7; }
+    figcaption { margin-top:9px; font-size:13px; color:#647067; overflow-wrap:anywhere; }
+    @media (max-width:760px) { body{padding:18px} .grid{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <header><h1>Surakshitam Naturals product gallery</h1><p>34 products · 78 website-ready WebP images · partner brands excluded</p></header>
+  <main id="gallery"></main>
+  <script>
+    fetch('product-image-manifest.json').then(r=>r.json()).then(data=>{
+      const main=document.querySelector('#gallery');
+      data.products.forEach(product=>{
+        const section=document.createElement('section');
+        section.innerHTML=`<h2>${product.name}</h2><div class="grid">${product.images.map((src,i)=>{const local=src.replace('/surakshitam-product-images/','');return `<figure><img src="${local}" alt="${product.name} gallery image ${i+1}"><figcaption>${local.split('/').pop()}</figcaption></figure>`}).join('')}</div>`;
+        main.append(section);
+      });
+    });
+  </script>
+</body>
+</html>

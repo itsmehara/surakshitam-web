@@ -3,23 +3,33 @@
  * Produces ./SurakshitamNaturals-Screenshots/Desktop-Shopping-Cart/<NNN>-<section>-<feature>.png
  *
  * Feature list captured:
+ *   Menus           — the Shop drop-down open (all category shelves), and the account
+ *                      drop-down open (where Log out now lives). Both are states you only
+ *                      see by interacting, so they need deliberate shots.
  *   Home            — 12 shots, scrolled top-to-bottom (hero, featured, story teaser,
  *                      ingredients teaser, testimonials, footer, ...) — home has a lot of
  *                      scroll-reveal sections, a couple of shots would miss most of it.
- *   Shop            — catalogue grid, category filter (home-care), product detail,
- *                      ingredients/usage detail (4 shots)
+ *   Shop            — catalogue grid, category filter (home-care), bio-enzyme shelf,
+ *                      product detail, ingredients/usage detail
  *   Skin/Hair care  — category views
- *   Offers/Combos   — /offers page, both tabs; wishlist page; FAQs; shop-by-concern filter;
- *                      the floating "Offers" button's "see all" modal on the homepage
+ *   Partner Brands  — the other-brands shelf, plus one partner product page (brand shown
+ *                      instead of ours, neutral pack image)
+ *   Offers/Combos   — /offers page, both tabs (incl. the always-on free-delivery card);
+ *                      wishlist page; FAQs; shop-by-concern filter; the floating "Offers"
+ *                      button's "see all" modal on the homepage
  *   Our story       — 7 shots, scrolled top-to-bottom
  *   Ingredients     — 6 shots, scrolled top-to-bottom
  *   Learn           — article index (3, scrolled), single article (2, scrolled)
- *   Search          — search results
+ *   Search          — product search, and a search that hits a partner brand
  *   Contact         — contact page
  *   Account         — login (OTP), login (password), account overview, order history,
  *                     edit-profile form
- *   Cart & checkout — cart page, checkout contact, address, review, mock payment modal,
- *                     order confirmation, order tracking
+ *   Cart & checkout — cart with parcel weight, the PIN-code delivery check (near and far,
+ *                     so the 15 km distance charge is visible), a cart over ₹699 with free
+ *                     delivery unlocked, checkout contact/address/review, mock payment
+ *                     modal, order confirmation with the delivery breakdown
+ *   Delivery        — order tracking for a bike delivery: rider details, call button and
+ *                     the live map; plus the rider's own location-sharing sheet
  *   Policies        — shipping policy, returns policy
  *
  * Every page gets a long settle window (15s + image-load wait) before its first
@@ -35,37 +45,28 @@
  */
 import { chromium } from "playwright";
 import { fileURLToPath } from "url";
-import { mkdir, gotoAndWait, clickText, makeShotter, gallery, assertServerUp, log } from "./screenshot-utils.mjs";
+import {
+  mkdir,
+  gotoAndWait,
+  clickText,
+  makeShotter,
+  gallery,
+  assertServerUp,
+  openMenuAndShot,
+  fillPincode,
+  log,
+} from "./screenshot-utils.mjs";
+import {
+  storefrontSeedScript,
+  CART_FREE_DELIVERY,
+  ORDER_BIKE,
+  ORDER_COURIER,
+} from "./screenshot-seed.mjs";
 
 const BASE = process.env.BASE || "http://localhost:3000";
 const ROOT = "./SurakshitamNaturals-Screenshots/Desktop-Shopping-Cart";
 const VIEWPORT = { width: 1440, height: 960 };
 const PAGE_WAIT = 15000; // every storefront page gets this long to settle before its first shot
-
-const CART = [{ id: "p-shea-butter-soap", qty: 1 }, { id: "p-hair-oil", qty: 2 }, { id: "p-dishwash-liquid", qty: 1 }];
-const PROFILE = { name: "Bhavesh Allapati", mobile: "+91 98491 16181", email: "srikanth.alapati@yahoo.com", address: "Nagole, Hyderabad, Telangana – 500068" };
-const AUTH = { id: "9849116181", mobile: "+91 98491 16181", name: "Bhavesh Allapati", email: "srikanth.alapati@yahoo.com", method: "otp", loggedInAt: "2026-08-16T11:00:00.000Z" };
-const ADDR = { fullName: "Bhavesh Allapati", phone: "9849116181", altPhone: "", line1: "Nagole", line2: "", landmark: "", city: "Hyderabad", state: "Telangana", postalCode: "500068", type: "Home" };
-const ORDER = [{ orderNumber: "SURK-2026-482913", createdAt: "2026-08-16T11:13:09.373Z", userId: "9849116181", items: [{ productId: "p-shea-butter-soap", slug: "shea-butter-soap", nameSnapshot: "Shea Butter Soap", skuSnapshot: "SN-SC-SHS-100", priceSnapshot: 14900, qty: 1, image: "/products/shea-butter-soap.webp", size: "100 g" }, { productId: "p-hair-oil", slug: "hair-oil", nameSnapshot: "Hair Oil", skuSnapshot: "SN-HR-OIL-100", priceSnapshot: 24900, qty: 2, image: "/products/hair-oil.webp", size: "100 ml" }], subtotal: 64700, shipping: 0, total: 64700, address: { fullName: "Bhavesh Allapati", phone: "9849116181", line1: "Nagole", city: "Hyderabad", state: "Telangana", postalCode: "500068", type: "Home" }, paymentStatus: "PAID", paymentId: "pay_demo_a1b2c3d4e5", fulfillmentStatus: "PACKED", courier: "Delhivery", trackingNumber: "DL4821093765" }];
-// Post-Phase-5 round 5/6 features: offers, combos, wishlist — seeded so /offers, the homepage
-// promo carousel/banner/floating button, and /wishlist all show real content instead of empty states.
-const OFFERS = [{ id: "off_demo1", code: "WELCOME10", description: "10% off your first order", type: "percent", value: 10, startDate: "2026-08-01", endDate: "2026-12-31", enabled: true }];
-const BUNDLES = [{ id: "bundle_demo1", slug: "daily-essentials-kit", name: "Daily Essentials Kit", description: "Our shea butter soap, hair oil and dishwash liquid, together at a special price.", image: "", productIds: ["p-shea-butter-soap", "p-hair-oil", "p-dishwash-liquid"], price: 55000, enabled: true }];
-const WISHLIST = ["p-rose-face-wash", "p-hair-serum"];
-
-function seedScript({ customer = false } = {}) {
-  return `try{
-    localStorage.setItem('sn-cart-v1', ${JSON.stringify(JSON.stringify(CART))});
-    localStorage.setItem('sn-profile-v1', ${JSON.stringify(JSON.stringify(PROFILE))});
-    localStorage.setItem('sn-address-v1', ${JSON.stringify(JSON.stringify(ADDR))});
-    localStorage.setItem('sn-orders-v1', ${JSON.stringify(JSON.stringify(ORDER))});
-    localStorage.setItem('sn-offers-v1', ${JSON.stringify(JSON.stringify(OFFERS))});
-    localStorage.setItem('sn-bundles-v1', ${JSON.stringify(JSON.stringify(BUNDLES))});
-    localStorage.setItem('sn-wishlist-v1', ${JSON.stringify(JSON.stringify(WISHLIST))});
-    localStorage.setItem('sn-visitor-v1', 'v_demo12ab');
-    ${customer ? `localStorage.setItem('sn-auth-v1', ${JSON.stringify(JSON.stringify(AUTH))});` : `localStorage.removeItem('sn-auth-v1');`}
-  }catch(e){}`;
-}
 
 export async function run(browser) {
   await assertServerUp(browser, BASE);
@@ -73,12 +74,24 @@ export async function run(browser) {
   const shot = makeShotter(ROOT);
 
   const custCtx = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 2 });
-  await custCtx.addInitScript(seedScript({ customer: true }));
+  await custCtx.addInitScript(storefrontSeedScript({ customer: true }));
   const cp = await custCtx.newPage();
 
   const guestCtx = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 2 });
-  await guestCtx.addInitScript(seedScript({ customer: false }));
+  await guestCtx.addInitScript(storefrontSeedScript({ customer: false }));
   const gp = await guestCtx.newPage();
+
+  // A third context purely for the "over ₹699" cart. The seed re-runs on every
+  // navigation, so a bigger cart can't just be written mid-run — it would be
+  // overwritten by the next page load.
+  const bigCartCtx = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 2 });
+  await bigCartCtx.addInitScript(storefrontSeedScript({ customer: true, cart: CART_FREE_DELIVERY }));
+  const bp = await bigCartCtx.newPage();
+
+  log("menus — shop & account drop-downs");
+  await gotoAndWait(cp, BASE, "/", PAGE_WAIT);
+  await openMenuAndShot(cp, 'nav[aria-label="Primary"] button[aria-haspopup="menu"]', shot, "menu-shop-dropdown");
+  await openMenuAndShot(cp, 'button[aria-label^="Account menu"]', shot, "menu-account-dropdown");
 
   log("home (12 shots, scrolled)");
   await gallery(cp, BASE, "/", shot, "home", 12, { waitAfterLoad: PAGE_WAIT });
@@ -88,6 +101,8 @@ export async function run(browser) {
   await shot(cp, "shop-catalogue-grid");
   await gotoAndWait(cp, BASE, "/shop?category=home-care", PAGE_WAIT);
   await shot(cp, "shop-category-filter");
+  await gotoAndWait(cp, BASE, "/shop?category=home-care&shelf=bio-enzyme", PAGE_WAIT);
+  await shot(cp, "shop-home-care-bio-enzyme");
   await gotoAndWait(cp, BASE, "/product/shea-butter-soap", PAGE_WAIT);
   await shot(cp, "shop-product-detail");
   await cp.evaluate(() => window.scrollTo(0, 900));
@@ -99,6 +114,12 @@ export async function run(browser) {
   await shot(cp, "skincare-category");
   await gotoAndWait(cp, BASE, "/shop?category=hair-care", PAGE_WAIT);
   await shot(cp, "haircare-category");
+
+  log("partner brands");
+  await gotoAndWait(cp, BASE, "/shop?category=partner-brands", PAGE_WAIT);
+  await shot(cp, "partner-brands-category");
+  await gotoAndWait(cp, BASE, "/product/homemade-wheat-noodles", PAGE_WAIT);
+  await shot(cp, "partner-brands-product-detail");
 
   log("offers & combos");
   await gotoAndWait(cp, BASE, "/offers", PAGE_WAIT);
@@ -139,6 +160,8 @@ export async function run(browser) {
   log("search");
   await gotoAndWait(cp, BASE, "/search?q=soap", PAGE_WAIT);
   await shot(cp, "search-results");
+  await gotoAndWait(cp, BASE, "/search?q=noodles", PAGE_WAIT);
+  await shot(cp, "search-partner-brand");
 
   log("account");
   await gotoAndWait(gp, BASE, "/login?next=/account", PAGE_WAIT);
@@ -159,6 +182,13 @@ export async function run(browser) {
   log("cart & checkout");
   await gotoAndWait(cp, BASE, "/cart", PAGE_WAIT);
   await shot(cp, "cart-page");
+  // A PIN past the 15 km radius, so the distance charge is actually visible.
+  await fillPincode(cp, "500049");
+  await shot(cp, "cart-delivery-distance-charge");
+
+  log("cart — free delivery unlocked (over ₹699)");
+  await gotoAndWait(bp, BASE, "/cart", PAGE_WAIT);
+  await shot(bp, "cart-free-delivery-unlocked");
   await gotoAndWait(cp, BASE, "/checkout", PAGE_WAIT);
   await shot(cp, "checkout-contact");
   await cp.evaluate(() => document.querySelectorAll("input").forEach((i) => { if (!i.value) { if (i.type === "email") i.value = "bhavesh@example.com"; else if (i.type === "tel") i.value = "9849116181"; } }));
@@ -173,10 +203,28 @@ export async function run(browser) {
   await clickText(cp, "button", /pay .*secur|pay ₹/i);
   await cp.waitForTimeout(1200);
   await shot(cp, "checkout-payment-modal");
-  await gotoAndWait(cp, BASE, "/order/SURK-2026-482913", PAGE_WAIT);
+  await gotoAndWait(cp, BASE, `/order/${ORDER_COURIER}`, PAGE_WAIT);
   await shot(cp, "checkout-order-confirmation");
+  await cp.evaluate(() => window.scrollTo(0, 620));
+  await cp.waitForTimeout(600);
+  await shot(cp, "checkout-order-delivery-breakdown");
+
+  log("delivery tracking — bike, rider & live map");
+  // The tracker prefills the most recent order but only renders it after the
+  // form is submitted, so the shot has to click Track first.
   await gotoAndWait(cp, BASE, "/track-order", PAGE_WAIT);
-  await shot(cp, "checkout-order-tracking");
+  await clickText(cp, "button", /^track$/i);
+  await cp.waitForTimeout(1500);
+  await shot(cp, "tracking-bike-rider-card");
+  await cp.evaluate(() => window.scrollTo(0, 760));
+  await cp.waitForTimeout(800);
+  await shot(cp, "tracking-live-map");
+  await gotoAndWait(cp, BASE, `/order/${ORDER_BIKE}`, PAGE_WAIT);
+  await shot(cp, "tracking-order-with-rider");
+
+  log("rider location sheet");
+  await gotoAndWait(cp, BASE, `/rider/${ORDER_BIKE}`, PAGE_WAIT);
+  await shot(cp, "delivery-rider-sheet");
 
   log("contact");
   await gotoAndWait(cp, BASE, "/contact", PAGE_WAIT);
@@ -190,6 +238,7 @@ export async function run(browser) {
 
   await custCtx.close();
   await guestCtx.close();
+  await bigCartCtx.close();
   log("DONE → " + ROOT);
 }
 

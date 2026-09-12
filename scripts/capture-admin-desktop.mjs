@@ -2,6 +2,12 @@
  * Surakshitam Naturals — admin ("Studio") portal screenshots, DESKTOP.
  * Produces ./SurakshitamNaturals-Screenshots/Desktop-Admin-Portal/<NNN>-<section>-<feature>.png
  *
+ * Covers: sign-in, the account menu, dashboard, orders (incl. the dispatch form in both
+ * bike and courier modes, with rider name/mobile/vehicle), order detail, packing,
+ * products (list, hidden filter, edit/add forms, the home-care type selector and the
+ * brand-partner toggle), the Offers/Combos/Ingredients tabs, the ingredient library and
+ * its family manager, ingredient edit/add forms, reports, team, activity, notifications.
+ *
  * Exports `run(browser)` so it can be called standalone or from capture-all.mjs.
  *
  * HOW TO RUN standalone (from surakshitam-web/, with `SCREENSHOTS=1 npm run dev` running):
@@ -86,11 +92,16 @@ export async function run(browser) {
   log("orders");
   await goto(page, BASE, "/studio/orders");
   await shot(page, "orders-list");
+  // Choosing "Dispatched" opens the dispatch form. Bike is the default mode, so
+  // the first shot shows the rider fields; the second shows the courier branch.
   const shipSelect = await page.$("select");
   if (shipSelect) {
     await shipSelect.selectOption("SHIPPED").catch(() => {});
+    await page.waitForTimeout(400);
+    await shot(page, "orders-dispatch-bike-rider");
+    await clickText(page, "button", /courier parcel/i);
     await page.waitForTimeout(300);
-    await shot(page, "orders-courier-form");
+    await shot(page, "orders-dispatch-courier");
   }
 
   log("order detail");
@@ -123,6 +134,12 @@ export async function run(browser) {
   await shot(page, "product-audit-history");
   await goto(page, BASE, "/studio/products/new");
   await shot(page, "product-add-form");
+  // A home-care product shows the bio-enzyme / general selector...
+  await goto(page, BASE, "/studio/products/p-dishwash-liquid");
+  await shot(page, "product-edit-home-care-type");
+  // ...and a resold product shows the brand-partner toggle and brand name.
+  await goto(page, BASE, "/studio/products/p-wheat-noodles");
+  await shot(page, "product-edit-partner-brand");
 
   log("products — offers tab");
   await goto(page, BASE, "/studio/products");
@@ -134,6 +151,22 @@ export async function run(browser) {
   await clickText(page, "button", /^combos$/i);
   await page.waitForTimeout(300);
   await shot(page, "products-combos-tab");
+
+  log("products — ingredients tab");
+  await goto(page, BASE, "/studio/products?tab=ingredients");
+  await shot(page, "ingredients-library");
+  await clickText(page, "button", /manage families/i);
+  await page.waitForTimeout(400);
+  await shot(page, "ingredients-families-manager");
+
+  log("ingredient forms");
+  await goto(page, BASE, "/studio/ingredients/neem");
+  await shot(page, "ingredient-edit-form");
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.waitForTimeout(400);
+  await shot(page, "ingredient-found-in-picker");
+  await goto(page, BASE, "/studio/ingredients/new");
+  await shot(page, "ingredient-add-form");
 
   log("reports");
   await goto(page, BASE, "/studio/reports");

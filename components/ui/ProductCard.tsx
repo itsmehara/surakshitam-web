@@ -12,7 +12,7 @@ const categoryLabel: Record<Product["category"], string> = {
   "home-care": "Home Care",
   "skin-care": "Skin Care",
   "hair-care": "Hair Care",
-  pantry: "Pantry & Foods",
+  "partner-brands": "Partner Brands",
 };
 
 export function ProductCard({ product, priority }: { product: Product; priority?: boolean }) {
@@ -58,7 +58,7 @@ export function ProductCard({ product, priority }: { product: Product; priority?
             className={
               partnerBrand
                 ? "object-contain p-2 transition-transform duration-500 ease-smooth group-hover:scale-[1.04]"
-                : "scale-[1.16] object-cover object-[50%_60%] transition-transform duration-500 ease-smooth group-hover:scale-[1.24]"
+                : "object-cover transition-transform duration-500 ease-smooth group-hover:scale-[1.06]"
             }
           />
         </Link>

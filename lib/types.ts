@@ -5,7 +5,7 @@
  * smallest currency unit) to avoid floating-point errors.
  */
 
-export type CategorySlug = "home-care" | "skin-care" | "hair-care" | "pantry";
+export type CategorySlug = "home-care" | "skin-care" | "hair-care" | "partner-brands";
 
 /**
  * Home care splits into two shelves: bio-enzyme formulations (fermented plant
@@ -19,6 +19,11 @@ export interface Category {
   name: string;
   description: string;
   image: string;
+  /**
+   * Wide "everything on this shelf" photo used by the homepage category cards —
+   * the whole range in one shot, rather than a single product standing in for it.
+   */
+  groupImage?: string;
 }
 
 export interface Product {
@@ -64,21 +69,25 @@ export interface Product {
   /** Home-care only: which shelf this belongs to. Defaults to "general". */
   homeCareType?: HomeCareType;
   /**
-   * Set for stock we resell rather than make — other companies' food and pantry
-   * goods. The brand is shown instead of our own so nothing implies these were
-   * made by Surakshitam, and they fall back to a neutral, unbranded placeholder
-   * image (see lib/catalog.ts `productImage`).
+   * Set for stock we resell rather than make — other companies' foods, pantry
+   * staples and everyday goods. The brand is shown instead of our own so nothing
+   * implies these were made by Surakshitam, and they fall back to a neutral,
+   * unbranded placeholder image (see lib/catalog.ts `productImage`).
    */
   brand?: string;
   /** True for third-party/resold stock. Drives the "Brand partner" labelling. */
   thirdParty?: boolean;
 }
 
-export type IngredientGroup =
-  | "Botanicals & herbs"
-  | "Plant butters & oils"
-  | "Natural cleansers"
-  | "Essential oils & extracts";
+/**
+ * Ingredient family ("Botanicals & herbs", "Plant butters & oils", …).
+ *
+ * Deliberately a free string rather than a fixed union: the admin can add and
+ * rename families from Studio without a code change. The four we ship with are
+ * `DEFAULT_INGREDIENT_GROUPS` in lib/ingredients.ts, and the live list is
+ * managed by lib/ingredient-store.ts.
+ */
+export type IngredientGroup = string;
 
 export interface Ingredient {
   slug: string;

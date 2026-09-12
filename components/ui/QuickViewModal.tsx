@@ -65,7 +65,7 @@ export function QuickViewModal() {
               className={
                 product.thirdParty
                   ? "object-contain p-2"
-                  : "scale-[1.1] object-cover object-[50%_55%]"
+                  : "object-cover"
               }
             />
           </div>

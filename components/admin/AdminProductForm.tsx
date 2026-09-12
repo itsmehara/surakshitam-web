@@ -20,7 +20,7 @@ const CATEGORIES: { slug: CategorySlug; label: string }[] = [
   { slug: "home-care", label: "Home Care" },
   { slug: "skin-care", label: "Skin Care" },
   { slug: "hair-care", label: "Hair Care" },
-  { slug: "pantry", label: "Pantry & Foods (brand partners)" },
+  { slug: "partner-brands", label: "Partner Brands (other companies' products)" },
 ];
 
 const HOME_CARE_TYPES: { value: HomeCareType; label: string }[] = [
@@ -275,7 +275,7 @@ export function AdminProductForm({ productId }: { productId?: string }) {
               <label className={labelCls}>Image path or URL</label>
               <input value={p.image} onChange={(e) => set({ image: e.target.value })} className={`mt-1 ${field}`} />
               <p className="mt-1 text-xs text-forest/45">
-                Use an existing path like <code>/products/hair-oil.webp</code> or a full image URL. In
+                Use an existing path like <code>/surakshitam-product-images/hair-oil/hair-oil-01-listing-front-clean.webp</code> or a full image URL. In
                 production, admins upload images (stored in Supabase Storage).
               </p>
             </div>

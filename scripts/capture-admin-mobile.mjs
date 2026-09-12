@@ -1,5 +1,9 @@
 /**
  * Surakshitam Naturals — admin ("Studio") portal screenshots, MOBILE.
+ *
+ * Same coverage as capture-admin-desktop.mjs — including the dispatch form in both bike
+ * and courier modes, the ingredient library with its family manager, and the product-form
+ * fields for home-care type and brand partners — at a phone viewport.
  * Produces ./SurakshitamNaturals-Screenshots/Mobile-Admin-Portal/<NNN>-<section>-<feature>.png
  *
  * Same flow as capture-admin-desktop.mjs, at a "regular" Android/iPhone-sized viewport
@@ -103,11 +107,16 @@ export async function run(browser) {
 
   log("orders");
   await twoShotMobile(page, BASE, "/studio/orders", shot, "orders-list", 5000);
+  // Choosing "Dispatched" opens the dispatch form. Bike is the default mode, so
+  // the first shot shows the rider fields; the second shows the courier branch.
   const shipSelect = await page.$("select");
   if (shipSelect) {
     await shipSelect.selectOption("SHIPPED").catch(() => {});
+    await page.waitForTimeout(400);
+    await shot(page, "orders-dispatch-bike-rider");
+    await clickText(page, "button", /courier parcel/i);
     await page.waitForTimeout(300);
-    await shot(page, "orders-courier-form");
+    await shot(page, "orders-dispatch-courier");
   }
 
   log("order detail");
@@ -132,6 +141,10 @@ export async function run(browser) {
   log("product forms");
   await twoShotMobile(page, BASE, "/studio/products/p-shea-butter-soap", shot, "product-edit-form", 5000);
   await twoShotMobile(page, BASE, "/studio/products/new", shot, "product-add-form", 5000);
+  // A home-care product shows the bio-enzyme / general selector...
+  await twoShotMobile(page, BASE, "/studio/products/p-dishwash-liquid", shot, "product-edit-home-care-type", 5000);
+  // ...and a resold product shows the brand-partner toggle and brand name.
+  await twoShotMobile(page, BASE, "/studio/products/p-wheat-noodles", shot, "product-edit-partner-brand", 5000);
 
   log("products — offers tab");
   await goto(page, BASE, "/studio/products");
@@ -143,6 +156,16 @@ export async function run(browser) {
   await clickText(page, "button", /^combos$/i);
   await page.waitForTimeout(300);
   await shot(page, "products-combos-tab");
+
+  log("products — ingredients tab");
+  await twoShotMobile(page, BASE, "/studio/products?tab=ingredients", shot, "ingredients-library", 5000);
+  await clickText(page, "button", /manage families/i);
+  await page.waitForTimeout(400);
+  await shot(page, "ingredients-families-manager");
+
+  log("ingredient forms");
+  await twoShotMobile(page, BASE, "/studio/ingredients/neem", shot, "ingredient-edit-form", 5000);
+  await twoShotMobile(page, BASE, "/studio/ingredients/new", shot, "ingredient-add-form", 5000);
 
   log("reports");
   await twoShotMobile(page, BASE, "/studio/reports", shot, "reports-tables", 5000);

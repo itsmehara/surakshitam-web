@@ -12,6 +12,7 @@ import {
   FREE_DELIVERY_MIN,
 } from "@/lib/delivery";
 import { ComboCard } from "@/components/ui/ComboCard";
+import { PromoCarousel } from "@/components/home/PromoCarousel";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { cn } from "@/lib/cn";
 
@@ -112,6 +113,11 @@ function OffersPageInner() {
         title="Offers & combos"
         intro="Every live discount code and combo kit, all in one place."
       />
+
+      {/* Moved here from the homepage: this is the page people come to for deals,
+          so the running strip of what's live belongs at the top of it. */}
+      <PromoCarousel />
+
       <div className="container py-10 sm:py-14">
         <div className="inline-flex rounded-full border border-forest/15 bg-white/60 p-1">
           {(["offers", "combos"] as Tab[]).map((t) => (

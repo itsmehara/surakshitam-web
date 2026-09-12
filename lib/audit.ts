@@ -23,6 +23,7 @@ export type AuditType =
   | "profile_update"
   | "report_export"
   | "team_update"
+  | "ingredient_update"
   | "unauthorized_access";
 
 export interface AuditActor {

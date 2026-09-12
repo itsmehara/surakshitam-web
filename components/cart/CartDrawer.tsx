@@ -100,7 +100,7 @@ export function CartDrawer() {
                       className={
                         product.thirdParty
                           ? "object-contain p-1"
-                          : "scale-[1.12] object-cover object-[50%_55%]"
+                          : "object-cover"
                       }
                     />
                   </Link>
