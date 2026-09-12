@@ -148,13 +148,25 @@
 .sn-face { backface-visibility: hidden; }
 .sn-face-back { transform: rotateY(180deg); }
 
-/* v2 hero slideshow: slow push-in on the active slide (Ken Burns). The class is
-   applied only to the visible slide, so each change restarts from scale(1). */
-@keyframes sn-kenburns {
-  from { transform: scale(1); }
-  to   { transform: scale(1.08); }
+/* v2 hero slideshow: the photo is never still. Three drift patterns (zoom +
+   pan) run infinite-alternate so a slide keeps moving for as long as it is on
+   screen — no one-shot Ken-Burns that ends and leaves the picture frozen.
+   Scale never drops below 1.06 so the pan never exposes an edge. */
+@keyframes sn-drift-a {
+  from { transform: scale(1.06) translate3d(0, 0, 0); }
+  to   { transform: scale(1.2)  translate3d(-3.5%, -2.5%, 0); }
 }
-.sn-kenburns { animation: sn-kenburns 9s ease-out forwards; }
+@keyframes sn-drift-b {
+  from { transform: scale(1.2)  translate3d(3%, 1.5%, 0); }
+  to   { transform: scale(1.06) translate3d(-1.5%, -1%, 0); }
+}
+@keyframes sn-drift-c {
+  from { transform: scale(1.08) translate3d(-3%, 2%, 0); }
+  to   { transform: scale(1.18) translate3d(2.5%, -2.5%, 0); }
+}
+.sn-drift-a { animation: sn-drift-a 11s ease-in-out infinite alternate; }
+.sn-drift-b { animation: sn-drift-b 13s ease-in-out infinite alternate; }
+.sn-drift-c { animation: sn-drift-c 12s ease-in-out infinite alternate; }
 @media (prefers-reduced-motion: reduce) {
-  .sn-kenburns { animation: none; }
+  .sn-drift-a, .sn-drift-b, .sn-drift-c { animation: none; }
 }

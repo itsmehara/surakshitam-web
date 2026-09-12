@@ -19,9 +19,9 @@ import { ArrowRight, ChevronDown, LeafIcon, BeakerIcon, RecycleIcon } from "@/co
  * more to scroll. Leaves + the falling-fruit solver run over the photo, as on
  * the v1 hero.
  *
- * Motion: crossfade every HOLD_MS with a slow Ken-Burns drift on the active
- * slide; pauses on hover / when the tab is hidden; a single static frame when
- * the visitor asks for reduced motion.
+ * Motion: crossfade every HOLD_MS; every slide drifts continuously (zoom +
+ * pan, `.sn-drift-*` in globals.css) so the picture is never frozen; pauses
+ * on hover; a single static frame when the visitor asks for reduced motion.
  */
 
 interface Slide {
@@ -76,8 +76,9 @@ const SLIDES: Slide[] = [
   },
 ];
 
-const HOLD_MS = 6500; // time a slide sits before the next crossfade
-const FADE_MS = 1400; // crossfade duration — long enough to feel like a dissolve, not a cut
+const HOLD_MS = 5000; // time a slide sits before the next crossfade
+const FADE_MS = 1200; // crossfade duration — long enough to feel like a dissolve, not a cut
+const DRIFT = ["sn-drift-a", "sn-drift-b", "sn-drift-c"]; // rotate so neighbours move differently
 
 const trust = [
   { icon: LeafIcon, label: "Plant-forward ingredients" },
@@ -101,15 +102,14 @@ export function HeroSlideshow() {
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
-  // Auto-advance; restarts whenever the slide changes so a manual click gets a full hold.
+  // Auto-advance; restarts whenever the slide changes so a manual click gets a
+  // full hold. No "is the tab visible" check: browsers already throttle timers
+  // in background tabs, and embedded previews report hidden even when shown.
   useEffect(() => {
     if (reduced || paused) return;
-    const tick = () => {
-      if (!document.hidden) go(1);
-    };
-    timer.current = window.setInterval(tick, HOLD_MS);
+    timer.current = window.setTimeout(() => go(1), HOLD_MS);
     return () => {
-      if (timer.current) window.clearInterval(timer.current);
+      if (timer.current) window.clearTimeout(timer.current);
     };
   }, [index, paused, reduced, go]);
 
@@ -145,9 +145,8 @@ export function HeroSlideshow() {
                 sizes="100vw"
                 className={cn(
                   "object-cover object-[center_right] will-change-transform",
-                  // Ken-Burns: a slow push-in while the slide is showing. The class is only on
-                  // the active slide so the drift restarts from 1.0 on every change.
-                  active && !reduced && "sn-kenburns",
+                  // Continuous drift on every slide, so the one fading in is already moving.
+                  !reduced && DRIFT[i % DRIFT.length],
                 )}
               />
             </div>
