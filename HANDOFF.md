@@ -113,6 +113,13 @@ fruit physics are unchanged.
 - **Drawer space pass**: 44px rows, note auto-grows from one line, preview collapsed on phones /
   open from `sm`, Clear in the header, Copy + Send-as-form as one text row.
 
+- **Round 3 (15 Sep, late)**: phone number shown only in the footer (PDP Call button, mobile
+  drawer row and contact-page number removed); Contact submenu = Product Enquiry / Partner With
+  Us / Book a Consultation; `SlotPicker` is date + slot dropdown on one row under an amber
+  "confirmed on availability" notice; contact-page email link jumps to `#enquiry`; **quantity is
+  set on the product card itself** (`AddToEnquiryButton` turns into a − n + stepper in place;
+  0 removes); `/contact` runs one page-long `BotanicalBackdrop` (`PageIntro backdrop={false}`).
+
 ### Still open for v3 (also logged in `../REGISTRY.md` → "v3-static pending")
 1. Enquiry Sheet + Apps Script deployment (ENQUIRY-SETUP.md steps 1–5), then set the
    `NEXT_PUBLIC_ENQUIRY_URL` repo variable and re-run the workflow. Redeploy `Code.gs` (new
