@@ -635,7 +635,7 @@ a fresh session doesn't have to rediscover them.
 
 | # | What needs deciding | Where it lives |
 |---|---|---|
-| 0 | **Hosting / backend platform** — VPS (Hostinger KVM 2) vs serverless (Cloudflare / Azure / AWS), and SQLite-family vs DynamoDB/Cosmos. Research complete 2026-09-12; decision pending with Hara + founders before Phase 6. | `surakshitam-docs/docs/hosting/HOSTING-RESEARCH-2026-09-12.md` §15 |
+| 0 | **Hosting / backend platform** — narrowed 2026-09-14 to serverless on AWS / Azure / Google (11 numbered options; VPS, Supabase, Vercel, Cloudflare dropped). Database family and cold-start tolerance still open. Decision pending with Hara + founders before Phase 6. | `surakshitam-docs/docs/hosting/SERVERLESS-SHORTLIST.md`; full record `HOSTING-RESEARCH-2026-09-12.md` §15 |
 | 1 | **Every price** is demo. | `lib/catalog.ts` — comment at line ~38 |
 | 2 | **8 products show `referenceStatus: packaging-concept`** — the pack in the photo is a concept, not the real pack. Either shoot the real pack or accept the concept. | `product-image-manifest.json` |
 | 3 | The **9 reel-set products** (aloe/charcoal/coffee/goat-milk/honey/manjista/red-wine/sandal soaps + henna) carry demo price, size, copy **and ingredient lists**. | `lib/catalog.ts` |
@@ -656,7 +656,7 @@ a fresh session doesn't have to rediscover them.
 
 ## 10. Remaining work — recommended order
 
-> **Hosting direction changed 2026-09-12:** Phase 6 is **not Supabase**. Two candidate directions, decision pending: (a) own backend on a VPS — Hostinger KVM 2 Mumbai, ₹9,051/yr with coupon; (b) **serverless go-live** — Cloudflare Workers + D1 (₹524/mo flat) or Azure Container Apps + Cosmos (₹31 → ₹520/mo) or AWS Lambda + DynamoDB (₹114/mo now); Hara leans AWS/Azure, analysis favours Cloudflare or Azure. Database: Postgres not mandatory — SQLite family via Drizzle behind a repository layer recommended. **Full record: `surakshitam-docs/docs/hosting/HOSTING-RESEARCH-2026-09-12.md`** (+ two HTML comparison pages beside it). Backup scripts (Postgres flavour) in `surakshitam-backend/ops/`.
+> **Hosting direction changed 2026-09-12:** Phase 6 is **not Supabase**. Two candidate directions, decision pending: (a) own backend on a VPS — Hostinger KVM 2 Mumbai, ₹9,051/yr with coupon; (b) **serverless go-live** — Cloudflare Workers + D1 (₹524/mo flat) or Azure Container Apps + Cosmos (₹31 → ₹520/mo) or AWS Lambda + DynamoDB (₹114/mo now); **Update 2026-09-14:** shortlist narrowed to AWS / Azure / Google serverless only — VPS, Supabase, Vercel and Cloudflare removed; see `surakshitam-docs/docs/hosting/SERVERLESS-SHORTLIST.md` (11 numbered options). Database: Postgres not mandatory — SQLite family via Drizzle behind a repository layer recommended. **Full record: `surakshitam-docs/docs/hosting/HOSTING-RESEARCH-2026-09-12.md`** (+ two HTML comparison pages beside it). Backup scripts (Postgres flavour) in `surakshitam-backend/ops/`.
 **Phases 1–5 and post-Phase-5 rounds 1–6 are complete** (see §7). Next up:
 
 1. **Founder sign-off on §8** — cheapest possible step, and it unblocks real content everywhere.
