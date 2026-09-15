@@ -106,6 +106,13 @@ fruit physics are unchanged.
   **when the new banner images arrive, swap `SLIDES[].src` and tune `focus` per slide; no layout
   change needed.** Trust line hidden on phones. Physics/leaves untouched.
 
+- **Consultation booking** (`components/contact/SlotPicker.tsx`): date input (Mon–Sat, next 30
+  days) + 30-minute slot grid 10:00–16:30 (`CONSULT_START/END`, `SLOT_MINUTES` — change there),
+  past slots disabled on today; "first consultation free · 30 min" is stated in the form, nav and
+  type label. `slot` is sent as one readable string, so the Sheet column is unchanged.
+- **Drawer space pass**: 44px rows, note auto-grows from one line, preview collapsed on phones /
+  open from `sm`, Clear in the header, Copy + Send-as-form as one text row.
+
 ### Still open for v3 (also logged in `../REGISTRY.md` → "v3-static pending")
 1. Enquiry Sheet + Apps Script deployment (ENQUIRY-SETUP.md steps 1–5), then set the
    `NEXT_PUBLIC_ENQUIRY_URL` repo variable and re-run the workflow. Redeploy `Code.gs` (new
