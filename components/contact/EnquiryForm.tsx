@@ -65,7 +65,7 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
   const requested = params.get("type");
   const [type, setType] = useState<EnquiryType>(isEnquiryType(requested) ? requested : "product");
   const [status, setStatus] = useState<Status>({ kind: "idle" });
-  const { lines, ready } = useEnquiryList();
+  const { lines, ready, note } = useEnquiryList();
 
   // Follow the URL if the visitor switches submenu while already on /contact.
   useEffect(() => {
@@ -81,9 +81,13 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
     [lines, product],
   );
   const [products, setProducts] = useState(product);
+  const [message, setMessage] = useState("");
   useEffect(() => {
-    if (ready) setProducts(listedProducts);
-  }, [ready, listedProducts]);
+    if (!ready) return;
+    setProducts(listedProducts);
+    // The drawer's note becomes the message so nothing typed there is lost.
+    if (note && lines.length) setMessage((m) => m || note);
+  }, [ready, listedProducts, note, lines.length]);
 
   const copy = COPY[type];
 
@@ -107,6 +111,7 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
     const result = await submitEnquiry(fields);
     if (result.ok) {
       form.reset();
+      setMessage("");
       setStatus({ kind: "sent", type });
     } else {
       setStatus({ kind: "error", message: result.error, fallback: whatsAppFormFallbackHref(fields) });
@@ -218,6 +223,8 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
           name="message"
           rows={4}
           required={type !== "product"}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
           placeholder={copy.placeholder}
           className={inputClass}
         />

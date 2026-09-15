@@ -19,7 +19,9 @@ import type { Product } from "@/lib/types";
  */
 
 const STORAGE_KEY = "sn-enquiry-list-v1";
+const NOTE_KEY = "sn-enquiry-note-v1";
 const MAX_QTY = 99;
+export const MAX_NOTE = 300;
 
 export type EnquiryItem = { id: string; qty: number };
 export type EnquiryLine = { product: Product; qty: number };
@@ -83,6 +85,9 @@ interface EnquiryListValue {
   setQty: (id: string, qty: number) => void;
   remove: (id: string) => void;
   clear: () => void;
+  /** Free-text note appended to the WhatsApp message / form. */
+  note: string;
+  setNote: (note: string) => void;
   drawerOpen: boolean;
   openDrawer: () => void;
   closeDrawer: () => void;
@@ -94,9 +99,15 @@ export function EnquiryListProvider({ children }: { children: React.ReactNode })
   const [items, dispatch] = useReducer(reducer, []);
   const [ready, setReady] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [note, setNoteState] = useState("");
 
   useEffect(() => {
     dispatch({ type: "hydrate", items: load() });
+    try {
+      setNoteState((window.localStorage.getItem(NOTE_KEY) ?? "").slice(0, MAX_NOTE));
+    } catch {
+      /* ignore */
+    }
     setReady(true);
   }, []);
 
@@ -104,10 +115,11 @@ export function EnquiryListProvider({ children }: { children: React.ReactNode })
     if (!ready) return;
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      window.localStorage.setItem(NOTE_KEY, note);
     } catch {
       /* private mode / quota — the list still works for this page view */
     }
-  }, [items, ready]);
+  }, [items, note, ready]);
 
   // Keep several open tabs in step.
   useEffect(() => {
@@ -137,12 +149,17 @@ export function EnquiryListProvider({ children }: { children: React.ReactNode })
       add: (id, qty = 1) => dispatch({ type: "add", id, qty }),
       setQty: (id, qty) => dispatch({ type: "setQty", id, qty }),
       remove: (id) => dispatch({ type: "remove", id }),
-      clear: () => dispatch({ type: "clear" }),
+      clear: () => {
+        dispatch({ type: "clear" });
+        setNoteState("");
+      },
+      note,
+      setNote: (n) => setNoteState(n.slice(0, MAX_NOTE)),
       drawerOpen,
       openDrawer: () => setDrawerOpen(true),
       closeDrawer: () => setDrawerOpen(false),
     }),
-    [items, lines, ready, drawerOpen],
+    [items, lines, ready, drawerOpen, note],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

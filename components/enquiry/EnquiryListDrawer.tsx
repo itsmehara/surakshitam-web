@@ -2,20 +2,22 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
-import { useEnquiryList } from "@/lib/enquiry-list/EnquiryListContext";
+import { useEffect, useState } from "react";
+import { useEnquiryList, MAX_NOTE } from "@/lib/enquiry-list/EnquiryListContext";
 import { productImage } from "@/lib/catalog";
-import { whatsAppListHref, trackWhatsAppClick } from "@/lib/enquiry";
-import { ClipboardIcon, CloseIcon, WhatsAppIcon, ArrowRight } from "@/components/icons";
+import { enquiryListMessage, whatsAppListHref, trackWhatsAppClick } from "@/lib/enquiry";
+import { ClipboardIcon, CloseIcon, WhatsAppIcon, ArrowRight, CheckIcon, ChevronDown } from "@/components/icons";
 import { cn } from "@/lib/cn";
 
 /**
- * Slide-in panel listing everything in the enquiry list: quantity −/+,
- * remove, clear, and the two ways to send it — one WhatsApp message or the
- * contact form (which pre-fills the same product lines).
+ * Slide-in panel for the enquiry list. Rows are deliberately compact (48px
+ * thumbnail, one control row) so a phone shows 6–7 products without
+ * scrolling. Below the list: a short optional note, a live preview of the
+ * exact WhatsApp text, then send / copy / send-as-form / clear.
  */
 export function EnquiryListDrawer() {
-  const { lines, count, setQty, remove, clear, drawerOpen, closeDrawer } = useEnquiryList();
+  const { lines, count, setQty, remove, clear, note, setNote, drawerOpen, closeDrawer } = useEnquiryList();
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!drawerOpen) return;
@@ -28,7 +30,19 @@ export function EnquiryListDrawer() {
     };
   }, [drawerOpen, closeDrawer]);
 
-  const waHref = whatsAppListHref(lines.map((l) => ({ name: l.product.name, size: l.product.size, qty: l.qty })));
+  const plain = lines.map((l) => ({ name: l.product.name, size: l.product.size, qty: l.qty }));
+  const message = enquiryListMessage(plain, note);
+  const waHref = whatsAppListHref(plain, note);
+
+  async function copyMessage() {
+    try {
+      await navigator.clipboard.writeText(message);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      /* clipboard blocked — the preview text is selectable anyway */
+    }
+  }
 
   return (
     <div
@@ -51,9 +65,9 @@ export function EnquiryListDrawer() {
           drawerOpen ? "translate-x-0" : "translate-x-full",
         )}
       >
-        <header className="flex items-center justify-between border-b border-forest/10 px-5 py-4">
+        <header className="flex items-center justify-between border-b border-forest/10 px-4 py-3">
           <div>
-            <h2 className="font-serif text-lg font-semibold text-forest">
+            <h2 className="font-serif text-lg font-semibold leading-tight text-forest">
               Enquiry list {count > 0 && <span className="text-forest/50">({count})</span>}
             </h2>
             <p className="text-xs text-forest/55">No payment here — we reply with price &amp; availability.</p>
@@ -88,68 +102,91 @@ export function EnquiryListDrawer() {
           </div>
         ) : (
           <>
-            <ul className="flex-1 divide-y divide-forest/8 overflow-y-auto px-5">
+            {/* ---- items: compact rows ---- */}
+            <ul className="divide-y divide-forest/8 overflow-y-auto px-4">
               {lines.map(({ product, qty }) => (
-                <li key={product.id} className="flex gap-3 py-4">
+                <li key={product.id} className="flex items-center gap-3 py-2">
                   <Link
                     href={`/product/${product.slug}`}
                     onClick={closeDrawer}
-                    className="relative h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-lg border border-forest/8 bg-cream"
+                    className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border border-forest/8 bg-cream"
                   >
                     <Image
                       src={productImage(product)}
-                      alt={product.name}
+                      alt=""
                       fill
-                      sizes="72px"
-                      className={product.thirdParty ? "object-contain p-1" : "object-cover"}
+                      sizes="48px"
+                      className={product.thirdParty ? "object-contain p-0.5" : "object-cover"}
                     />
                   </Link>
-                  <div className="flex min-w-0 flex-1 flex-col">
-                    <div className="flex items-start justify-between gap-2">
-                      <Link
-                        href={`/product/${product.slug}`}
-                        onClick={closeDrawer}
-                        className="font-serif text-sm font-semibold leading-snug text-forest hover:text-moss"
-                      >
-                        {product.name}
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={() => remove(product.id)}
-                        aria-label={`Remove ${product.name}`}
-                        className="shrink-0 text-forest/40 hover:text-clay"
-                      >
-                        <CloseIcon width={16} />
-                      </button>
-                    </div>
-                    <p className="text-xs text-forest/50">{product.size}</p>
-                    <div className="mt-auto flex items-center pt-2">
-                      <div className="flex items-center gap-1 rounded-full border border-forest/15 p-1 text-forest">
-                        <button
-                          type="button"
-                          onClick={() => setQty(product.id, qty - 1)}
-                          aria-label={`Decrease quantity of ${product.name}`}
-                          className="flex h-7 w-7 items-center justify-center rounded-full text-base leading-none hover:bg-forest/5"
-                        >
-                          −
-                        </button>
-                        <span className="min-w-6 text-center text-sm tabular-nums">{qty}</span>
-                        <button
-                          type="button"
-                          onClick={() => setQty(product.id, qty + 1)}
-                          aria-label={`Increase quantity of ${product.name}`}
-                          className="flex h-7 w-7 items-center justify-center rounded-full text-base leading-none hover:bg-forest/5"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
+                  <div className="min-w-0 flex-1">
+                    <Link
+                      href={`/product/${product.slug}`}
+                      onClick={closeDrawer}
+                      className="line-clamp-2 font-serif text-[0.9rem] font-semibold leading-tight text-forest hover:text-moss"
+                    >
+                      {product.name}
+                    </Link>
+                    <p className="text-[0.7rem] text-forest/50">{product.size}</p>
                   </div>
+                  <div className="flex shrink-0 items-center rounded-full border border-forest/15 text-forest">
+                    <button
+                      type="button"
+                      onClick={() => setQty(product.id, qty - 1)}
+                      aria-label={`Decrease quantity of ${product.name}`}
+                      className="flex h-7 w-7 items-center justify-center rounded-full text-base leading-none hover:bg-forest/5"
+                    >
+                      −
+                    </button>
+                    <span className="min-w-5 text-center text-sm tabular-nums">{qty}</span>
+                    <button
+                      type="button"
+                      onClick={() => setQty(product.id, qty + 1)}
+                      aria-label={`Increase quantity of ${product.name}`}
+                      className="flex h-7 w-7 items-center justify-center rounded-full text-base leading-none hover:bg-forest/5"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => remove(product.id)}
+                    aria-label={`Remove ${product.name}`}
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-forest/40 hover:bg-clay/10 hover:text-clay"
+                  >
+                    <CloseIcon width={14} />
+                  </button>
                 </li>
               ))}
             </ul>
 
-            <footer className="space-y-3 border-t border-forest/10 px-5 py-4">
+            {/* ---- note + preview + actions ---- */}
+            <div className="mt-auto space-y-3 border-t border-forest/10 px-4 py-3">
+              <div>
+                <label htmlFor="enq-list-note" className="mb-1 block text-xs font-medium text-forest">
+                  Add a note (optional)
+                </label>
+                <textarea
+                  id="enq-list-note"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  rows={2}
+                  maxLength={MAX_NOTE}
+                  placeholder="Delivery area, preferred fragrance, any questions…"
+                  className="w-full resize-none rounded-lg border border-forest/15 bg-white px-3 py-2 text-sm text-forest placeholder:text-forest/35 focus:border-moss focus:outline-none"
+                />
+              </div>
+
+              <details open className="group rounded-lg border border-forest/10 bg-parchment/60">
+                <summary className="flex cursor-pointer list-none items-center justify-between px-3 py-2 text-xs font-medium text-forest">
+                  Your WhatsApp message
+                  <ChevronDown width={14} className="text-moss transition-transform group-open:rotate-180" />
+                </summary>
+                <pre className="max-h-32 overflow-y-auto whitespace-pre-wrap border-t border-forest/8 px-3 py-2 font-sans text-xs leading-relaxed text-forest/75">
+                  {message}
+                </pre>
+              </details>
+
               <a
                 href={waHref}
                 target="_blank"
@@ -157,20 +194,35 @@ export function EnquiryListDrawer() {
                 onClick={() =>
                   trackWhatsAppClick({
                     cta: "enquiry-list",
-                    product: lines.map((l) => `${l.product.name} ×${l.qty}`).join("; "),
+                    product: plain.map((l) => `${l.name} ×${l.qty}`).join("; "),
                   })
                 }
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] text-sm font-semibold text-white shadow-soft transition-transform duration-200 hover:scale-[1.02]"
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] text-sm font-semibold text-white shadow-soft transition-transform duration-200 hover:scale-[1.02]"
               >
-                <WhatsAppIcon width={20} height={20} /> Send enquiry on WhatsApp
+                <WhatsAppIcon width={20} height={20} /> Send on WhatsApp
               </a>
-              <Link
-                href="/contact/?type=product"
-                onClick={closeDrawer}
-                className="flex h-11 w-full items-center justify-center gap-2 rounded-full border border-forest/20 text-sm font-medium text-forest transition-colors hover:border-forest/50"
-              >
-                Send as a form instead <ArrowRight width={16} />
-              </Link>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={copyMessage}
+                  className="flex h-10 items-center justify-center gap-1.5 rounded-full border border-forest/20 text-xs font-medium text-forest transition-colors hover:border-forest/50"
+                >
+                  {copied ? (
+                    <>
+                      <CheckIcon width={14} className="text-moss" /> Copied
+                    </>
+                  ) : (
+                    "Copy message"
+                  )}
+                </button>
+                <Link
+                  href="/contact/?type=product"
+                  onClick={closeDrawer}
+                  className="flex h-10 items-center justify-center gap-1.5 rounded-full border border-forest/20 text-xs font-medium text-forest transition-colors hover:border-forest/50"
+                >
+                  Send as a form <ArrowRight width={14} />
+                </Link>
+              </div>
               <button
                 type="button"
                 onClick={clear}
@@ -178,7 +230,7 @@ export function EnquiryListDrawer() {
               >
                 Clear list
               </button>
-            </footer>
+            </div>
           </>
         )}
       </aside>

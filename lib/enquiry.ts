@@ -95,14 +95,28 @@ export function formatEnquiryLines(lines: { name: string; size?: string; qty: nu
 
 /**
  * The single WhatsApp message for the whole enquiry list — the reason the
- * list exists. Numbered so the founders can answer line by line.
+ * list exists. Numbered so the founders can answer line by line; the optional
+ * note is the customer's own words (delivery area, questions, preferences).
+ * Exposed as text so the drawer can preview exactly what will be sent.
  */
-export function whatsAppListHref(lines: { name: string; size?: string; qty: number }[]): string {
-  const text =
+export function enquiryListMessage(
+  lines: { name: string; size?: string; qty: number }[],
+  note?: string,
+): string {
+  const trimmed = note?.trim();
+  return (
     "Hi Surakshitam Naturals, I'd like to enquire about these products:\n\n" +
     formatEnquiryLines(lines) +
-    "\n\nPlease share price, availability and delivery details.";
-  return waLink(text);
+    (trimmed ? `\n\nNote: ${trimmed}` : "") +
+    "\n\nPlease share price, availability and delivery details."
+  );
+}
+
+export function whatsAppListHref(
+  lines: { name: string; size?: string; qty: number }[],
+  note?: string,
+): string {
+  return waLink(enquiryListMessage(lines, note));
 }
 
 /**
