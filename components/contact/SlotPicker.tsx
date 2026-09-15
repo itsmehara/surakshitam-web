@@ -47,7 +47,7 @@ export function formatSlot(date: string, minutes: number): string {
 }
 
 const inputClass =
-  "w-full rounded-lg border border-forest/15 bg-white px-3 py-2.5 text-sm text-forest focus:border-moss focus:outline-none disabled:bg-parchment/60 disabled:text-forest/40";
+  "h-10 w-full rounded-lg border border-forest/15 bg-white px-3 py-2 text-sm leading-6 text-forest focus:border-moss focus:outline-none disabled:bg-parchment/60 disabled:text-forest/40";
 
 export function SlotPicker({
   date,
@@ -73,7 +73,7 @@ export function SlotPicker({
       {/* Availability notice — must be read before choosing: serif, dark amber, left accent bar */}
       <div
         role="note"
-        className="mb-3 flex gap-3 rounded-lg border border-amber-400 border-l-4 border-l-amber-600 bg-amber-100 px-3.5 py-3"
+        className="mb-2.5 flex gap-3 rounded-lg border border-amber-400 border-l-4 border-l-amber-600 bg-amber-100 px-3.5 py-2.5"
       >
         <span aria-hidden="true" className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-600 font-serif text-xs font-bold text-white">
           !
@@ -89,7 +89,7 @@ export function SlotPicker({
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label htmlFor="enq-date" className="mb-1.5 block text-sm font-medium text-forest">
+          <label htmlFor="enq-date" className="mb-1 block text-sm font-medium text-forest">
             Preferred day <span className="text-clay">*</span>
           </label>
           <input
@@ -104,7 +104,7 @@ export function SlotPicker({
           />
         </div>
         <div>
-          <label htmlFor="enq-time" className="mb-1.5 block text-sm font-medium text-forest">
+          <label htmlFor="enq-time" className="mb-1 block text-sm font-medium text-forest">
             Preferred time <span className="text-clay">*</span>
           </label>
           <select

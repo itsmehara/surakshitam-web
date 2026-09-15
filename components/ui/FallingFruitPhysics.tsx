@@ -50,7 +50,9 @@ const GRAVITY = 1400;      // px/s² — tuned by eye, not by physics texts
 const RESTITUTION = 0.42;  // how much bounce survives an impact
 const FLOOR_FRICTION = 0.86;
 const AIR = 0.999;
-const GROUND_FRACTION = 0.82; // where the pile forms, as a share of the section
+// The pile forms on the section's bottom edge — the same line the CSS leaves
+// and drop-pieces reach — so nothing looks like it stopped in mid-air.
+const GROUND_FRACTION = 1;
 const REST_SPEED = 26;     // below this, a body on the floor is considered settled
 const RESPAWN_AFTER = 2.6; // seconds a body rests before it falls again
 const STEP = 1 / 60;
@@ -114,9 +116,11 @@ export function FallingFruitPhysics({ className }: { className?: string }) {
         if (b.x < b.spec.r) { b.x = b.spec.r; b.vx = Math.abs(b.vx) * 0.5; }
         if (b.x > width - b.spec.r) { b.x = width - b.spec.r; b.vx = -Math.abs(b.vx) * 0.5; }
 
-        // floor
-        if (b.y > ground - b.spec.r) {
-          b.y = ground - b.spec.r;
+        // floor — rest the *drawn* bottom on the line, not the collision circle
+        // (some sprites are taller than their circle, e.g. an amla cluster)
+        const foot = Math.max(b.spec.r, b.spec.h / 2);
+        if (b.y > ground - foot) {
+          b.y = ground - foot;
           if (b.vy > 0) {
             b.vy = -b.vy * RESTITUTION;
             b.vx *= FLOOR_FRICTION;
@@ -154,7 +158,8 @@ export function FallingFruitPhysics({ className }: { className?: string }) {
       // settle, then drop again so the pile never just accumulates forever
       for (let i = 0; i < bodies.length; i++) {
         const b = bodies[i];
-        const settled = b.y > ground - b.spec.r - 2 && Math.abs(b.vy) < REST_SPEED && Math.abs(b.vx) < 12;
+        const settled =
+          b.y > ground - Math.max(b.spec.r, b.spec.h / 2) - 2 && Math.abs(b.vy) < REST_SPEED && Math.abs(b.vx) < 12;
         if (settled) {
           b.restFor += STEP;
           b.vx *= 0.9; b.spin *= 0.9;

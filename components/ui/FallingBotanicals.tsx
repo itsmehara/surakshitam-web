@@ -64,9 +64,15 @@ const PIECES: Piece[] = [
   { kind: "tulsi",    left: 97, dur: 18,  sway: 6,   delay: -19, amp: 24, scale: 1.1  },
 ];
 
-/** Landing line and the three bounce heights, as % of the section. */
-const GROUND = "76%";
-const BOUNCES = ["50%", "63%", "71%"];
+/**
+ * Landing line = the section's bottom edge, minus the piece's own height so it
+ * rests *on* the edge rather than sliding under it (the wrapper is anchored at
+ * top:0, so a 100% translation would put the piece's top at the bottom).
+ * Bounce apexes are measured up from that line.
+ */
+const PIECE_H = "64px";
+const GROUND = `calc(100% - ${PIECE_H})`;
+const BOUNCES = [`calc(100% - ${PIECE_H} - 26%)`, `calc(100% - ${PIECE_H} - 13%)`, `calc(100% - ${PIECE_H} - 5%)`];
 
 const GREEN = { neem: "#3F6136", neemDark: "#2C4726", tulsi: "#6E9B57", tulsiDark: "#4C7038" };
 const STEM = "#6B5A2E";

@@ -147,10 +147,10 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4" aria-busy={status.kind === "sending"}>
+    <form onSubmit={onSubmit} className="space-y-3" aria-busy={status.kind === "sending"}>
       {/* Type — segmented on wide screens, a native select on phones */}
       <fieldset>
-        <legend className="mb-2 block text-sm font-medium text-forest">I&apos;d like to</legend>
+        <legend className="mb-1.5 block text-sm font-medium text-forest">I&apos;d like to</legend>
         <div className="hidden gap-2 sm:flex" role="radiogroup">
           {ENQUIRY_TYPES.map((t) => (
             <button
@@ -182,16 +182,20 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
             </option>
           ))}
         </select>
-        <p className="mt-2 text-xs leading-relaxed text-forest/60 sm:text-sm">{copy.intro}</p>
+        <p className="mt-1.5 text-xs leading-relaxed text-forest/60 sm:text-sm">{copy.intro}</p>
       </fieldset>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
         <Field label="Name" name="name" required autoComplete="name" />
         <Field label="Phone / WhatsApp" name="phone" type="tel" required autoComplete="tel" inputMode="tel" />
-      </div>
-      {/* Partner: email and brand share a row; other types: email alone */}
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Email (optional)" name="email" type="email" autoComplete="email" />
+        {/* Partner: email and brand share the second row; other types get a full-width email */}
+        <Field
+          label="Email (optional)"
+          name="email"
+          type="email"
+          autoComplete="email"
+          className={type === "partner" ? undefined : "sm:col-span-2"}
+        />
         {type === "partner" && (
           <Field label="Brand / business name" name="business" required autoComplete="organization" />
         )}
@@ -199,7 +203,7 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
 
       {type === "product" && (
         <div>
-          <label htmlFor="enq-product" className="mb-1.5 block text-sm font-medium text-forest">
+          <label htmlFor="enq-product" className="mb-1 block text-sm font-medium text-forest">
             Products <span className="text-clay">*</span>
           </label>
           <textarea
@@ -220,7 +224,7 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
       {type === "consultation" && <SlotPicker date={slot.date} minutes={slot.minutes} onChange={setSlot} />}
 
       <div>
-        <label htmlFor="enq-message" className="mb-1.5 block text-sm font-medium text-forest">
+        <label htmlFor="enq-message" className="mb-1 block text-sm font-medium text-forest">
           {copy.messageLabel}
           {type !== "product" && <span className="text-clay"> *</span>}
         </label>
@@ -258,11 +262,11 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3 pt-1">
         <button
           type="submit"
           disabled={status.kind === "sending"}
-          className="rounded-full bg-forest px-7 py-3 text-sm font-medium text-cream transition-colors hover:bg-ink disabled:opacity-60"
+          className="h-11 rounded-full bg-forest px-7 text-sm font-medium text-cream transition-colors hover:bg-ink disabled:opacity-60"
         >
           {status.kind === "sending" ? "Sending…" : copy.button}
         </button>
@@ -272,22 +276,24 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
   );
 }
 
+/** 40px boxes, 4px label gap — one rhythm for every input, select and textarea in the form. */
 const inputClass =
-  "w-full rounded-lg border border-forest/15 bg-white px-3 py-2.5 text-sm text-forest placeholder:text-forest/35 focus:border-moss focus:outline-none";
+  "w-full rounded-lg border border-forest/15 bg-white px-3 py-2 text-sm leading-6 text-forest placeholder:text-forest/35 focus:border-moss focus:outline-none";
 
 function Field({
   label,
   name,
   required,
+  className,
   ...rest
-}: { label: string; name: string; required?: boolean } & React.InputHTMLAttributes<HTMLInputElement>) {
+}: { label: string; name: string; required?: boolean; className?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   const id = `enq-${name}`;
   return (
-    <div>
-      <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-forest">
+    <div className={className}>
+      <label htmlFor={id} className="mb-1 block text-sm font-medium text-forest">
         {label} {required && <span className="text-clay">*</span>}
       </label>
-      <input id={id} name={name} required={required} className={inputClass} {...rest} />
+      <input id={id} name={name} required={required} className={cn(inputClass, "h-10")} {...rest} />
     </div>
   );
 }

@@ -29,15 +29,15 @@ export default function ContactPage() {
         intro="Ask about products, partner with us, or book a consultation. WhatsApp is quickest; the form below works just as well."
       />
 
-      <div className="container relative grid gap-12 py-12 sm:py-16 lg:grid-cols-[1.2fr_1fr]">
+      <div className="container relative grid gap-8 py-8 sm:py-12 lg:grid-cols-[1.45fr_1fr] lg:gap-10">
         <section id="enquiry" aria-labelledby="enquiry-heading">
           <h2 id="enquiry-heading" className="font-serif text-2xl font-semibold text-forest">
             Send an enquiry
           </h2>
-          <p className="mt-2 text-sm text-forest/60">
+          <p className="mt-1.5 text-sm text-forest/60">
             Product questions, brand partnerships or a consultation slot — one form, pick what you need.
           </p>
-          <div className="mt-6">
+          <div className="mt-5">
             {/* EnquiryForm reads ?type= with useSearchParams → Suspense for the static export */}
             <Suspense fallback={<div className="h-96 rounded-lg bg-parchment/60" />}>
               <EnquiryForm />
