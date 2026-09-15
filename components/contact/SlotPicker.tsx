@@ -70,12 +70,22 @@ export function SlotPicker({
 
   return (
     <div>
-      {/* Availability notice — read before choosing */}
-      <p className="mb-3 rounded-lg border border-amber-300/70 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-900">
-        <span className="font-semibold">Slots are confirmed on availability.</span> If your preferred time is
-        already taken, we&apos;ll offer you the next available slot on WhatsApp. Mon–Sat, 10 am – 5 pm ·
-        30 minutes · first consultation free.
-      </p>
+      {/* Availability notice — must be read before choosing: serif, dark amber, left accent bar */}
+      <div
+        role="note"
+        className="mb-3 flex gap-3 rounded-lg border border-amber-400 border-l-4 border-l-amber-600 bg-amber-100 px-3.5 py-3"
+      >
+        <span aria-hidden="true" className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-600 font-serif text-xs font-bold text-white">
+          !
+        </span>
+        <p className="font-serif text-[0.95rem] leading-snug text-amber-950">
+          <span className="font-bold">Slots are confirmed on availability.</span> If your preferred time is
+          already taken, we&apos;ll offer you the next available slot on WhatsApp.
+          <span className="mt-1 block font-sans text-xs font-semibold tracking-wide text-amber-900">
+            Mon–Sat, 10 am – 5 pm · 30 minutes · first consultation free
+          </span>
+        </p>
+      </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
