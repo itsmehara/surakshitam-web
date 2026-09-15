@@ -47,7 +47,7 @@ function packSvg({ brand, name, size, tint, shape }) {
   <text x="400" y="492" text-anchor="middle" font-family="Helvetica, Arial, sans-serif"
         font-size="18" fill="#6F6A60">${esc(size)}</text>
   <text x="400" y="742" text-anchor="middle" font-family="Helvetica, Arial, sans-serif"
-        font-size="15" letter-spacing="1.6" fill="#9A9488">BRAND PARTNER PRODUCT · SAMPLE PACK IMAGE</text>
+        font-size="15" letter-spacing="1.6" fill="#9A9488">BRAND PARTNER PRODUCT · ILLUSTRATIVE PACK IMAGE</text>
 </svg>`);
 }
 
@@ -65,11 +65,10 @@ function genericPlaceholderSvg() {
 </svg>`);
 }
 
+// v3: only the one partner product that is actually listed (ANSWERS-2026-09-14 §C15).
+// millet-noodles / ragi-murukku / groundnut-oil were dropped from the catalogue.
 const ITEMS = [
-  { file: "wheat-noodles.webp", brand: "Amma's Kitchen", name: "Wheat Noodles", size: "250 g", tint: "#E4C98F", shape: "pouch" },
-  { file: "millet-noodles.webp", brand: "Millet Mitra", name: "Millet Noodles", size: "200 g", tint: "#D9C6A6", shape: "pouch" },
-  { file: "ragi-murukku.webp", brand: "Amma's Kitchen", name: "Ragi Murukku", size: "200 g", tint: "#D8B98C", shape: "pouch" },
-  { file: "groundnut-oil.webp", brand: "Ghani Fresh", name: "Groundnut Oil", size: "1 L", tint: "#EBD79A", shape: "bottle" },
+  { file: "wheat-noodles.webp", brand: "Homemade Swagruha Kitchen", name: "Wheat Noodles", size: "250 g", tint: "#E4C98F", shape: "pouch" },
 ];
 
 await mkdir(OUT, { recursive: true });

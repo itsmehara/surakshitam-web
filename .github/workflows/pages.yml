@@ -1,0 +1,48 @@
+# v3-static: build the Next.js static export and publish `out/` to GitHub Pages.
+# Pages settings → Build and deployment → Source must be "GitHub Actions".
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [v3-static]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time; a newer push cancels the queued one, never a running deploy.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          # Enquiry form → Apps Script /exec URL (public by design; the secret
+          # lives in Script Properties). Set under Settings → Secrets and
+          # variables → Actions → Variables. Empty = form shows "not configured".
+          NEXT_PUBLIC_ENQUIRY_URL: ${{ vars.NEXT_PUBLIC_ENQUIRY_URL }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
