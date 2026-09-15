@@ -23,11 +23,23 @@ import { ArrowRight, ChevronDown, LeafIcon, BeakerIcon, RecycleIcon } from "@/co
  * pan, `.sn-drift-*` in globals.css) so the picture is never frozen. It does
  * NOT pause when the mouse rests on the photo — that read as "stuck" — only
  * while the cursor is over the dots/arrows. Static frame under reduced motion.
+ *
+ * Layout (15 Sep): on phones the banner is cropped to portrait, so the copy
+ * sits at the BOTTOM over a vertical scrim and the photo shows through the top
+ * half; on desktop the copy sits left over a horizontal scrim and the photo
+ * fills the right. Each slide can set its own focal point per breakpoint
+ * (`focus`) — the 16:9 banners keep the products on the right, so the mobile
+ * crop is nudged right of centre. Swap `SLIDES` when the new images arrive.
  */
 
 interface Slide {
   src: string;
   alt: string;
+  /**
+   * CSS `object-position` for the crop — `mobile` applies below `lg`
+   * (portrait crop), `desktop` from `lg` up. Defaults: "62% center" / "center right".
+   */
+  focus?: { mobile?: string; desktop?: string };
   eyebrow: string;
   title: [string, string];
   body: string;
@@ -142,8 +154,14 @@ export function HeroSlideshow() {
                 fill
                 priority={i === 0}
                 sizes="100vw"
+                style={
+                  {
+                    "--focus-m": s.focus?.mobile ?? "62% center",
+                    "--focus-d": s.focus?.desktop ?? "center right",
+                  } as React.CSSProperties
+                }
                 className={cn(
-                  "object-cover object-[center_right] will-change-transform",
+                  "object-cover object-[var(--focus-m)] will-change-transform lg:object-[var(--focus-d)]",
                   // Continuous drift on every slide, so the one fading in is already moving.
                   !reduced && DRIFT[i % DRIFT.length],
                 )}
@@ -153,10 +171,16 @@ export function HeroSlideshow() {
         })}
       </div>
 
-      {/* ---- readability scrim: light on the left where the copy sits, clear on the right where the products are ---- */}
+      {/* ---- readability scrims ----
+          phones/tablets: copy is at the bottom, so fade upward and leave the top of the photo clear;
+          desktop: copy is on the left, so fade rightward and leave the products clear. */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-gradient-to-r from-[#F4F6EA]/95 via-[#F4F6EA]/70 to-transparent lg:via-[#F4F6EA]/55 lg:to-45%"
+        className="absolute inset-0 bg-gradient-to-t from-[#F4F6EA] via-[#F4F6EA]/85 via-45% to-[#F4F6EA]/10 lg:hidden"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 hidden bg-gradient-to-r from-[#F4F6EA]/95 via-[#F4F6EA]/55 to-transparent to-45% lg:block"
       />
       {/* bottom fade so the slide meets the next section cleanly */}
       <div
@@ -169,16 +193,18 @@ export function HeroSlideshow() {
       <FallingFruitPhysics />
 
       {/* ---- copy ---- */}
-      <div className="container relative flex min-h-[78svh] flex-col justify-center py-16 sm:py-20 lg:min-h-[80svh]">
+      <div className="container relative flex min-h-[72svh] flex-col justify-end pb-20 pt-56 sm:min-h-[76svh] sm:pt-64 lg:min-h-[80svh] lg:justify-center lg:py-20">
         <div key={index} className="max-w-xl animate-fade-up">
           <p className="eyebrow">{slide.eyebrow}</p>
-          <h1 className="mt-4 text-hero font-semibold text-forest">
+          <h1 className="mt-3 text-hero font-semibold text-forest lg:mt-4">
             {slide.title[0]}
             <br />
             {slide.title[1]}
           </h1>
-          <p className="mt-4 max-w-lg text-base leading-relaxed text-forest/75">{slide.body}</p>
-          <div className="mt-6 flex flex-wrap items-center gap-3">
+          <p className="mt-3 max-w-lg text-[0.95rem] leading-relaxed text-forest/75 sm:text-base lg:mt-4">
+            {slide.body}
+          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-3 lg:mt-6">
             <LinkButton href={slide.cta.href} size="lg">
               {slide.cta.label} <ArrowRight width={18} />
             </LinkButton>
@@ -186,7 +212,7 @@ export function HeroSlideshow() {
               Our Story
             </LinkButton>
           </div>
-          <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2">
+          <ul className="mt-5 hidden flex-wrap gap-x-6 gap-y-2 sm:flex lg:mt-6">
             {trust.map(({ icon: Icon, label }) => (
               <li key={label} className="flex items-center gap-2 text-sm text-forest/70">
                 <Icon width={18} className="text-moss" />
@@ -198,7 +224,7 @@ export function HeroSlideshow() {
 
         {/* ---- slide controls ---- */}
         <div
-          className="absolute bottom-6 left-0 right-0 flex items-center justify-between px-4 sm:px-6 lg:px-8"
+          className="absolute bottom-5 left-0 right-0 flex items-center justify-between px-4 sm:bottom-6 sm:px-6 lg:px-8"
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
         >
