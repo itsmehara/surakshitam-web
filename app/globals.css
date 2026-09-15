@@ -100,53 +100,10 @@
   70%      { transform: translate3d(-14px, 0, 0); }
 }
 
-/* heavy pieces: accelerate, land, bounce down in steps, settle */
-@keyframes sn-drop {
-  0%       { transform: translate3d(0, -15%, 0); animation-timing-function: cubic-bezier(0.45, 0, 0.9, 0.55); }
-  48%      { transform: translate3d(0, var(--sn-ground), 0); animation-timing-function: cubic-bezier(0.08, 0.6, 0.35, 1); }
-  60%      { transform: translate3d(0, var(--sn-bounce1), 0); animation-timing-function: cubic-bezier(0.45, 0, 0.9, 0.55); }
-  70%      { transform: translate3d(0, var(--sn-ground), 0); animation-timing-function: cubic-bezier(0.08, 0.6, 0.35, 1); }
-  78%      { transform: translate3d(0, var(--sn-bounce2), 0); animation-timing-function: cubic-bezier(0.45, 0, 0.9, 0.55); }
-  85%      { transform: translate3d(0, var(--sn-ground), 0); animation-timing-function: cubic-bezier(0.08, 0.6, 0.35, 1); }
-  90%      { transform: translate3d(0, var(--sn-bounce3), 0); animation-timing-function: cubic-bezier(0.45, 0, 0.9, 0.55); }
-  94%, 100%{ transform: translate3d(0, var(--sn-ground), 0); }
-}
-
-/* rolls away while it bounces, then keeps rolling once it settles */
-@keyframes sn-roll {
-  0%, 40%  { transform: translate3d(0, 0, 0) rotate(0deg); }
-  100%     { transform: translate3d(var(--sn-roll), 0, 0) rotate(var(--sn-spin)); }
-}
-
-/* Solid for 96% of its life. The last ~0.3s exists only so the piece doesn't
-   pop out of existence when the loop restarts — it is not the semi-transparent
-   look we removed earlier. Everything you actually watch is at full strength. */
-@keyframes sn-vanish {
-  0%, 96% { opacity: 1; }
-  100%    { opacity: 0; }
-}
-
 .sn-gust  { animation: sn-gust 11s ease-in-out infinite; }
 .sn-fall  { animation: sn-fall var(--sn-dur) linear var(--sn-delay) infinite; }
 .sn-sway  { animation: sn-sway var(--sn-swaydur) ease-in-out var(--sn-delay) infinite; }
-.sn-drop  { animation: sn-drop var(--sn-dur) linear var(--sn-delay) infinite,
-                       sn-vanish var(--sn-dur) linear var(--sn-delay) infinite; }
-.sn-roll  { animation: sn-roll var(--sn-dur) cubic-bezier(0.25, 0.9, 0.4, 1) var(--sn-delay) infinite; }
 
-/* A cut lemon half is a solid object: as it tumbles you see the cut face, then
-   the peel, then the face again. Two stacked faces inside a preserve-3d box
-   with the back one pre-rotated gives that for free — a flat sprite spinning in
-   2D would just look like a sticker turning. */
-@keyframes sn-flip {
-  0%   { transform: rotateY(0deg)   rotateZ(0deg); }
-  100% { transform: rotateY(360deg) rotateZ(var(--sn-tilt, 40deg)); }
-}
-.sn-flip {
-  transform-style: preserve-3d;
-  animation: sn-flip var(--sn-flipdur) linear var(--sn-delay) infinite;
-}
-.sn-face { backface-visibility: hidden; }
-.sn-face-back { transform: rotateY(180deg); }
 
 /* v2 hero slideshow: the photo is never still. Three drift patterns (zoom +
    pan) run infinite-alternate so a slide keeps moving for as long as it is on

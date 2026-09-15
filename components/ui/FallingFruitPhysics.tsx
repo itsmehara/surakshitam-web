@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { ReethaCluster, AmlaCluster, LemonFace, LemonBack, LemonEdge } from "./FallingBotanicals";
 
 /**
  * The heavy ingredients — reetha, amla and half a lemon — falling under a real
@@ -24,11 +23,30 @@ import { ReethaCluster, AmlaCluster, LemonFace, LemonBack, LemonEdge } from "./F
  *
  * Leaves stay on CSS in `FallingBotanicals.tsx`: they don't collide with
  * anything, so paying for JavaScript to move them would buy nothing.
+ *
+ * Sprites (16 Sep): photo cut-outs in `public/physics/*.webp` (masters in
+ * surakshitam-docs/source-assets/physics/), exported at 160px on the long side
+ * = 2.5× the largest render size. They replaced hand-drawn SVGs, which is why
+ * this file no longer imports anything from FallingBotanicals.
  */
 
-type Kind = "reetha" | "amla" | "lemon";
+/** Sprite file → its trimmed aspect (w/h), so w derives from h and nothing squashes. */
+const SPRITES = {
+  "reetha-cluster": 1.068,
+  "reetha-pair": 1.14,
+  "reetha-single": 1.001,
+  amla: 1.029,
+  "lemon-half": 1.035,
+} as const;
+type Sprite = keyof typeof SPRITES;
 
-type Spec = { kind: Kind; count: number; r: number; w: number; h: number };
+type Spec = { sprite: Sprite; r: number; w: number; h: number };
+
+/** One body: sprite + rendered height; width follows the image, radius fits the round part. */
+function spec(sprite: Sprite, h: number, rScale = 0.5): Spec {
+  const w = Math.round(h * SPRITES[sprite]);
+  return { sprite, r: Math.round(Math.min(w, h) * rScale), w, h };
+}
 
 /**
  * 8 bodies. Fewer than the cap the solver can handle, and it reads better —
@@ -36,14 +54,14 @@ type Spec = { kind: Kind; count: number; r: number; w: number; h: number };
  * one small bunch, singles, and a couple of lemon halves.
  */
 const SPECS: Spec[] = [
-  { kind: "reetha", count: 5, r: 33, w: 78, h: 74 },
-  { kind: "reetha", count: 3, r: 27, w: 62, h: 58 },
-  { kind: "reetha", count: 1, r: 11, w: 24, h: 32 },
-  { kind: "amla", count: 2, r: 25, w: 60, h: 52 },
-  { kind: "amla", count: 1, r: 16, w: 36, h: 46 },
-  { kind: "amla", count: 1, r: 16, w: 36, h: 46 },
-  { kind: "lemon", count: 1, r: 21, w: 42, h: 42 },
-  { kind: "lemon", count: 1, r: 21, w: 42, h: 42 },
+  spec("reetha-cluster", 64, 0.46), // three nuts on a stalk — the biggest piece
+  spec("reetha-pair", 54, 0.46),
+  spec("reetha-single", 30),
+  spec("amla", 46),
+  spec("amla", 36),
+  spec("lemon-half", 44),
+  spec("lemon-half", 38),
+  spec("reetha-single", 24),
 ];
 
 const GRAVITY = 1400;      // px/s² — tuned by eye, not by physics texts
@@ -211,7 +229,7 @@ export function FallingFruitPhysics({ className }: { className?: string }) {
       aria-hidden="true"
       className={"pointer-events-none absolute inset-0 overflow-hidden " + (className ?? "")}
     >
-      {SPECS.map((spec, i) => (
+      {SPECS.map((sp, i) => (
         <span
           key={i}
           className="absolute left-0 top-0 block will-change-transform"
@@ -219,23 +237,18 @@ export function FallingFruitPhysics({ className }: { className?: string }) {
           // nothing flashes into view before the solver takes over
           style={{ transform: `translate3d(0, -400px, 0)` }}
         >
-          {spec.kind === "reetha" ? (
-            <ReethaCluster count={spec.count} />
-          ) : spec.kind === "amla" ? (
-            <AmlaCluster count={spec.count} />
-          ) : (
-            <span className="relative block h-[42px] w-[42px]" style={{ transformStyle: "preserve-3d" }}>
-              <span className="sn-face absolute inset-0 block" style={{ transform: "translateZ(5px)" }}>
-                <LemonFace />
-              </span>
-              <span className="sn-face absolute inset-0 block" style={{ transform: "rotateY(180deg) translateZ(5px)" }}>
-                <LemonBack />
-              </span>
-              <span className="sn-face absolute top-0 block" style={{ left: "15.5px", transform: "rotateY(90deg) translateZ(21px)" }}>
-                <LemonEdge />
-              </span>
-            </span>
-          )}
+          {/* plain <img>, not next/image: fixed size, already optimised, must never lazy-load */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`/physics/${sp.sprite}.webp`}
+            alt=""
+            width={sp.w}
+            height={sp.h}
+            draggable={false}
+            className="block select-none"
+            // a hint of contact shadow so a photo cut-out sits on the page instead of floating on it
+            style={{ filter: "drop-shadow(0 2px 2px rgba(20, 30, 15, 0.22))" }}
+          />
         </span>
       ))}
     </div>
