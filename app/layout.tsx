@@ -4,6 +4,7 @@ import "@fontsource-variable/fraunces";
 import "@fontsource-variable/inter";
 import { site } from "@/lib/site";
 import { AppShell } from "@/components/layout/AppShell";
+import { EnquiryListProvider } from "@/lib/enquiry-list/EnquiryListContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -81,7 +82,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to content
         </a>
-        <AppShell>{children}</AppShell>
+        <EnquiryListProvider>
+          <AppShell>{children}</AppShell>
+        </EnquiryListProvider>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}

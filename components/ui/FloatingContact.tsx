@@ -1,22 +1,27 @@
 import { site } from "@/lib/site";
 import { WhatsAppIcon, InstagramIcon } from "@/components/icons";
 import { WhatsAppLink } from "@/components/ui/WhatsAppLink";
+import { EnquiryListFab } from "@/components/enquiry/EnquiryListFab";
 
 /**
- * Stacked floating contact buttons (bottom-right): Instagram, then WhatsApp.
+ * Stacked floating buttons (bottom-right): enquiry list (only when it has
+ * items), Instagram (tablet and up — three stacked buttons crowd a phone, and
+ * Instagram is in the footer and on /contact anyway), then WhatsApp.
  * Labels expand leftward on hover so they never clip the viewport edge.
  * The WhatsApp button logs its click via <WhatsAppLink> (cta "floating").
  */
 export function FloatingContact() {
   return (
     <div className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
+      <EnquiryListFab />
+
       {/* Instagram */}
       <a
         href={site.social.instagram}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Follow us on Instagram"
-        className="group flex items-center overflow-hidden rounded-full text-white shadow-card transition-transform duration-200 hover:scale-[1.03]"
+        className="group hidden items-center overflow-hidden rounded-full text-white shadow-card transition-transform duration-200 hover:scale-[1.03] sm:flex"
         style={{
           background:
             "linear-gradient(45deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)",

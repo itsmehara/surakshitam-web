@@ -182,3 +182,12 @@ export const YouTubeIcon = (p: IconProps) => (
     <path d="M11 9.8l4 2.2-4 2.2z" fill="currentColor" stroke="none" />
   </svg>
 );
+
+/** Clipboard with a list — the enquiry-list glyph (distinct from the old cart). */
+export const ClipboardIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <rect x="5" y="4" width="14" height="17" rx="2" />
+    <path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1" />
+    <path d="M9 11h6M9 15h6" />
+  </svg>
+);

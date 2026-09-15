@@ -2,8 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/lib/types";
 import { productImage } from "@/lib/catalog";
-import { WhatsAppLink } from "./WhatsAppLink";
-import { WhatsAppIcon } from "@/components/icons";
+import { AddToEnquiryButton } from "./AddToEnquiryButton";
 
 const categoryLabel: Record<Product["category"], string> = {
   "home-care": "Home Care",
@@ -14,7 +13,7 @@ const categoryLabel: Record<Product["category"], string> = {
 
 /**
  * Listing card. v3-static shows no price, stock or rating — the card leads to
- * the product page and offers a direct "Order on WhatsApp" link instead.
+ * the product page and adds the product to the enquiry list.
  */
 export function ProductCard({ product, priority }: { product: Product; priority?: boolean }) {
   const isBioEnzyme = product.homeCareType === "bio-enzyme";
@@ -73,16 +72,10 @@ export function ProductCard({ product, priority }: { product: Product; priority?
           <p className="mt-0.5 text-[0.65rem] text-forest/40">Brand partner · sold by us</p>
         )}
 
-        <div className="mt-auto flex items-center justify-between gap-2 pt-3">
-          <span className="text-[0.7rem] text-forest/50">{product.size}</span>
-          {/* Sits above the card-wide overlay link so the tap goes to WhatsApp, not the PDP. */}
-          <WhatsAppLink
-            cta="product-card"
-            product={product.name}
-            className="relative z-10 inline-flex items-center gap-1.5 rounded-full bg-[#25D366]/12 px-2.5 py-1 text-[0.7rem] font-medium text-forest transition-colors hover:bg-[#25D366]/25"
-          >
-            <WhatsAppIcon width={13} height={13} /> Order on WhatsApp
-          </WhatsAppLink>
+        <p className="mt-1 text-[0.7rem] text-forest/50">{product.size}</p>
+        {/* z-10 keeps the tap on the button, above the card-wide overlay link. */}
+        <div className="mt-auto pt-3">
+          <AddToEnquiryButton productId={product.id} name={product.name} />
         </div>
       </div>
     </article>

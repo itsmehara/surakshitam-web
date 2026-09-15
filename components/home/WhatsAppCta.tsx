@@ -18,14 +18,15 @@ export function WhatsAppCta() {
           />
           <div className="relative mx-auto max-w-xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cream/70">
-              Order on WhatsApp
+              Enquire on WhatsApp
             </p>
             <h2 className="mt-3 text-2xl font-semibold text-cream sm:text-3xl">
               Found something you&rsquo;d like to try?
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-cream/80">
-              Message us with the product name and we&rsquo;ll reply with price, availability and
-              delivery details. Mon–Sat, {site.hours}. Online ordering is coming soon.
+              Add products to your enquiry list as you browse, then send them to us in one message —
+              we reply with price, availability and delivery details. Mon–Sat, {site.hours}. Online
+              ordering is coming soon.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <WhatsAppLink

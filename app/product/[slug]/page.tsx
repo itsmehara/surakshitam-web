@@ -4,9 +4,9 @@ import { notFound } from "next/navigation";
 import { products, getProductBySlug, getProductsByCategory, productImage } from "@/lib/catalog";
 import { ProductGallery } from "@/components/ui/ProductGallery";
 import { ProductCard } from "@/components/ui/ProductCard";
-import { WhatsAppLink } from "@/components/ui/WhatsAppLink";
+import { AddToEnquiryButton } from "@/components/ui/AddToEnquiryButton";
 import { OrderingNote } from "@/components/ui/OrderingNote";
-import { CheckIcon, LeafIcon, ChevronDown, WhatsAppIcon, PhoneIcon } from "@/components/icons";
+import { CheckIcon, LeafIcon, ChevronDown, PhoneIcon } from "@/components/icons";
 import { site } from "@/lib/site";
 
 export function generateStaticParams() {
@@ -134,15 +134,9 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 
             <p className="mt-5 text-sm text-forest/55">Pack size · {product.size}</p>
 
-            {/* Actions — v3: every order starts as a WhatsApp conversation */}
+            {/* Actions — v3: collect products in the enquiry list, send one message */}
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <WhatsAppLink
-                cta="product-page"
-                product={product.name}
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 text-sm font-semibold text-white shadow-soft transition-transform duration-200 hover:scale-[1.02] sm:flex-1"
-              >
-                <WhatsAppIcon width={20} height={20} /> Order on WhatsApp
-              </WhatsAppLink>
+              <AddToEnquiryButton productId={product.id} name={product.name} variant="page" className="sm:flex-1" />
               <a
                 href={`tel:${site.phone.replace(/\s+/g, "")}`}
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-forest/20 px-6 text-sm font-medium text-forest transition-colors hover:border-forest/50 sm:flex-1"
