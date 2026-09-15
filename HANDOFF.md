@@ -6,6 +6,86 @@ need to re-read the whole codebase. Complements `../surakshitam-docs/docs/`
 
 ---
 
+## 0. v3-static — what this branch is (read this first on `v3-static`)
+
+**Branch:** `v3-static`, cut from `v2/full-screen-hero` on 2026-09-15. Version naming
+(ANSWERS-2026-09-14 §VERSION NAMING): v1 = special-screen storefront · v2 = full-screen hero +
+full shopping prototype (localStorage) · **v3 = this static listing site** · v4 = real backend.
+`master` and `v2/full-screen-hero` are untouched; everything below applies to `v3-static` only.
+
+**What it is:** a plain-HTML export of the storefront (`next build` → `out/`) published by GitHub
+Pages at **https://www.surakshitamnaturals.com** (GoDaddy DNS → `itsmehara.github.io`). No cart,
+login, admin, prices, stock, ratings, offers, policies or FAQs. Every product CTA is
+**"Order on WhatsApp"** (Business number +91 74163 94594) with the agreed pre-filled text; the
+contact page carries the **enquiry form → Google Sheet** (`lib/enquiry.ts`, see
+`../surakshitam-docs/docs/v3-static/ENQUIRY-SETUP.md`). Hero slideshow, animations and the
+fruit physics are unchanged.
+
+**Source of truth for content decisions:** `../surakshitam-docs/docs/v3-static/ANSWERS-2026-09-14.md`.
+
+### Build / deploy
+- `npm run build` → `out/` (static export; `next.config.mjs` sets `output:"export"`,
+  `trailingSlash:true`, `images.unoptimized:true`). Zero dynamic routes: `/product/[slug]` and
+  `/learn/[slug]` use `generateStaticParams`; `/shop` reads its filters client-side
+  (`components/shop/ShopView.tsx` + `useSearchParams`) so one `shop/index.html` serves every
+  `?category=` / `?shelf=` / `?concern=` / `?sort=` combination.
+- Local check: `npx serve out` (workspace `.claude/launch.json` has a `serve-out` entry on :3456).
+- `.github/workflows/pages.yml` — on push to `v3-static`: `npm ci`, `npm run build`,
+  `actions/upload-pages-artifact` (`out/`), `actions/deploy-pages`. Pages source must be
+  **GitHub Actions**. `NEXT_PUBLIC_ENQUIRY_URL` comes from a repository **variable** (Settings →
+  Secrets and variables → Actions → Variables); empty = the form reports "not configured".
+- `public/CNAME` = `www.surakshitamnaturals.com`; `public/.nojekyll` stops Pages' Jekyll pass from
+  dropping `_next/`.
+- `robots.ts`/`sitemap.ts` export as `robots.txt`/`sitemap.xml` with trailing-slash URLs.
+
+### What was removed vs v2 (and where it still lives: `v2/full-screen-hero`)
+- Routes: `studio/*`, `cart`, `checkout`, `login`, `register`, `account`, `order/*`, `rider/*`,
+  `track-order`, `wishlist`, `offers`, `combos`, `search`, `policies/*`, `faqs`.
+- Components: `account/`, `admin/`, `auth/`, `cart/`, `checkout/`, `search/`, `tracking/`,
+  `contact/ContactForm`, `home/{Hero,Reviews,Newsletter,PromoCarousel}`, `layout/OfferBanner`,
+  `ui/{AddToCartButton,BuyNowButton,ComboCard,ComingSoon,FaqAccordion,OffersFab,PromoCardGrid,
+  PromoTile,QuickViewButton,QuickViewModal,StarRating,WishlistButton,WhatsAppFloat}`.
+- lib: `admin, audit, auth, bundles, cart/, catalog-store, delivery, demo-seed, format,
+  ingredient-store, notifications, offers, orders, payments, print-label, profile, promotions,
+  reviews, rider-tracking, site-settings, users, weight, wishlist/`.
+- Data model: `Product` lost `price`, `mrp`, `stock`, `rating`, `reviewCount`, `weightGrams`;
+  `Review` type gone. Catalog dropped Face Cream, Face Pack, Millet Hakka Noodles, Roasted Ragi
+  Murukku, Wood-Pressed Groundnut Oil → **33 products** (32 house + 1 partner). Partner brand
+  "Amma's Kitchen" → **"Homemade Swagruha Kitchen"** (artwork regenerated via
+  `scripts/generate-partner-images.mjs`, which now lists only that one item).
+- `scripts/capture-*.mjs` and `screenshot-seed.mjs` still reference v2 routes/localStorage —
+  they are not part of the build and were left as-is; they will not work against v3.
+
+### What was added / changed
+- `components/ui/WhatsAppLink.tsx` is now wired everywhere a WhatsApp link exists (header bar,
+  header button, mobile drawer, footer, floating button, product cards, PDP, contact, home CTA);
+  each has a distinct `cta` so the "WhatsApp Clicks" sheet tab can tell them apart.
+- `components/ui/OrderingNote.tsx` — the "Online ordering coming soon" line on shop + PDP.
+- `components/home/WhatsAppCta.tsx` replaces Reviews + Newsletter at the bottom of the home page.
+- `app/contact/page.tsx` — `<EnquiryForm>`, WhatsApp card (`id="whatsapp"`, footer deep-links to
+  it), phone / email / address / **Mon–Sat 10 am – 6 pm** / YouTube · Instagram · Facebook.
+- `lib/site.ts` — `url` is the real domain, `hours` added, Facebook URL is the vanity
+  `facebook.com/surakshitam.naturals`, nav = Shop ▾ / Our Story / Ingredients / Learn / Contact,
+  footer "Reach us" column replaces "Help".
+- `components/ui/NotFoundView.tsx` reads the path after mount — Pages serves one `404.html` for
+  every missing URL, so rendering `usePathname()` during hydration threw React #425.
+- Ingredients page: `useIngredientLibrary` returns the seed only (no admin overlay).
+- Every "demo / prototype / to confirm with founders" note that was visible to customers was
+  removed from the rendered pages (Our Story quote, Learn intro/outro, Ingredients intro, footer).
+
+### Still open for v3 (also logged in `../REGISTRY.md` → "v3-static pending")
+1. Enquiry Sheet + Apps Script deployment (ENQUIRY-SETUP.md steps 1–5), then set the
+   `NEXT_PUBLIC_ENQUIRY_URL` repo variable and re-run the workflow.
+2. GitHub Pages settings + GoDaddy DNS (records in the WhatsApp message to Supriya, 15 Sep).
+3. `public/products/partners/{millet-noodles,ragi-murukku,groundnut-oil}.webp` and
+   `public/category-groups/partner-brands-4-product-card-group.webp` still show the dropped
+   products — orphaned / stale artwork, delete or re-shoot.
+4. Content the founders have not yet confirmed (§8 below still applies minus prices): "plant-based"
+   wording vs honey/goat-milk/beeswax, bio-enzyme badge, packaging-concept photos, ingredient lists.
+5. Analytics — deferred (ANSWERS §F30).
+
+---
+
 ## 1. What this is
 Premium natural home/skin/hair-care e-commerce site for **Surakshitam Naturals** (founders
 **Srikanth & Supriya**, Hyderabad). It is a **high-fidelity, fully clickable PROTOTYPE**: all
