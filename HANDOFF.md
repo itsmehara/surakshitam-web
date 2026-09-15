@@ -73,9 +73,43 @@ fruit physics are unchanged.
 - Every "demo / prototype / to confirm with founders" note that was visible to customers was
   removed from the rendered pages (Our Story quote, Learn intro/outro, Ingredients intro, footer).
 
+### Round 2 (15 Sep, evening) — enquiry list, contact types, header, hero
+- **Top ribbon removed** from `Header.tsx`. Header is now `h-16` / `lg:h-[4.5rem]`; the shop's
+  sticky filter bar and the AppShell Suspense fallback use those offsets. On phones the
+  WhatsApp header button is icon-only so it never crowds the wordmark.
+- **Enquiry list** (`lib/enquiry-list/EnquiryListContext.tsx`, localStorage `sn-enquiry-list-v1`)
+  replaces the per-product WhatsApp buttons. `AddToEnquiryButton` on cards (pill → "In enquiry
+  list") and on the PDP (stepper once listed). `components/enquiry/EnquiryListFab.tsx` sits at the
+  top of the `FloatingContact` stack with a count badge, only when the list has items;
+  `EnquiryListDrawer.tsx` has qty −/+, remove, clear, **"Send enquiry on WhatsApp"** (ONE numbered
+  message via `whatsAppListHref`, click logged with cta `enquiry-list`) and **"Send as a form
+  instead"** (→ `/contact?type=product`, form pre-filled with the same lines). It is an enquiry
+  list, not a checkout — no prices anywhere. Instagram FAB is `hidden sm:flex` (three stacked
+  buttons crowded a phone).
+- **Contact submenu** (`lib/site.ts`): Send Enquiry / Promote Your Brand · Partner With Us / Book
+  a Consultation Slot → `/contact?type=product|partner|consultation`. `Header.isActive` now
+  compares query params generically (`NAV_PARAMS = ["category","type"]`).
+- **EnquiryForm** handles the three types: segmented control (desktop) / select (phones), `?type=`
+  pre-selects, type-specific extra field (products textarea / business name / preferred slot),
+  copy and success text per type. On error it shows the message **and** a "Send it on WhatsApp
+  instead" link built from the same fields (`whatsAppFormFallbackHref`) — also what a visitor
+  sees while `NEXT_PUBLIC_ENQUIRY_URL` is unset. Payload adds `type`, `business`, `slot`;
+  **`Code.gs` updated** (3 new columns appended, typed alert subject, per-type validation) —
+  redeploy the script and, if the Sheet already has the 8-column header, add I1:K1 by hand
+  (ENQUIRY-SETUP.md §8).
+- **Shop** (`ShopView.tsx`): category chips scroll sideways with no scrollbar (`.sn-scroll-x`),
+  sort is a native `<select>` (router.push), bio-enzyme blurb hidden on phones. Five Shop submenu
+  items unchanged.
+- **Hero** (`HeroSlideshow.tsx`): below `lg` the copy sits at the bottom over a vertical scrim so
+  the photo shows through the top; `lg+` unchanged (copy left, photo right). Each slide accepts
+  `focus: { mobile, desktop }` (CSS object-position; defaults "62% center" / "center right") —
+  **when the new banner images arrive, swap `SLIDES[].src` and tune `focus` per slide; no layout
+  change needed.** Trust line hidden on phones. Physics/leaves untouched.
+
 ### Still open for v3 (also logged in `../REGISTRY.md` → "v3-static pending")
 1. Enquiry Sheet + Apps Script deployment (ENQUIRY-SETUP.md steps 1–5), then set the
-   `NEXT_PUBLIC_ENQUIRY_URL` repo variable and re-run the workflow.
+   `NEXT_PUBLIC_ENQUIRY_URL` repo variable and re-run the workflow. Redeploy `Code.gs` (new
+   columns) first.
 2. GitHub Pages settings + GoDaddy DNS (records in the WhatsApp message to Supriya, 15 Sep).
 3. `public/products/partners/{millet-noodles,ragi-murukku,groundnut-oil}.webp` and
    `public/category-groups/partner-brands-4-product-card-group.webp` still show the dropped
@@ -83,6 +117,7 @@ fruit physics are unchanged.
 4. Content the founders have not yet confirmed (§8 below still applies minus prices): "plant-based"
    wording vs honey/goat-milk/beeswax, bio-enzyme badge, packaging-concept photos, ingredient lists.
 5. Analytics — deferred (ANSWERS §F30).
+6. Hero banner images — Hara to supply the new set + per-slide preferences; then set `focus`.
 
 ---
 
