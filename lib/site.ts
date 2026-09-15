@@ -94,7 +94,7 @@ export const primaryNav: NavItem[] = [
     children: [
       { label: "Send Enquiry", href: "/contact?type=product", description: "Ask about products, price & availability" },
       { label: "Promote Your Brand / Partner With Us", href: "/contact?type=partner", description: "List your homemade products with us" },
-      { label: "Book a Consultation Slot", href: "/contact?type=consultation", description: "Skin, hair or home-care guidance" },
+      { label: "Book a Consultation Slot", href: "/contact?type=consultation", description: "First 30 minutes free · Mon–Sat, 10 am – 5 pm" },
     ],
   },
 ];

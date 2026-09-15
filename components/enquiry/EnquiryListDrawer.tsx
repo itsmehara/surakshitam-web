@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useEnquiryList, MAX_NOTE } from "@/lib/enquiry-list/EnquiryListContext";
 import { productImage } from "@/lib/catalog";
 import { enquiryListMessage, whatsAppListHref, trackWhatsAppClick } from "@/lib/enquiry";
@@ -11,13 +11,26 @@ import { cn } from "@/lib/cn";
 
 /**
  * Slide-in panel for the enquiry list. Rows are deliberately compact (48px
- * thumbnail, one control row) so a phone shows 6–7 products without
- * scrolling. Below the list: a short optional note, a live preview of the
- * exact WhatsApp text, then send / copy / send-as-form / clear.
+ * thumbnail, one control row) so a phone shows 8+ products without scrolling.
+ * Below the list: a one-line note that grows as you type, the exact WhatsApp
+ * text (open by default on tablet+, collapsed on phones to keep the list
+ * tall), then send / copy / send-as-form. "Clear" lives in the header.
  */
 export function EnquiryListDrawer() {
   const { lines, count, setQty, remove, clear, note, setNote, drawerOpen, closeDrawer } = useEnquiryList();
   const [copied, setCopied] = useState(false);
+  // Preview starts open where there is room for it; phones get it collapsed.
+  const [previewOpen, setPreviewOpen] = useState(false);
+  useEffect(() => setPreviewOpen(window.matchMedia("(min-width: 640px)").matches), []);
+
+  // The note textarea grows with its text (1–4 lines) — also on open, for a saved note.
+  const noteRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const el = noteRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 96)}px`;
+  }, [note, drawerOpen]);
 
   useEffect(() => {
     if (!drawerOpen) return;
@@ -65,21 +78,32 @@ export function EnquiryListDrawer() {
           drawerOpen ? "translate-x-0" : "translate-x-full",
         )}
       >
-        <header className="flex items-center justify-between border-b border-forest/10 px-4 py-3">
-          <div>
+        <header className="flex items-center justify-between gap-2 border-b border-forest/10 px-4 py-2.5">
+          <div className="min-w-0">
             <h2 className="font-serif text-lg font-semibold leading-tight text-forest">
               Enquiry list {count > 0 && <span className="text-forest/50">({count})</span>}
             </h2>
-            <p className="text-xs text-forest/55">No payment here — we reply with price &amp; availability.</p>
+            <p className="truncate text-[0.7rem] text-forest/55">No payment — we reply with price &amp; availability.</p>
           </div>
-          <button
-            type="button"
-            onClick={closeDrawer}
-            aria-label="Close enquiry list"
-            className="flex h-9 w-9 items-center justify-center rounded-full text-forest hover:bg-forest/5"
-          >
-            <CloseIcon width={18} />
-          </button>
+          <div className="flex shrink-0 items-center gap-1">
+            {count > 0 && (
+              <button
+                type="button"
+                onClick={clear}
+                className="rounded-full px-2.5 py-1 text-xs text-forest/55 underline underline-offset-2 hover:text-clay"
+              >
+                Clear
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={closeDrawer}
+              aria-label="Close enquiry list"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-forest hover:bg-forest/5"
+            >
+              <CloseIcon width={18} />
+            </button>
+          </div>
         </header>
 
         {lines.length === 0 ? (
@@ -105,17 +129,17 @@ export function EnquiryListDrawer() {
             {/* ---- items: compact rows ---- */}
             <ul className="divide-y divide-forest/8 overflow-y-auto px-4">
               {lines.map(({ product, qty }) => (
-                <li key={product.id} className="flex items-center gap-3 py-2">
+                <li key={product.id} className="flex items-center gap-2.5 py-1.5">
                   <Link
                     href={`/product/${product.slug}`}
                     onClick={closeDrawer}
-                    className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border border-forest/8 bg-cream"
+                    className="relative h-11 w-11 shrink-0 overflow-hidden rounded-md border border-forest/8 bg-cream"
                   >
                     <Image
                       src={productImage(product)}
                       alt=""
                       fill
-                      sizes="48px"
+                      sizes="44px"
                       className={product.thirdParty ? "object-contain p-0.5" : "object-cover"}
                     />
                   </Link>
@@ -161,28 +185,29 @@ export function EnquiryListDrawer() {
             </ul>
 
             {/* ---- note + preview + actions ---- */}
-            <div className="mt-auto space-y-3 border-t border-forest/10 px-4 py-3">
-              <div>
-                <label htmlFor="enq-list-note" className="mb-1 block text-xs font-medium text-forest">
-                  Add a note (optional)
-                </label>
-                <textarea
-                  id="enq-list-note"
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  rows={2}
-                  maxLength={MAX_NOTE}
-                  placeholder="Delivery area, preferred fragrance, any questions…"
-                  className="w-full resize-none rounded-lg border border-forest/15 bg-white px-3 py-2 text-sm text-forest placeholder:text-forest/35 focus:border-moss focus:outline-none"
-                />
-              </div>
+            <div className="mt-auto space-y-2 border-t border-forest/10 px-4 pb-3 pt-2.5">
+              <textarea
+                ref={noteRef}
+                id="enq-list-note"
+                aria-label="Add a note (optional)"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                rows={1}
+                maxLength={MAX_NOTE}
+                placeholder="Add a note — delivery area, questions… (optional)"
+                className="w-full resize-none rounded-lg border border-forest/15 bg-white px-3 py-2 text-sm text-forest placeholder:text-forest/40 focus:border-moss focus:outline-none"
+              />
 
-              <details open className="group rounded-lg border border-forest/10 bg-parchment/60">
-                <summary className="flex cursor-pointer list-none items-center justify-between px-3 py-2 text-xs font-medium text-forest">
-                  Your WhatsApp message
+              <details
+                open={previewOpen}
+                onToggle={(e) => setPreviewOpen(e.currentTarget.open)}
+                className="group rounded-lg border border-forest/10 bg-parchment/60"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between px-3 py-1.5 text-xs font-medium text-forest">
+                  {previewOpen ? "Your WhatsApp message" : "Preview your WhatsApp message"}
                   <ChevronDown width={14} className="text-moss transition-transform group-open:rotate-180" />
                 </summary>
-                <pre className="max-h-32 overflow-y-auto whitespace-pre-wrap border-t border-forest/8 px-3 py-2 font-sans text-xs leading-relaxed text-forest/75">
+                <pre className="max-h-28 overflow-y-auto whitespace-pre-wrap border-t border-forest/8 px-3 py-2 font-sans text-xs leading-relaxed text-forest/75">
                   {message}
                 </pre>
               </details>
@@ -201,12 +226,8 @@ export function EnquiryListDrawer() {
               >
                 <WhatsAppIcon width={20} height={20} /> Send on WhatsApp
               </a>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={copyMessage}
-                  className="flex h-10 items-center justify-center gap-1.5 rounded-full border border-forest/20 text-xs font-medium text-forest transition-colors hover:border-forest/50"
-                >
+              <div className="flex items-center justify-center gap-4 text-xs font-medium text-forest/70">
+                <button type="button" onClick={copyMessage} className="inline-flex items-center gap-1 hover:text-forest">
                   {copied ? (
                     <>
                       <CheckIcon width={14} className="text-moss" /> Copied
@@ -215,21 +236,15 @@ export function EnquiryListDrawer() {
                     "Copy message"
                   )}
                 </button>
+                <span aria-hidden="true" className="text-forest/25">·</span>
                 <Link
                   href="/contact/?type=product"
                   onClick={closeDrawer}
-                  className="flex h-10 items-center justify-center gap-1.5 rounded-full border border-forest/20 text-xs font-medium text-forest transition-colors hover:border-forest/50"
+                  className="inline-flex items-center gap-1 hover:text-forest"
                 >
-                  Send as a form <ArrowRight width={14} />
+                  Send as a form <ArrowRight width={13} />
                 </Link>
               </div>
-              <button
-                type="button"
-                onClick={clear}
-                className="block w-full text-center text-xs text-forest/50 underline underline-offset-2 hover:text-clay"
-              >
-                Clear list
-              </button>
             </div>
           </>
         )}

@@ -12,7 +12,7 @@ export type EnquiryType = "product" | "partner" | "consultation";
 export const ENQUIRY_TYPES: { value: EnquiryType; label: string; short: string }[] = [
   { value: "product", label: "Product enquiry", short: "Send Enquiry" },
   { value: "partner", label: "Promote your brand / partner with us", short: "Partner With Us" },
-  { value: "consultation", label: "Book a consultation slot", short: "Book a Consultation" },
+  { value: "consultation", label: "Book a free consultation (30 min)", short: "Book a Consultation" },
 ];
 
 export function isEnquiryType(v: unknown): v is EnquiryType {

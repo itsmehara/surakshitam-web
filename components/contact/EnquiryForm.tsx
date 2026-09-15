@@ -13,6 +13,7 @@ import {
   type EnquiryType,
 } from "@/lib/enquiry";
 import { useEnquiryList } from "@/lib/enquiry-list/EnquiryListContext";
+import { SlotPicker, formatSlot } from "./SlotPicker";
 import { CheckIcon, WhatsAppIcon } from "@/components/icons";
 import { cn } from "@/lib/cn";
 
@@ -52,11 +53,11 @@ const COPY: Record<
     button: "Send partnership request",
   },
   consultation: {
-    intro: "Book a short call or visit for skin, hair or home-care guidance. Tell us what you'd like help with and when suits you.",
+    intro: "Your first 30-minute consultation is free — skin, hair or home-care guidance, by phone or at our Nagole workspace. Pick a day and time and we'll confirm on WhatsApp.",
     messageLabel: "What would you like help with?",
     placeholder: "e.g. dry skin routine, hair-fall, switching to natural home cleaners…",
-    success: "Thank you — we'll confirm your slot by phone or WhatsApp.",
-    button: "Request a slot",
+    success: "Thank you — we'll confirm your free 30-minute slot by phone or WhatsApp.",
+    button: "Book my free slot",
   },
 };
 
@@ -82,12 +83,13 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
   );
   const [products, setProducts] = useState(product);
   const [message, setMessage] = useState("");
+  const [slot, setSlot] = useState<{ date: string; minutes: number | null }>({ date: "", minutes: null });
   useEffect(() => {
     if (!ready) return;
     setProducts(listedProducts);
-    // The drawer's note becomes the message so nothing typed there is lost.
-    if (note && lines.length) setMessage((m) => m || note);
-  }, [ready, listedProducts, note, lines.length]);
+    // The drawer's note becomes the product-enquiry message so nothing typed there is lost.
+    if (type === "product" && note && lines.length) setMessage((m) => m || note);
+  }, [ready, listedProducts, note, lines.length, type]);
 
   const copy = COPY[type];
 
@@ -103,15 +105,23 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
       email: str("email"),
       product: type === "product" ? str("product") : "",
       business: type === "partner" ? str("business") : "",
-      slot: type === "consultation" ? str("slot") : "",
+      slot:
+        type === "consultation" && slot.date && slot.minutes !== null
+          ? formatSlot(slot.date, slot.minutes)
+          : "",
       message: str("message"),
       website: str("website"),
     };
+    if (type === "consultation" && !fields.slot) {
+      setStatus({ kind: "error", message: "Please pick a day and a time slot.", fallback: whatsAppFormFallbackHref(fields) });
+      return;
+    }
     setStatus({ kind: "sending" });
     const result = await submitEnquiry(fields);
     if (result.ok) {
       form.reset();
       setMessage("");
+      setSlot({ date: "", minutes: null });
       setStatus({ kind: "sent", type });
     } else {
       setStatus({ kind: "error", message: result.error, fallback: whatsAppFormFallbackHref(fields) });
@@ -205,12 +215,12 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
         <Field label="Brand / business name" name="business" required autoComplete="organization" />
       )}
       {type === "consultation" && (
-        <Field
-          label="Preferred day & time"
-          name="slot"
-          required
-          placeholder="e.g. Saturday morning, or any weekday after 4 pm"
-        />
+        <>
+          <p className="flex w-fit items-center gap-2 rounded-full bg-moss/12 px-3 py-1 text-xs font-medium text-moss">
+            <CheckIcon width={14} /> First consultation free · 30 minutes
+          </p>
+          <SlotPicker date={slot.date} minutes={slot.minutes} onChange={setSlot} />
+        </>
       )}
 
       <div>
