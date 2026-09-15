@@ -87,7 +87,16 @@ export const primaryNav: NavItem[] = [
   { label: "Our Story", href: "/our-story" },
   { label: "Ingredients", href: "/ingredients" },
   { label: "Learn", href: "/learn" },
-  { label: "Contact", href: "/contact" },
+  {
+    label: "Contact",
+    href: "/contact",
+    // Each child opens the same enquiry form with the type pre-selected (?type=).
+    children: [
+      { label: "Send Enquiry", href: "/contact?type=product", description: "Ask about products, price & availability" },
+      { label: "Promote Your Brand / Partner With Us", href: "/contact?type=partner", description: "List your homemade products with us" },
+      { label: "Book a Consultation Slot", href: "/contact?type=consultation", description: "Skin, hair or home-care guidance" },
+    ],
+  },
 ];
 
 export type Concern = {

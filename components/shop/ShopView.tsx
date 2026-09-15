@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { products, categories } from "@/lib/catalog";
 import { concernsForCategory } from "@/lib/site";
 import type { Product } from "@/lib/types";
@@ -54,6 +54,7 @@ const CATEGORY_ALIASES: Record<string, string> = { pantry: "partner-brands" };
  */
 export function ShopView() {
   const sp = useSearchParams();
+  const router = useRouter();
   const searchParams: SearchParams = {
     category: sp.get("category") ?? undefined,
     sort: sp.get("sort") ?? undefined,
@@ -148,11 +149,13 @@ export function ShopView() {
         )}
       </div>
 
-      {/* Sticky filter + sort bar */}
-      <div className="sticky top-[6.25rem] z-30 border-b border-forest/8 bg-cream/95 backdrop-blur-md lg:top-[6.75rem]">
-        <div className="container flex items-center gap-3 overflow-x-auto py-2.5">
+      {/* Sticky category + sort bar — sits directly under the header (h-16 / lg:h-[4.5rem]).
+          The chip row scrolls sideways on phones with the scrollbar hidden; sort is a
+          native select so it never competes with the chips for width. */}
+      <div className="sticky top-16 z-30 border-b border-forest/8 bg-cream/95 backdrop-blur-md lg:top-[4.5rem]">
+        <div className="container flex items-center gap-3 py-2.5">
           <div
-            className="flex shrink-0 gap-2"
+            className="sn-scroll-x flex min-w-0 flex-1 gap-2"
             role="group"
             aria-label="Filter by category"
           >
@@ -176,28 +179,21 @@ export function ShopView() {
             })}
           </div>
 
-          <div
-            className="ml-auto flex shrink-0 items-center gap-1.5"
-            aria-label="Sort products"
-          >
-            <span className="hidden text-xs text-forest/50 sm:inline">
-              Sort
-            </span>
-            {sortOptions.map((o) => (
-              <Link
-                key={o.value}
-                href={href({ sort: o.value })}
-                className={cn(
-                  "whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
-                  activeSort === o.value
-                    ? "bg-moss/15 text-moss"
-                    : "text-forest/55 hover:bg-forest/5",
-                )}
-              >
-                {o.label}
-              </Link>
-            ))}
-          </div>
+          <label className="ml-auto flex shrink-0 items-center gap-1.5 text-xs text-forest/50">
+            <span className="hidden sm:inline">Sort</span>
+            <select
+              aria-label="Sort products"
+              value={activeSort}
+              onChange={(e) => router.push(href({ sort: e.target.value }))}
+              className="rounded-full border border-forest/15 bg-cream py-1.5 pl-3 pr-7 text-xs font-medium text-forest focus:border-moss focus:outline-none"
+            >
+              {sortOptions.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
       </div>
 
@@ -240,7 +236,7 @@ export function ShopView() {
                 </Link>
               );
             })}
-            <p className="basis-full text-xs leading-relaxed text-forest/55 sm:basis-auto sm:border-l sm:border-forest/10 sm:pl-3">
+            <p className="hidden basis-full text-xs leading-relaxed text-forest/55 sm:block sm:basis-auto sm:border-l sm:border-forest/10 sm:pl-3">
               Bio-enzyme cleaners are built on fermented plant peels — they
               break down after use, so what goes down the drain feeds the soil
               instead of harming it.
@@ -253,12 +249,12 @@ export function ShopView() {
       {availableConcerns.length > 0 && (
         <div className="border-b border-forest/8 bg-cream">
           <div
-            className="container flex items-center gap-2 overflow-x-auto py-2.5"
+            className="container sn-scroll-x flex items-center gap-2 py-2.5"
             role="group"
             aria-label="Shop by concern"
           >
-            <span className="hidden shrink-0 text-xs text-forest/50 sm:inline">
-              Shop by concern
+            <span className="shrink-0 text-xs text-forest/50">
+              Concern
             </span>
             {availableConcerns.map((c) => {
               const active = activeConcern === c.slug;

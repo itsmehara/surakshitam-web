@@ -21,7 +21,6 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const activeCategory = searchParams.get("category");
 
   // Which primary-nav dropdown is open (by label), if any.
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -46,17 +45,20 @@ export function Header() {
 
   const nav = primaryNav;
 
-  // Which primary-nav item corresponds to the current page.
+  // Query params that distinguish sibling menu items (Shop ?category=, Contact ?type=).
+  const NAV_PARAMS = ["category", "type"];
+
+  // Which primary-nav item corresponds to the current page. Items with a query
+  // string match only when that param is set; the bare parent ("All Products",
+  // plain "Contact") matches when none of the nav params is set.
   const isActive = (href: string) => {
     const [path, query] = href.split("?");
-    if (path === "/shop") {
-      // Product pages count as "Shop" (unless a category tab matches).
-      if (pathname.startsWith("/product")) return !query;
-      if (pathname !== "/shop") return false;
-      const hrefCat = query ? new URLSearchParams(query).get("category") : null;
-      return hrefCat === activeCategory;
-    }
-    return pathname === path || pathname.startsWith(path + "/");
+    // Product pages count as "Shop" (the parent, not a category tab).
+    if (path === "/shop" && pathname.startsWith("/product")) return !query;
+    const pathMatch = pathname === path || pathname === path + "/";
+    if (!pathMatch) return false;
+    if (!query) return NAV_PARAMS.every((k) => !searchParams.get(k));
+    return [...new URLSearchParams(query).entries()].every(([k, v]) => searchParams.get(k) === v);
   };
 
   /** A parent is active when it, or anything inside it, matches. */
@@ -82,34 +84,6 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50">
-      {/* Announcement bar — also doubles as real, clickable contact channels (not just a mocked
-          notification viewer): a customer can call or WhatsApp the founders directly. */}
-      <div className="bg-forest text-cream">
-        <div className="container flex h-9 items-center justify-between gap-3 text-xs sm:text-[0.8rem]">
-          <p className="hidden min-w-0 flex-1 truncate tracking-wide sm:block">
-            Homemade &amp; plant-based · Made with natural essential oils · Handcrafted in Hyderabad
-          </p>
-          <div className="flex flex-1 items-center justify-center gap-4 sm:flex-none">
-            <a
-              href={telHref}
-              className="inline-flex items-center gap-1.5 text-cream/90 transition-colors hover:text-cream"
-              aria-label={`Call us at ${site.phone}`}
-            >
-              <PhoneIcon width={13} height={13} />
-              <span className="hidden sm:inline">{site.phone}</span>
-            </a>
-            <WhatsAppLink
-              cta="header"
-              className="inline-flex items-center gap-1.5 text-cream/90 transition-colors hover:text-cream"
-              aria-label="Chat with us on WhatsApp"
-            >
-              <WhatsAppIcon width={13} height={13} />
-              <span className="hidden sm:inline">WhatsApp</span>
-            </WhatsAppLink>
-          </div>
-        </div>
-      </div>
-
       <div
         className={cn(
           "border-b transition-colors duration-300",
@@ -196,7 +170,7 @@ export function Header() {
                     <div
                       role="menu"
                       aria-label={item.label}
-                      className="absolute left-1/2 top-full z-50 w-72 -translate-x-1/2 pt-3"
+                      className="absolute left-1/2 top-full z-50 w-80 -translate-x-1/2 pt-3"
                     >
                       <div className="overflow-hidden rounded-lg border border-forest/10 bg-cream shadow-card">
                         {item.children.map((child) => {
@@ -239,14 +213,15 @@ export function Header() {
             })}
           </nav>
 
-          {/* Right side: the one action a listing site needs — start a WhatsApp chat */}
+          {/* Right side: the one action a listing site needs — start a WhatsApp chat.
+              Icon-only on phones so it never crowds the wordmark. */}
           <WhatsAppLink
             cta="header-button"
-            className="inline-flex h-10 items-center gap-2 rounded-full bg-[#25D366] px-4 text-sm font-medium text-white shadow-soft transition-transform duration-200 hover:scale-[1.03]"
+            aria-label="Chat on WhatsApp"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[#25D366] text-sm font-medium text-white shadow-soft transition-transform duration-200 hover:scale-[1.03] sm:w-auto sm:px-4"
           >
             <WhatsAppIcon width={18} height={18} />
             <span className="hidden sm:inline">Chat on WhatsApp</span>
-            <span className="sm:hidden">WhatsApp</span>
           </WhatsAppLink>
         </div>
       </div>

@@ -170,3 +170,11 @@
 @media (prefers-reduced-motion: reduce) {
   .sn-drift-a, .sn-drift-b, .sn-drift-c { animation: none; }
 }
+
+/* Horizontal chip rows (shop filters): scroll sideways on phones without a scrollbar. */
+.sn-scroll-x {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.sn-scroll-x::-webkit-scrollbar { display: none; }
