@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { PageIntro } from "@/components/ui/PageIntro";
+import { BotanicalBackdrop } from "@/components/ui/BotanicalBackdrop";
 import { EnquiryForm } from "@/components/contact/EnquiryForm";
 import { WhatsAppLink } from "@/components/ui/WhatsAppLink";
 import { site } from "@/lib/site";
@@ -17,14 +18,18 @@ const socialClass =
 
 export default function ContactPage() {
   return (
-    <>
+    // One backdrop for the whole page: leaves drift and fruit falls past the
+    // form and piles up just above the footer (same treatment as the shop grid).
+    <div className="relative overflow-hidden">
+      <BotanicalBackdrop />
       <PageIntro
+        backdrop={false}
         eyebrow="Contact"
         title="We'd love to hear from you"
         intro="Ask about products, partner with us, or book a consultation. WhatsApp is quickest; the form below works just as well."
       />
 
-      <div className="container grid gap-12 py-12 sm:py-16 lg:grid-cols-[1.2fr_1fr]">
+      <div className="container relative grid gap-12 py-12 sm:py-16 lg:grid-cols-[1.2fr_1fr]">
         <section id="enquiry" aria-labelledby="enquiry-heading">
           <h2 id="enquiry-heading" className="font-serif text-2xl font-semibold text-forest">
             Send an enquiry
@@ -103,6 +108,6 @@ export default function ContactPage() {
           </div>
         </aside>
       </div>
-    </>
+    </div>
   );
 }
