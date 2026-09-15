@@ -120,6 +120,15 @@ fruit physics are unchanged.
   set on the product card itself** (`AddToEnquiryButton` turns into a − n + stepper in place;
   0 removes); `/contact` runs one page-long `BotanicalBackdrop` (`PageIntro backdrop={false}`).
 
+- **Physics sprites are photos (16 Sep)**: `public/physics/{reetha-single,reetha-pair,
+  reetha-cluster,amla,lemon-half}.webp`, generated cut-outs (masters in
+  `surakshitam-docs/source-assets/physics/`). `FallingFruitPhysics.SPECS` = `spec(sprite,
+  height, rScale)`; width follows the image's trimmed aspect in `SPRITES`. To re-export after
+  replacing a master: trim → resize long side 160 → webp q84 (one-liner in the 16 Sep chat log,
+  or just ask). The hand-drawn fruit and the 3D lemon flip are gone; leaves remain CSS/SVG.
+- **Ground line**: physics floor = section bottom edge (`GROUND_FRACTION = 1`), sprites rest
+  their drawn bottom on it.
+
 ### Still open for v3 (also logged in `../REGISTRY.md` → "v3-static pending")
 1. Enquiry Sheet + Apps Script deployment (ENQUIRY-SETUP.md steps 1–5), then set the
    `NEXT_PUBLIC_ENQUIRY_URL` repo variable and re-run the workflow. Redeploy `Code.gs` (new
