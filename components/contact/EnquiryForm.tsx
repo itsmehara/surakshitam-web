@@ -53,7 +53,7 @@ const COPY: Record<
     button: "Send partnership request",
   },
   consultation: {
-    intro: "Your first 30-minute consultation is free — skin, hair or home-care guidance, by phone or at our Nagole workspace. Pick a day and time and we'll confirm on WhatsApp.",
+    intro: "Skin, hair or home-care guidance, by phone or at our Nagole workspace. Your first 30 minutes are free.",
     messageLabel: "What would you like help with?",
     placeholder: "e.g. dry skin routine, hair-fall, switching to natural home cleaners…",
     success: "Thank you — we'll confirm your free 30-minute slot by phone or WhatsApp.",
@@ -147,7 +147,7 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5" aria-busy={status.kind === "sending"}>
+    <form onSubmit={onSubmit} className="space-y-4" aria-busy={status.kind === "sending"}>
       {/* Type — segmented on wide screens, a native select on phones */}
       <fieldset>
         <legend className="mb-2 block text-sm font-medium text-forest">I&apos;d like to</legend>
@@ -182,14 +182,20 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
             </option>
           ))}
         </select>
-        <p className="mt-2 text-sm text-forest/60">{copy.intro}</p>
+        <p className="mt-2 text-xs leading-relaxed text-forest/60 sm:text-sm">{copy.intro}</p>
       </fieldset>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Name" name="name" required autoComplete="name" />
         <Field label="Phone / WhatsApp" name="phone" type="tel" required autoComplete="tel" inputMode="tel" />
       </div>
-      <Field label="Email (optional)" name="email" type="email" autoComplete="email" />
+      {/* Partner: email and brand share a row; other types: email alone */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field label="Email (optional)" name="email" type="email" autoComplete="email" />
+        {type === "partner" && (
+          <Field label="Brand / business name" name="business" required autoComplete="organization" />
+        )}
+      </div>
 
       {type === "product" && (
         <div>
@@ -211,17 +217,7 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
           )}
         </div>
       )}
-      {type === "partner" && (
-        <Field label="Brand / business name" name="business" required autoComplete="organization" />
-      )}
-      {type === "consultation" && (
-        <>
-          <p className="flex w-fit items-center gap-2 rounded-full bg-moss/12 px-3 py-1 text-xs font-medium text-moss">
-            <CheckIcon width={14} /> First consultation free · 30 minutes
-          </p>
-          <SlotPicker date={slot.date} minutes={slot.minutes} onChange={setSlot} />
-        </>
-      )}
+      {type === "consultation" && <SlotPicker date={slot.date} minutes={slot.minutes} onChange={setSlot} />}
 
       <div>
         <label htmlFor="enq-message" className="mb-1.5 block text-sm font-medium text-forest">
@@ -231,7 +227,7 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
         <textarea
           id="enq-message"
           name="message"
-          rows={4}
+          rows={3}
           required={type !== "product"}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
@@ -277,7 +273,7 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
 }
 
 const inputClass =
-  "w-full rounded-lg border border-forest/15 bg-white px-4 py-2.5 text-sm text-forest placeholder:text-forest/35 focus:border-moss focus:outline-none";
+  "w-full rounded-lg border border-forest/15 bg-white px-3 py-2.5 text-sm text-forest placeholder:text-forest/35 focus:border-moss focus:outline-none";
 
 function Field({
   label,

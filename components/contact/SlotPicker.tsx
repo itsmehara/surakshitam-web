@@ -4,11 +4,12 @@ import { useMemo } from "react";
 import { cn } from "@/lib/cn";
 
 /**
- * Consultation slot picker — a native date input (Mon–Sat, next 30 days) plus
- * a grid of 30-minute starts from 10:00 to 16:30, so every slot ends by 5 pm.
- * Past slots are disabled when the chosen day is today. The value handed
- * back is one readable string ("Sat 20 Sep 2026, 10:30–11:00") — that is
- * what the Sheet, the alert email and the WhatsApp fallback all show.
+ * Consultation slot picker — one row: a native date input (Mon–Sat, next 30
+ * days) beside a dropdown of 30-minute starts from 10:00 to 16:30, so every
+ * slot ends by 5 pm. Past slots are disabled when the chosen day is today.
+ * The value handed back is one readable string ("Sat 20 Sep 2026, 10:30–11:00")
+ * — what the Sheet, the alert email and the WhatsApp fallback all show.
+ * Slots are preferences: the founders confirm against real availability.
  */
 export const CONSULT_START = 10; // 10:00
 export const CONSULT_END = 17; // 17:00 — last slot starts 16:30
@@ -45,6 +46,9 @@ export function formatSlot(date: string, minutes: number): string {
   return `${day}, ${label(minutes)}–${label(minutes + SLOT_MINUTES)}`;
 }
 
+const inputClass =
+  "w-full rounded-lg border border-forest/15 bg-white px-3 py-2.5 text-sm text-forest focus:border-moss focus:outline-none disabled:bg-parchment/60 disabled:text-forest/40";
+
 export function SlotPicker({
   date,
   minutes,
@@ -62,67 +66,65 @@ export function SlotPicker({
   const isSunday = chosen?.getDay() === 0;
   const isToday = date === min;
   const nowMinutes = today.getHours() * 60 + today.getMinutes();
+  const timeDisabled = !date || isSunday;
 
   return (
-    <div className="space-y-3">
-      <div>
-        <label htmlFor="enq-date" className="mb-1.5 block text-sm font-medium text-forest">
-          Preferred day <span className="text-clay">*</span>
-        </label>
-        <input
-          id="enq-date"
-          type="date"
-          required
-          min={min}
-          max={max}
-          value={date}
-          onChange={(e) => onChange({ date: e.target.value, minutes: null })}
-          className="w-full rounded-lg border border-forest/15 bg-white px-4 py-2.5 text-sm text-forest focus:border-moss focus:outline-none sm:max-w-xs"
-        />
-        <p className="mt-1 text-xs text-forest/50">Mon–Sat · slots between 10 am and 5 pm · 30 minutes each</p>
-        {isSunday && (
-          <p className="mt-1 text-xs font-medium text-clay">We&apos;re closed on Sundays — please pick another day.</p>
-        )}
-      </div>
+    <div>
+      {/* Availability notice — read before choosing */}
+      <p className="mb-3 rounded-lg border border-amber-300/70 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-900">
+        <span className="font-semibold">Slots are confirmed on availability.</span> If your preferred time is
+        already taken, we&apos;ll offer you the next available slot on WhatsApp. Mon–Sat, 10 am – 5 pm ·
+        30 minutes · first consultation free.
+      </p>
 
-      {date && !isSunday && (
+      <div className="grid grid-cols-2 gap-3">
         <div>
-          <p className="mb-1.5 text-sm font-medium text-forest">
+          <label htmlFor="enq-date" className="mb-1.5 block text-sm font-medium text-forest">
+            Preferred day <span className="text-clay">*</span>
+          </label>
+          <input
+            id="enq-date"
+            type="date"
+            required
+            min={min}
+            max={max}
+            value={date}
+            onChange={(e) => onChange({ date: e.target.value, minutes: null })}
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label htmlFor="enq-time" className="mb-1.5 block text-sm font-medium text-forest">
             Preferred time <span className="text-clay">*</span>
-          </p>
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5" role="radiogroup" aria-label="Time slot">
+          </label>
+          <select
+            id="enq-time"
+            required
+            disabled={timeDisabled}
+            value={minutes ?? ""}
+            onChange={(e) => onChange({ date, minutes: e.target.value === "" ? null : Number(e.target.value) })}
+            className={cn(inputClass, "pr-8")}
+          >
+            <option value="">{date ? "Choose a time" : "Pick a day first"}</option>
             {SLOTS.map((s) => {
               const past = isToday && s.minutes <= nowMinutes;
-              const active = minutes === s.minutes;
               return (
-                <button
-                  key={s.minutes}
-                  type="button"
-                  role="radio"
-                  aria-checked={active}
-                  disabled={past}
-                  onClick={() => onChange({ date, minutes: s.minutes })}
-                  className={cn(
-                    "rounded-full border px-2 py-2 text-xs font-medium transition-colors",
-                    active
-                      ? "border-forest bg-forest text-cream"
-                      : past
-                        ? "cursor-not-allowed border-forest/8 text-forest/30 line-through"
-                        : "border-forest/15 text-forest hover:border-forest/40",
-                  )}
-                >
+                <option key={s.minutes} value={s.minutes} disabled={past}>
                   {s.start}
-                </button>
+                  {past ? " (passed)" : ""}
+                </option>
               );
             })}
-          </div>
-          {minutes !== null && (
-            <p className="mt-2 text-xs text-forest/60">
-              Selected: <span className="font-medium text-forest">{formatSlot(date, minutes)}</span>
-            </p>
-          )}
+          </select>
         </div>
-      )}
+      </div>
+      {isSunday ? (
+        <p className="mt-1.5 text-xs font-medium text-clay">We&apos;re closed on Sundays — please pick another day.</p>
+      ) : date && minutes !== null ? (
+        <p className="mt-1.5 text-xs text-forest/60">
+          Requested: <span className="font-medium text-forest">{formatSlot(date, minutes)}</span>
+        </p>
+      ) : null}
     </div>
   );
 }

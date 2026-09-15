@@ -4,7 +4,7 @@ import { PageIntro } from "@/components/ui/PageIntro";
 import { EnquiryForm } from "@/components/contact/EnquiryForm";
 import { WhatsAppLink } from "@/components/ui/WhatsAppLink";
 import { site } from "@/lib/site";
-import { WhatsAppIcon, InstagramIcon, FacebookIcon, YouTubeIcon, PhoneIcon } from "@/components/icons";
+import { WhatsAppIcon, InstagramIcon, FacebookIcon, YouTubeIcon, ArrowRight } from "@/components/icons";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -16,8 +16,6 @@ const socialClass =
   "flex h-10 w-10 items-center justify-center rounded-full bg-forest/8 text-forest transition-colors hover:bg-forest/15";
 
 export default function ContactPage() {
-  const telHref = `tel:${site.phone.replace(/\s+/g, "")}`;
-
   return (
     <>
       <PageIntro
@@ -52,7 +50,7 @@ export default function ContactPage() {
             <WhatsAppIcon width={24} />
             <div>
               <p className="font-semibold">Chat on WhatsApp</p>
-              <p className="text-sm text-white/85">{site.whatsapp} · usually the fastest way to reach us</p>
+              <p className="text-sm text-white/85">Fastest way to reach us · Mon–Sat, {site.hours}</p>
             </div>
           </WhatsAppLink>
 
@@ -60,19 +58,13 @@ export default function ContactPage() {
             <h2 className="font-serif text-lg font-semibold text-forest">Reach us directly</h2>
             <dl className="mt-4 space-y-3 text-sm">
               <div>
-                <dt className="text-forest/50">Phone / WhatsApp</dt>
-                <dd className="text-forest">
-                  <a href={telHref} className="inline-flex items-center gap-1.5 hover:text-moss">
-                    <PhoneIcon width={14} /> {site.phone}
-                  </a>
-                </dd>
-              </div>
-              <div>
                 <dt className="text-forest/50">Email</dt>
                 <dd className="text-forest">
-                  <a href={`mailto:${site.email}`} className="hover:text-moss">
-                    {site.email}
+                  {/* Opens the form above rather than a mail app — every message lands in the Sheet. */}
+                  <a href="#enquiry" className="inline-flex items-center gap-1 hover:text-moss">
+                    {site.email} <ArrowRight width={13} className="text-moss" />
                   </a>
+                  <span className="block text-xs text-forest/50">Use the enquiry form — we reply by email or WhatsApp.</span>
                 </dd>
               </div>
               <div>

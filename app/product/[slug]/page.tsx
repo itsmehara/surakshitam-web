@@ -6,7 +6,7 @@ import { ProductGallery } from "@/components/ui/ProductGallery";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { AddToEnquiryButton } from "@/components/ui/AddToEnquiryButton";
 import { OrderingNote } from "@/components/ui/OrderingNote";
-import { CheckIcon, LeafIcon, ChevronDown, PhoneIcon } from "@/components/icons";
+import { CheckIcon, LeafIcon, ChevronDown } from "@/components/icons";
 import { site } from "@/lib/site";
 
 export function generateStaticParams() {
@@ -135,14 +135,8 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
             <p className="mt-5 text-sm text-forest/55">Pack size · {product.size}</p>
 
             {/* Actions — v3: collect products in the enquiry list, send one message */}
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <AddToEnquiryButton productId={product.id} name={product.name} variant="page" className="sm:flex-1" />
-              <a
-                href={`tel:${site.phone.replace(/\s+/g, "")}`}
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-forest/20 px-6 text-sm font-medium text-forest transition-colors hover:border-forest/50 sm:flex-1"
-              >
-                <PhoneIcon width={18} height={18} /> Call {site.phone}
-              </a>
+            <div className="mt-6 sm:max-w-sm">
+              <AddToEnquiryButton productId={product.id} name={product.name} variant="page" className="w-full" />
             </div>
             <OrderingNote className="mt-3" />
 

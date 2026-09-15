@@ -10,7 +10,6 @@ import {
   MenuIcon,
   CloseIcon,
   ArrowRight,
-  PhoneIcon,
   WhatsAppIcon,
   ChevronDown,
 } from "@/components/icons";
@@ -79,8 +78,6 @@ export function Header() {
       document.body.style.overflow = "";
     };
   }, [open]);
-
-  const telHref = `tel:${site.phone.replace(/\s+/g, "")}`;
 
   return (
     <header className="sticky top-0 z-50">
@@ -313,17 +310,15 @@ export function Header() {
               );
             })}
           </nav>
-          <div className="mt-auto flex flex-col gap-3 border-t border-forest/10 px-5 py-5">
-            <a href={telHref} className="flex items-center gap-2 text-sm font-medium text-forest">
-              <PhoneIcon width={18} /> {site.phone}
-            </a>
+          <div className="mt-auto border-t border-forest/10 px-5 py-4">
             <WhatsAppLink
               cta="mobile-drawer"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 text-sm font-medium text-forest"
+              className="flex h-11 items-center justify-center gap-2 rounded-full bg-[#25D366] text-sm font-semibold text-white"
             >
               <WhatsAppIcon width={18} /> Chat on WhatsApp
             </WhatsAppLink>
+            <p className="mt-2 text-center text-xs text-forest/50">Mon–Sat, {site.hours}</p>
           </div>
         </div>
       </div>

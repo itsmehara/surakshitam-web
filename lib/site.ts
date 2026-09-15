@@ -92,9 +92,9 @@ export const primaryNav: NavItem[] = [
     href: "/contact",
     // Each child opens the same enquiry form with the type pre-selected (?type=).
     children: [
-      { label: "Send Enquiry", href: "/contact?type=product", description: "Ask about products, price & availability" },
-      { label: "Promote Your Brand / Partner With Us", href: "/contact?type=partner", description: "List your homemade products with us" },
-      { label: "Book a Consultation Slot", href: "/contact?type=consultation", description: "First 30 minutes free · Mon–Sat, 10 am – 5 pm" },
+      { label: "Product Enquiry", href: "/contact?type=product", description: "Price, availability & delivery" },
+      { label: "Partner With Us", href: "/contact?type=partner", description: "Promote your homemade brand with us" },
+      { label: "Book a Consultation", href: "/contact?type=consultation", description: "First 30 min free · Mon–Sat, 10 am – 5 pm" },
     ],
   },
 ];
