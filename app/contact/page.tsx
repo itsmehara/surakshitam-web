@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { EnquiryForm } from "@/components/contact/EnquiryForm";
 import { WhatsAppLink } from "@/components/ui/WhatsAppLink";
@@ -22,20 +23,22 @@ export default function ContactPage() {
       <PageIntro
         eyebrow="Contact"
         title="We'd love to hear from you"
-        intro="The quickest way to order or ask about a product is WhatsApp. Prefer a form? Send an enquiry below and we'll reply by phone or email."
+        intro="Ask about products, partner with us, or book a consultation. WhatsApp is quickest; the form below works just as well."
       />
 
       <div className="container grid gap-12 py-12 sm:py-16 lg:grid-cols-[1.2fr_1fr]">
-        <section aria-labelledby="enquiry-heading">
+        <section id="enquiry" aria-labelledby="enquiry-heading">
           <h2 id="enquiry-heading" className="font-serif text-2xl font-semibold text-forest">
             Send an enquiry
           </h2>
           <p className="mt-2 text-sm text-forest/60">
-            Tell us which product you&apos;re interested in and we&apos;ll get back to you with price,
-            availability and delivery details.
+            Product questions, brand partnerships or a consultation slot — one form, pick what you need.
           </p>
           <div className="mt-6">
-            <EnquiryForm />
+            {/* EnquiryForm reads ?type= with useSearchParams → Suspense for the static export */}
+            <Suspense fallback={<div className="h-96 rounded-lg bg-parchment/60" />}>
+              <EnquiryForm />
+            </Suspense>
           </div>
         </section>
 

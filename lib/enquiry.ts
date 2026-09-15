@@ -6,11 +6,30 @@
  * in .env.local for dev and in the GitHub Pages build env for production.
  */
 
+/** The three things the contact form is used for (ANSWERS-2026-09-14 + 15 Sep brief). */
+export type EnquiryType = "product" | "partner" | "consultation";
+
+export const ENQUIRY_TYPES: { value: EnquiryType; label: string; short: string }[] = [
+  { value: "product", label: "Product enquiry", short: "Send Enquiry" },
+  { value: "partner", label: "Promote your brand / partner with us", short: "Partner With Us" },
+  { value: "consultation", label: "Book a consultation slot", short: "Book a Consultation" },
+];
+
+export function isEnquiryType(v: unknown): v is EnquiryType {
+  return v === "product" || v === "partner" || v === "consultation";
+}
+
 export type EnquiryFields = {
+  type: EnquiryType;
   name: string;
   phone: string;
   email?: string;
+  /** Product enquiry: the product(s), one per line. */
   product?: string;
+  /** Partner enquiry: brand / business name. */
+  business?: string;
+  /** Consultation: preferred day & time, free text. */
+  slot?: string;
   message?: string;
   /** Honeypot — must stay empty. Bots that fill it are silently dropped. */
   website?: string;
@@ -50,16 +69,59 @@ export async function submitEnquiry(fields: EnquiryFields): Promise<EnquiryResul
   }
 }
 
-// ---------- WhatsApp click tracking ----------
+// ---------- WhatsApp message builders ----------
+
+const WA_NUMBER = "917416394594";
+
+function waLink(text: string): string {
+  return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`;
+}
 
 /** Decided 14 Sep: pre-filled WhatsApp text. Generic when no product is given. */
 export function whatsAppHref(product?: string): string {
-  const number = "917416394594";
-  const text = product
-    ? `Hi Surakshitam Naturals, I'm interested in ${product}. Please share price and availability.`
-    : "Hi Surakshitam Naturals, I'd like to know more about your products.";
-  return `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
+  return waLink(
+    product
+      ? `Hi Surakshitam Naturals, I'm interested in ${product}. Please share price and availability.`
+      : "Hi Surakshitam Naturals, I'd like to know more about your products.",
+  );
 }
+
+/** One line per product for the enquiry-list message and the form's product field. */
+export function formatEnquiryLines(lines: { name: string; size?: string; qty: number }[]): string {
+  return lines
+    .map((l, i) => `${i + 1}. ${l.name}${l.size ? ` (${l.size})` : ""} × ${l.qty}`)
+    .join("\n");
+}
+
+/**
+ * The single WhatsApp message for the whole enquiry list — the reason the
+ * list exists. Numbered so the founders can answer line by line.
+ */
+export function whatsAppListHref(lines: { name: string; size?: string; qty: number }[]): string {
+  const text =
+    "Hi Surakshitam Naturals, I'd like to enquire about these products:\n\n" +
+    formatEnquiryLines(lines) +
+    "\n\nPlease share price, availability and delivery details.";
+  return waLink(text);
+}
+
+/**
+ * Fallback for the contact form when the enquiry service is unreachable or
+ * not configured — the same content, sent as a WhatsApp message instead, so
+ * nobody types it all out twice.
+ */
+export function whatsAppFormFallbackHref(f: EnquiryFields): string {
+  const label = ENQUIRY_TYPES.find((t) => t.value === f.type)?.label ?? "Enquiry";
+  const parts = [`Hi Surakshitam Naturals — ${label}`, `Name: ${f.name}`, `Phone: ${f.phone}`];
+  if (f.email) parts.push(`Email: ${f.email}`);
+  if (f.business) parts.push(`Brand / business: ${f.business}`);
+  if (f.slot) parts.push(`Preferred slot: ${f.slot}`);
+  if (f.product) parts.push(`Products:\n${f.product}`);
+  if (f.message) parts.push(`Message: ${f.message}`);
+  return waLink(parts.join("\n"));
+}
+
+// ---------- WhatsApp click tracking ----------
 
 /**
  * Fire-and-forget: logs a WhatsApp click to the "WhatsApp Clicks" tab.
