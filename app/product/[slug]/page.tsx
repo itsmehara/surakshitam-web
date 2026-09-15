@@ -2,15 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { products, getProductBySlug, getProductsByCategory, productImage } from "@/lib/catalog";
-import { productWeightGrams, formatWeight } from "@/lib/weight";
-import { FREE_DELIVERY_HEADLINE, FREE_DELIVERY_SUBLINE } from "@/lib/delivery";
-import { formatPrice, discountPercent } from "@/lib/format";
-import { StarRating } from "@/components/ui/StarRating";
-import { AddToCartButton } from "@/components/ui/AddToCartButton";
-import { BuyNowButton } from "@/components/ui/BuyNowButton";
 import { ProductGallery } from "@/components/ui/ProductGallery";
 import { ProductCard } from "@/components/ui/ProductCard";
-import { CheckIcon, TruckIcon, LeafIcon, ChevronDown } from "@/components/icons";
+import { WhatsAppLink } from "@/components/ui/WhatsAppLink";
+import { OrderingNote } from "@/components/ui/OrderingNote";
+import { CheckIcon, LeafIcon, ChevronDown, WhatsAppIcon, PhoneIcon } from "@/components/icons";
 import { site } from "@/lib/site";
 
 export function generateStaticParams() {
@@ -42,14 +38,10 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
   const product = getProductBySlug(params.slug);
   if (!product) notFound();
 
-  const discount = discountPercent(product.price, product.mrp);
-  const outOfStock = product.stock <= 0;
   const isBioEnzyme = product.homeCareType === "bio-enzyme";
   // Resold stock is attributed to its own maker, never to us.
   const partnerBrand = product.thirdParty ? product.brand : undefined;
-  const unitWeight = productWeightGrams(product);
   const cover = productImage(product);
-  const lowStock = product.stock > 0 && product.stock <= 10;
   const related = getProductsByCategory(product.category)
     .filter((p) => p.id !== product.id)
     .slice(0, 4);
@@ -88,14 +80,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
     sku: product.sku,
     image: cover,
     brand: { "@type": "Brand", name: partnerBrand ?? site.name },
-    offers: {
-      "@type": "Offer",
-      priceCurrency: "INR",
-      price: (product.price / 100).toFixed(2),
-      availability: outOfStock
-        ? "https://schema.org/OutOfStock"
-        : "https://schema.org/InStock",
-    },
+    // No `offers` block: v3 lists no prices, orders go through WhatsApp.
   };
 
   return (
@@ -119,7 +104,6 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
           <ProductGallery
             images={product.images?.length ? product.images : [cover]}
             name={product.name}
-            discountLabel={discount ? `${discount}% off` : undefined}
           />
 
           {/* Details */}
@@ -148,53 +132,29 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               </p>
             )}
 
-            {product.rating && (
-              <div className="mt-4">
-                <StarRating rating={product.rating} count={product.reviewCount} size={16} />
-              </div>
-            )}
+            <p className="mt-5 text-sm text-forest/55">Pack size · {product.size}</p>
 
-            <div className="mt-5 flex items-baseline gap-3">
-              <span className="text-2xl font-semibold text-forest">{formatPrice(product.price)}</span>
-              {product.mrp && (
-                <span className="text-base text-forest/40 line-through">{formatPrice(product.mrp)}</span>
-              )}
-              <span className="text-sm text-forest/55">· {product.size}</span>
-            </div>
-            <p className="mt-1 text-xs text-forest/45">
-              Demo price — inclusive of all taxes (placeholder) · approx. {formatWeight(unitWeight)} per
-              unit for delivery
-            </p>
-
-            {/* Stock */}
-            <div className="mt-5">
-              {outOfStock ? (
-                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-clay">
-                  Currently out of stock
-                </span>
-              ) : lowStock ? (
-                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-clay">
-                  Only {product.stock} left — made in small batches
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-moss">
-                  <CheckIcon width={16} /> In stock
-                </span>
-              )}
-            </div>
-
-            {/* Actions */}
+            {/* Actions — v3: every order starts as a WhatsApp conversation */}
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="sm:max-w-[220px] sm:flex-1">
-                <AddToCartButton productId={product.id} name={product.name} disabled={outOfStock} />
-              </div>
-              <BuyNowButton productId={product.id} disabled={outOfStock} className="sm:flex-1" />
+              <WhatsAppLink
+                cta="product-page"
+                product={product.name}
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 text-sm font-semibold text-white shadow-soft transition-transform duration-200 hover:scale-[1.02] sm:flex-1"
+              >
+                <WhatsAppIcon width={20} height={20} /> Order on WhatsApp
+              </WhatsAppLink>
+              <a
+                href={`tel:${site.phone.replace(/\s+/g, "")}`}
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-forest/20 px-6 text-sm font-medium text-forest transition-colors hover:border-forest/50 sm:flex-1"
+              >
+                <PhoneIcon width={18} height={18} /> Call {site.phone}
+              </a>
             </div>
+            <OrderingNote className="mt-3" />
 
             {/* Assurances */}
             <div className="mt-6 rounded-lg border border-forest/8 bg-parchment/60 p-4">
               <div className="grid gap-3 sm:grid-cols-2">
-                <Assurance icon={<TruckIcon width={18} />} text={FREE_DELIVERY_HEADLINE} />
                 <Assurance
                   icon={<LeafIcon width={18} />}
                   text={
@@ -203,8 +163,8 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                       : "Plant-forward, small-batch made"
                   }
                 />
+                <Assurance icon={<CheckIcon width={18} />} text="Made in small batches in Hyderabad" />
               </div>
-              <p className="mt-2 text-xs text-forest/50">{FREE_DELIVERY_SUBLINE}</p>
             </div>
 
             {/* Accordions */}

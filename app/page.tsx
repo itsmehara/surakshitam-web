@@ -5,9 +5,8 @@ import { WhyChooseUs } from "@/components/home/WhyChooseUs";
 import { IngredientBenefits } from "@/components/home/IngredientBenefits";
 import { BestSellers } from "@/components/home/BestSellers";
 import { Sustainability } from "@/components/home/Sustainability";
-import { Reviews } from "@/components/home/Reviews";
 import { InstagramFeedSection } from "@/components/home/InstagramFeedSection";
-import { Newsletter } from "@/components/home/Newsletter";
+import { WhatsAppCta } from "@/components/home/WhatsAppCta";
 
 export default function HomePage() {
   return (
@@ -20,9 +19,9 @@ export default function HomePage() {
       <IngredientBenefits />
       <BestSellers />
       <Sustainability />
-      <Reviews />
       <InstagramFeedSection />
-      <Newsletter />
+      {/* v3: closing WhatsApp call-to-action (no reviews / newsletter in the static site) */}
+      <WhatsAppCta />
     </>
   );
 }

@@ -1,62 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { primaryNav, site, type NavItem } from "@/lib/site";
-import { isOffersNavEnabled } from "@/lib/site-settings";
-import { useCart } from "@/lib/cart/CartContext";
-import { useWishlist } from "@/lib/wishlist/WishlistContext";
-import { useAuth } from "@/components/auth/AuthProvider";
 import { Logo } from "@/components/ui/Logo";
+import { WhatsAppLink } from "@/components/ui/WhatsAppLink";
 import {
   MenuIcon,
   CloseIcon,
-  SearchIcon,
-  CartIcon,
-  UserIcon,
   ArrowRight,
   PhoneIcon,
   WhatsAppIcon,
-  HeartIcon,
   ChevronDown,
 } from "@/components/icons";
 import { cn } from "@/lib/cn";
-
-const accountMenuItem =
-  "block px-4 py-2.5 text-sm text-forest transition-colors hover:bg-parchment";
 
 export function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get("category");
-  const { count, openCart } = useCart();
-  const { count: wishlistCount } = useWishlist();
-  const { isLoggedIn: authed, user, signOut } = useAuth();
-  const accountHref = authed ? "/account" : "/login?next=/account";
-  const firstName = user?.name?.trim().split(/\s+/)[0] ?? "";
-
-  // Signing out lives inside this menu rather than on a visible button, so it
-  // takes a deliberate two-step action and can't be hit by accident.
-  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
-  const accountMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!accountMenuOpen) return;
-    const onPointerDown = (e: MouseEvent | TouchEvent) => {
-      if (!accountMenuRef.current?.contains(e.target as Node)) setAccountMenuOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setAccountMenuOpen(false);
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [accountMenuOpen]);
 
   // Which primary-nav dropdown is open (by label), if any.
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -76,23 +41,10 @@ export function Header() {
     };
   }, [openMenu]);
 
-  // Close both menus whenever the route changes (a menu link was followed).
-  useEffect(() => {
-    setAccountMenuOpen(false);
-    setOpenMenu(null);
-  }, [pathname]);
+  // Close the open dropdown whenever the route changes (a menu link was followed).
+  useEffect(() => setOpenMenu(null), [pathname]);
 
-  function handleSignOut() {
-    setAccountMenuOpen(false);
-    setOpen(false);
-    signOut();
-    router.push("/");
-  }
-
-  // "Offers" nav item is admin-toggleable (default on) — see AdminOffers.tsx.
-  const [offersNavEnabled, setOffersNavEnabled] = useState(true);
-  useEffect(() => setOffersNavEnabled(isOffersNavEnabled()), []);
-  const nav = offersNavEnabled ? primaryNav : primaryNav.filter((item) => item.href !== "/offers");
+  const nav = primaryNav;
 
   // Which primary-nav item corresponds to the current page.
   const isActive = (href: string) => {
@@ -127,7 +79,6 @@ export function Header() {
   }, [open]);
 
   const telHref = `tel:${site.phone.replace(/\s+/g, "")}`;
-  const waHref = `https://wa.me/${site.whatsapp.replace(/\D/g, "")}`;
 
   return (
     <header className="sticky top-0 z-50">
@@ -147,16 +98,14 @@ export function Header() {
               <PhoneIcon width={13} height={13} />
               <span className="hidden sm:inline">{site.phone}</span>
             </a>
-            <a
-              href={waHref}
-              target="_blank"
-              rel="noopener noreferrer"
+            <WhatsAppLink
+              cta="header"
               className="inline-flex items-center gap-1.5 text-cream/90 transition-colors hover:text-cream"
               aria-label="Chat with us on WhatsApp"
             >
               <WhatsAppIcon width={13} height={13} />
               <span className="hidden sm:inline">WhatsApp</span>
-            </a>
+            </WhatsAppLink>
           </div>
         </div>
       </div>
@@ -290,100 +239,15 @@ export function Header() {
             })}
           </nav>
 
-          {/* Utility icons */}
-          <div className="flex items-center gap-0.5 sm:gap-1">
-            <Link
-              href="/search"
-              aria-label="Search"
-              className="flex h-10 w-10 items-center justify-center rounded-full text-forest transition-colors hover:bg-forest/5"
-            >
-              <SearchIcon />
-            </Link>
-            {authed ? (
-              <div className="relative hidden sm:block" ref={accountMenuRef}>
-                <button
-                  type="button"
-                  onClick={() => setAccountMenuOpen((v) => !v)}
-                  aria-haspopup="menu"
-                  aria-expanded={accountMenuOpen}
-                  aria-label={`Account menu — ${firstName || "signed in"}`}
-                  className="flex h-10 items-center gap-2 rounded-full px-2.5 text-forest transition-colors hover:bg-forest/5"
-                >
-                  <UserIcon />
-                  {firstName && (
-                    <span className="max-w-[8rem] truncate text-sm font-medium">{firstName}</span>
-                  )}
-                  <ChevronDown
-                    width={14}
-                    className={cn("transition-transform", accountMenuOpen && "rotate-180")}
-                  />
-                </button>
-                {accountMenuOpen && (
-                  <div
-                    role="menu"
-                    className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-lg border border-forest/10 bg-cream shadow-card"
-                  >
-                    <div className="border-b border-forest/8 px-4 py-3">
-                      <p className="text-xs text-forest/50">Signed in as</p>
-                      <p className="truncate text-sm font-medium text-forest">
-                        {user?.name || user?.mobile}
-                      </p>
-                    </div>
-                    <Link href="/account" role="menuitem" className={accountMenuItem}>
-                      My account &amp; orders
-                    </Link>
-                    <Link href="/wishlist" role="menuitem" className={accountMenuItem}>
-                      Wishlist{wishlistCount > 0 ? ` (${wishlistCount})` : ""}
-                    </Link>
-                    <Link href="/track-order" role="menuitem" className={accountMenuItem}>
-                      Track an order
-                    </Link>
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={handleSignOut}
-                      className="block w-full border-t border-forest/8 px-4 py-2.5 text-left text-sm font-medium text-clay transition-colors hover:bg-clay/8"
-                    >
-                      Log out
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link
-                href={accountHref}
-                aria-label="Sign in"
-                className="hidden h-10 items-center gap-2 rounded-full px-2.5 text-forest transition-colors hover:bg-forest/5 sm:flex"
-              >
-                <UserIcon />
-              </Link>
-            )}
-            <Link
-              href="/wishlist"
-              aria-label={`Wishlist, ${wishlistCount} item${wishlistCount === 1 ? "" : "s"}`}
-              className="relative hidden h-10 w-10 items-center justify-center rounded-full text-forest transition-colors hover:bg-forest/5 sm:flex"
-            >
-              <HeartIcon />
-              {wishlistCount > 0 && (
-                <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-clay px-1 text-[0.6rem] font-semibold text-cream">
-                  {wishlistCount}
-                </span>
-              )}
-            </Link>
-            <button
-              type="button"
-              onClick={openCart}
-              aria-label={`Open cart, ${count} item${count === 1 ? "" : "s"}`}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full text-forest transition-colors hover:bg-forest/5"
-            >
-              <CartIcon />
-              {count > 0 && (
-                <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-clay px-1 text-[0.6rem] font-semibold text-cream">
-                  {count}
-                </span>
-              )}
-            </button>
-          </div>
+          {/* Right side: the one action a listing site needs — start a WhatsApp chat */}
+          <WhatsAppLink
+            cta="header-button"
+            className="inline-flex h-10 items-center gap-2 rounded-full bg-[#25D366] px-4 text-sm font-medium text-white shadow-soft transition-transform duration-200 hover:scale-[1.03]"
+          >
+            <WhatsAppIcon width={18} height={18} />
+            <span className="hidden sm:inline">Chat on WhatsApp</span>
+            <span className="sm:hidden">WhatsApp</span>
+          </WhatsAppLink>
         </div>
       </div>
 
@@ -475,30 +339,16 @@ export function Header() {
             })}
           </nav>
           <div className="mt-auto flex flex-col gap-3 border-t border-forest/10 px-5 py-5">
-            <Link
-              href="/wishlist"
+            <a href={telHref} className="flex items-center gap-2 text-sm font-medium text-forest">
+              <PhoneIcon width={18} /> {site.phone}
+            </a>
+            <WhatsAppLink
+              cta="mobile-drawer"
               onClick={() => setOpen(false)}
               className="flex items-center gap-2 text-sm font-medium text-forest"
             >
-              <HeartIcon width={18} /> Wishlist{wishlistCount > 0 ? ` (${wishlistCount})` : ""}
-            </Link>
-            <Link
-              href={accountHref}
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-2 text-sm font-medium text-forest"
-            >
-              <UserIcon width={18} />{" "}
-              {authed ? `${firstName ? firstName + " · " : ""}Account & Orders` : "Sign in / Sign up"}
-            </Link>
-            {authed && (
-              <button
-                type="button"
-                onClick={handleSignOut}
-                className="self-start text-xs font-medium text-forest/50 underline underline-offset-2 hover:text-clay"
-              >
-                Log out
-              </button>
-            )}
+              <WhatsAppIcon width={18} /> Chat on WhatsApp
+            </WhatsAppLink>
           </div>
         </div>
       </div>

@@ -1,8 +1,10 @@
 /**
  * Domain types for the storefront.
  * Designed to map cleanly onto a future database / CMS schema
- * (see docs/DATA_MODEL.md). Prices are stored in paise (integer,
- * smallest currency unit) to avoid floating-point errors.
+ * (see docs/DATA_MODEL.md).
+ *
+ * v3-static: no price, MRP, stock or ratings — the site is a listing and every
+ * order goes through WhatsApp. Those fields come back with the backend (v4).
  */
 
 export type CategorySlug = "home-care" | "skin-care" | "hair-care" | "partner-brands";
@@ -42,25 +44,12 @@ export interface Product {
   /** How to use — demo content, founder verification recommended. */
   usage: string;
   size: string;
-  /**
-   * Approximate shipped weight of one unit, in grams. Optional — when absent it
-   * is derived from `size` (see lib/weight.ts). Always presented to customers
-   * as approximate.
-   */
-  weightGrams?: number;
-  /** Selling price in paise. DEMO PRICE — REPLACE. */
-  price: number;
-  /** MRP in paise, if discounted. DEMO PRICE — REPLACE. */
-  mrp?: number;
   sku: string;
   image: string;
   /** Optional gallery of additional images (Amazon-style). Falls back to [image]. */
   images?: string[];
   /** Optional alternate image shown on hover. */
   imageAlt?: string;
-  rating?: number;
-  reviewCount?: number;
-  stock: number;
   featured?: boolean;
   bestSeller?: boolean;
   isNew?: boolean;
@@ -102,14 +91,4 @@ export interface Ingredient {
   properties: string[];
   /** Product names that use it. */
   usedIn: string[];
-}
-
-export interface Review {
-  id: string;
-  author: string;
-  location: string;
-  rating: number;
-  title: string;
-  body: string;
-  product: string;
 }

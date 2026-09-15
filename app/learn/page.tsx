@@ -21,7 +21,7 @@ export default function LearnPage() {
         drift="sn-drift-c"
         eyebrow="Learn"
         title="Care guides & ingredient stories"
-        intro="Short, useful reads on ingredients, product care and how our formulations come together. Demo articles shown for the prototype."
+        intro="Short, useful reads on ingredients, product care and how our formulations come together."
       />
 
       <div className="container py-12 sm:py-16">

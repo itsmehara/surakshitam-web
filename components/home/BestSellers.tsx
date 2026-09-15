@@ -16,8 +16,8 @@ export function BestSellers() {
               Best sellers this season
             </h2>
           </div>
-          <Link href="/shop?sort=best-selling" className="link-underline text-sm">
-            View best sellers <ArrowRight width={16} />
+          <Link href="/shop" className="link-underline text-sm">
+            Shop all <ArrowRight width={16} />
           </Link>
         </div>
 

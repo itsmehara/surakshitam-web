@@ -1,12 +1,9 @@
 import type { Metadata, Viewport } from "next";
-// Self-hosted fonts (no external requests) — works offline for the demo.
+// Self-hosted fonts (no external requests).
 import "@fontsource-variable/fraunces";
 import "@fontsource-variable/inter";
 import { site } from "@/lib/site";
 import { AppShell } from "@/components/layout/AppShell";
-import { AuthProvider } from "@/components/auth/AuthProvider";
-import { CartProvider } from "@/lib/cart/CartContext";
-import { WishlistProvider } from "@/lib/wishlist/WishlistContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -59,6 +56,9 @@ const orgJsonLd = {
   description: site.description,
   slogan: site.tagline,
   telephone: site.phone,
+  email: site.email,
+  openingHours: "Mo-Sa 10:00-18:00",
+  sameAs: [site.social.instagram, site.social.facebook, site.social.youtube],
   image: `${site.url}/brand/logo.png`,
   areaServed: "IN",
   address: {
@@ -81,13 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to content
         </a>
-        <AuthProvider>
-          <CartProvider>
-            <WishlistProvider>
-              <AppShell>{children}</AppShell>
-            </WishlistProvider>
-          </CartProvider>
-        </AuthProvider>
+        <AppShell>{children}</AppShell>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}

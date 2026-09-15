@@ -14,26 +14,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/ingredients",
     "/learn",
     "/contact",
-    "/policies/privacy",
-    "/policies/terms",
-    "/policies/shipping",
-    "/policies/returns",
   ].map((path) => ({
-    url: `${base}${path}`,
+    url: `${base}${path}/`,
     lastModified: now,
     changeFrequency: "weekly" as const,
     priority: path === "" ? 1 : 0.7,
   }));
 
   const productRoutes = products.map((p) => ({
-    url: `${base}/product/${p.slug}`,
+    url: `${base}/product/${p.slug}/`,
     lastModified: now,
     changeFrequency: "weekly" as const,
     priority: 0.8,
   }));
 
   const articleRoutes = articles.map((a) => ({
-    url: `${base}/learn/${a.slug}`,
+    url: `${base}/learn/${a.slug}/`,
     lastModified: now,
     changeFrequency: "monthly" as const,
     priority: 0.6,

@@ -12,12 +12,13 @@ export const site = {
   tagline: "Homemade, plant-based care",
   description:
     "Homemade, plant-based home care, skin care and hair care from Hyderabad — herbal soaps, natural cleaners and hair care made with natural essential oils for everyday, sustainable living.",
-  url: "https://surakshitamnaturals.example", // DEMO — replace with production domain
+  url: "https://www.surakshitamnaturals.com",
   locale: "en_IN",
   currency: "INR",
   email: "surakshitamnatural@gmail.com",
   phone: "+91 74163 94594",
   whatsapp: "+91 74163 94594",
+  hours: "10 am – 6 pm",
   address: {
     line1: "Plot No. 40, Road No. 13, Hanuman Nagar",
     line2: "Jaipuri Colony, Nagole",
@@ -29,7 +30,7 @@ export const site = {
   instagramHandle: "surakshitam_naturals",
   social: {
     instagram: "https://www.instagram.com/surakshitam_naturals/",
-    facebook: "https://www.facebook.com/profile.php?id=61580808786017",
+    facebook: "https://www.facebook.com/surakshitam.naturals",
     youtube: "https://www.youtube.com/@SurakshitamNaturals",
   },
 } as const;
@@ -43,7 +44,7 @@ export const categoryBlurbs: Partial<Record<CategorySlug, string>> = {
   "home-care": "Bio-enzyme & everyday cleaning",
   "skin-care": "Soaps, cleansers & creams",
   "hair-care": "Shampoo, oils, packs & serums",
-  "partner-brands": "Foods & goods from other makers",
+  "partner-brands": "Homemade foods from makers we know",
 };
 
 export type NavItem = {
@@ -65,8 +66,9 @@ export type NavItem = {
  * is generated from `categories`, so adding a fifth or sixth costs the header
  * nothing at all.
  *
- * What stays at the top level is what isn't a shelf — the commercial page
- * (Offers) and the three brand pages people actually navigate to directly.
+ * What stays at the top level is what isn't a shelf — the brand pages people
+ * navigate to directly, and Contact (v3 is a listing site: every order starts
+ * with a conversation, so the contact page is a primary destination).
  */
 export const primaryNav: NavItem[] = [
   {
@@ -80,13 +82,12 @@ export const primaryNav: NavItem[] = [
         href: `/shop?category=${c.slug}`,
         description: categoryBlurbs[c.slug] ?? "",
       })),
-      { label: "Best Sellers", href: "/shop?sort=best-selling", description: "What people reorder" },
     ],
   },
-  { label: "Offers", href: "/offers" },
   { label: "Our Story", href: "/our-story" },
   { label: "Ingredients", href: "/ingredients" },
   { label: "Learn", href: "/learn" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export type Concern = {
@@ -129,12 +130,10 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
     title: "Shop",
     items: [
       { label: "All Products", href: "/shop" },
-      { label: "Offers & Combos", href: "/offers" },
       { label: "Home Care", href: "/shop?category=home-care" },
       { label: "Skin Care", href: "/shop?category=skin-care" },
       { label: "Hair Care", href: "/shop?category=hair-care" },
       { label: "Partner Brands", href: "/shop?category=partner-brands" },
-      { label: "Best Sellers", href: "/shop?sort=best-selling" },
     ],
   },
   {
@@ -147,13 +146,12 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
     ],
   },
   {
-    title: "Help",
+    title: "Reach us",
     items: [
-      { label: "FAQs", href: "/faqs" },
-      { label: "Contact", href: "/contact" },
-      { label: "Track Order", href: "/track-order" },
-      { label: "Shipping Policy", href: "/policies/shipping" },
-      { label: "Returns", href: "/policies/returns" },
+      { label: "Contact & enquiries", href: "/contact" },
+      { label: "Order on WhatsApp", href: "/contact#whatsapp" },
+      { label: "Instagram", href: "https://www.instagram.com/surakshitam_naturals/" },
+      { label: "YouTube", href: "https://www.youtube.com/@SurakshitamNaturals" },
     ],
   },
 ];

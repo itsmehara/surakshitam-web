@@ -173,7 +173,6 @@ export default function OurStoryPage() {
             </blockquote>
             <figcaption className="mt-4 text-sm text-forest/60">
               Supriya, co-founder
-              <span className="mt-1 block text-xs text-forest/40">Demo quote — to confirm with founders</span>
             </figcaption>
           </figure>
         </div>
@@ -268,10 +267,6 @@ export default function OurStoryPage() {
             Explore Ingredients
           </LinkButton>
         </div>
-        <p className="mx-auto mt-8 max-w-md text-xs text-forest/45">
-          Founder narrative shown for the prototype. Photographs and any specific claims to be
-          confirmed with the founders before publishing.
-        </p>
       </section>
     </>
   );

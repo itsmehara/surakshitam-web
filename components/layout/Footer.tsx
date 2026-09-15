@@ -1,19 +1,11 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { site, footerNav } from "@/lib/site";
 import { Logo } from "@/components/ui/Logo";
+import { WhatsAppLink } from "@/components/ui/WhatsAppLink";
 import { WhatsAppIcon, InstagramIcon, FacebookIcon, YouTubeIcon, ArrowRight } from "@/components/icons";
-import { isOffersNavEnabled } from "@/lib/site-settings";
 
 export function Footer() {
-  const [offersNavEnabled, setOffersNavEnabled] = useState(true);
-  useEffect(() => setOffersNavEnabled(isOffersNavEnabled()), []);
-
-  const cols = offersNavEnabled
-    ? footerNav
-    : footerNav.map((col) => ({ ...col, items: col.items.filter((item) => item.href !== "/offers") }));
+  const cols = footerNav;
 
   return (
     <footer className="bg-forest text-cream">
@@ -42,18 +34,21 @@ export function Footer() {
                   {site.email}
                 </a>
               </p>
+              <p>Mon–Sat, {site.hours}</p>
             </address>
             <div className="mt-6 flex items-center gap-3">
-              <a
-                href={`https://wa.me/${site.whatsapp.replace(/\D/g, "")}`}
+              <WhatsAppLink
+                cta="footer"
                 aria-label="WhatsApp"
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-cream/10 text-cream transition-colors hover:bg-cream/20"
               >
                 <WhatsAppIcon width={18} />
-              </a>
+              </WhatsAppLink>
               <a
                 href={site.social.instagram}
                 aria-label="Instagram"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-cream/10 text-cream transition-colors hover:bg-cream/20"
               >
                 <InstagramIcon width={18} />
@@ -89,12 +84,23 @@ export function Footer() {
                 <ul className="mt-4 space-y-2.5">
                   {col.items.map((item) => (
                     <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        className="text-sm text-cream/75 transition-colors hover:text-cream"
-                      >
-                        {item.label}
-                      </Link>
+                      {item.href.startsWith("http") ? (
+                        <a
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-cream/75 transition-colors hover:text-cream"
+                        >
+                          {item.label}
+                        </a>
+                      ) : (
+                        <Link
+                          href={item.href}
+                          className="text-sm text-cream/75 transition-colors hover:text-cream"
+                        >
+                          {item.label}
+                        </Link>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -104,19 +110,10 @@ export function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col gap-4 border-t border-cream/15 pt-6 text-xs text-cream/60 sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            © {new Date().getFullYear()} {site.name}. Demo prototype — content and pricing are
-            placeholder data.
-          </p>
+          <p>© {new Date().getFullYear()} {site.name}, Hyderabad. Online ordering coming soon.</p>
           <div className="flex flex-wrap gap-x-5 gap-y-2">
-            <Link href="/policies/privacy" className="transition-colors hover:text-cream">
-              Privacy
-            </Link>
-            <Link href="/policies/terms" className="transition-colors hover:text-cream">
-              Terms
-            </Link>
-            <Link href="/policies/shipping" className="transition-colors hover:text-cream">
-              Shipping
+            <Link href="/our-story" className="transition-colors hover:text-cream">
+              Our Story
             </Link>
             <Link href="/contact" className="inline-flex items-center gap-1 transition-colors hover:text-cream">
               Contact <ArrowRight width={13} />

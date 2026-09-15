@@ -14,11 +14,7 @@ export const metadata: Metadata = {
     "The plant-forward ingredients behind Surakshitam Naturals — botanicals, plant butters, natural cleansers and essential oils, and why we choose each one.",
 };
 
-/**
- * The shipped library, rendered on the server so the page has real content in
- * its HTML. `IngredientLibrary` swaps in whatever the admin has since saved in
- * Studio (see lib/ingredient-store.ts) once it mounts.
- */
+/** The shipped library, rendered on the server so the page has real content in its HTML. */
 const seed = { ingredients, groups: DEFAULT_INGREDIENT_GROUPS };
 
 const selection = [
@@ -51,7 +47,7 @@ export default function IngredientsPage() {
         alt="Plant butters, herbs, essential oils and natural cleansers used across the range"
         eyebrow="Ingredients"
         title="What we use, and why"
-        intro="Good products start with knowing what goes into them. Here is the library of plant-forward ingredients behind our range — grouped, with a plain-language note on why we choose each. Descriptions are general and non-medical, for the prototype."
+        intro="Good products start with knowing what goes into them. Here is the library of plant-forward ingredients behind our range — grouped, with a plain-language note on why we choose each. Descriptions are general and non-medical."
       >
         <IngredientCounts seed={seed} />
       </BannerIntro>
@@ -77,7 +73,7 @@ export default function IngredientsPage() {
         </div>
       </section>
 
-      {/* Ingredient library, grouped — editable from Studio */}
+      {/* Ingredient library, grouped */}
       <section className="container py-14 sm:py-20">
         <IngredientLibrary seed={seed} />
       </section>

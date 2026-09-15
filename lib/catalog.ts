@@ -1,11 +1,10 @@
 import type { Category, Product } from "./types";
 
 /**
- * DEMO CATALOG — pricing, ratings and stock are placeholder data.
- * Structure mirrors Supriya's product card: three sections —
- * Home Care, Skin Care, Hair Care. Products without real photos yet use a
- * clearly-marked "photo coming soon" placeholder cover.
- * Replace prices ("DEMO PRICE") and verify all copy with the founders.
+ * Product catalogue. Structure mirrors Supriya's product card: three sections —
+ * Home Care, Skin Care, Hair Care — plus one Partner Brands shelf.
+ * v3-static carries no prices, stock or ratings (orders go through WhatsApp);
+ * copy and ingredient lists are still to be verified by the founders.
  */
 
 export const categories: Category[] = [
@@ -47,7 +46,6 @@ export const categories: Category[] = [
   },
 ];
 
-// Prices in paise (₹1 = 100 paise). All values are DEMO PRICE — REPLACE.
 export const products: Product[] = [
   /* ------------------------------ HOME CARE ------------------------------ */
   {
@@ -62,8 +60,6 @@ export const products: Product[] = [
     keyIngredients: ["Plant-derived cleansers", "Lemon extract", "Glycerin"],
     usage: "Add a few drops to a wet sponge, work into a lather, then rinse thoroughly.",
     size: "500 ml",
-    price: 19900,
-    mrp: 24900,
     sku: "SN-HC-DWL-500",
     image: "/surakshitam-product-images/natural-dishwash-liquid/natural-dishwash-liquid-01-listing-front-clean.webp",
     images: [
@@ -71,9 +67,6 @@ export const products: Product[] = [
       "/surakshitam-product-images/natural-dishwash-liquid/natural-dishwash-liquid-02-lemon-ingredient-lifestyle.webp",
       "/surakshitam-product-images/natural-dishwash-liquid/natural-dishwash-liquid-03-sponge-usage-detail.webp",
     ],
-    rating: 4.7,
-    reviewCount: 128,
-    stock: 42,
     featured: true,
     bestSeller: true,
   },
@@ -89,7 +82,6 @@ export const products: Product[] = [
     keyIngredients: ["Plant-derived cleansers", "Reetha (soapnut)"],
     usage: "Rub a damp sponge on the bar to build lather, clean, then rinse.",
     size: "200 g",
-    price: 8900,
     sku: "SN-HC-DWB-200",
     image: "/surakshitam-product-images/natural-dishwash-bar/natural-dishwash-bar-01-listing-front-clean.webp",
     images: [
@@ -97,9 +89,6 @@ export const products: Product[] = [
       "/surakshitam-product-images/natural-dishwash-bar/natural-dishwash-bar-02-lemon-reetha-lifestyle.webp",
       "/surakshitam-product-images/natural-dishwash-bar/natural-dishwash-bar-03-open-texture-detail.webp",
     ],
-    rating: 4.5,
-    reviewCount: 64,
-    stock: 30,
     bestSeller: true,
   },
   {
@@ -114,8 +103,6 @@ export const products: Product[] = [
     keyIngredients: ["Plant-derived surfactants", "Citrus oils"],
     usage: "Dilute one capful in a bucket of water and mop as usual.",
     size: "500 ml",
-    price: 21900,
-    mrp: 26900,
     sku: "SN-HC-FLC-500",
     image: "/surakshitam-product-images/natural-floor-cleaner/natural-floor-cleaner-01-listing-front-clean.webp",
     images: [
@@ -123,9 +110,6 @@ export const products: Product[] = [
       "/surakshitam-product-images/natural-floor-cleaner/natural-floor-cleaner-02-lemongrass-lifestyle.webp",
       "/surakshitam-product-images/natural-floor-cleaner/natural-floor-cleaner-03-measuring-cap-usage.webp",
     ],
-    rating: 4.6,
-    reviewCount: 89,
-    stock: 8,
     featured: true,
     bestSeller: true,
   },
@@ -141,15 +125,12 @@ export const products: Product[] = [
     keyIngredients: ["Plant-derived surfactants", "Essential oils"],
     usage: "Add one cap per load; use less for lightly soiled laundry.",
     size: "500 ml",
-    price: 24900,
-    mrp: 29900,
     sku: "SN-HC-WML-500",
     image: "/surakshitam-product-images/washing-machine-liquid/washing-machine-liquid-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/washing-machine-liquid/washing-machine-liquid-01-listing-front-clean.webp",
       "/surakshitam-product-images/washing-machine-liquid/washing-machine-liquid-02-fresh-laundry-lifestyle.webp",
     ],
-    stock: 20,
     isNew: true,
   },
   {
@@ -164,16 +145,12 @@ export const products: Product[] = [
     keyIngredients: ["Mineral cleansers", "Natural acids"],
     usage: "Sprinkle onto a damp cloth, rub the utensil, then rinse clean.",
     size: "200 g",
-    price: 12900,
     sku: "SN-HC-UTS-200",
     image: "/surakshitam-product-images/natural-utensil-shine/natural-utensil-shine-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/natural-utensil-shine/natural-utensil-shine-01-listing-front-clean.webp",
       "/surakshitam-product-images/natural-utensil-shine/natural-utensil-shine-02-lemon-powder-usage.webp",
     ],
-    rating: 4.4,
-    reviewCount: 51,
-    stock: 25,
   },
 
   /* ------------------------------ SKIN CARE ------------------------------ */
@@ -189,8 +166,6 @@ export const products: Product[] = [
     keyIngredients: ["Shea butter", "Coconut oil", "Glycerin"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     size: "100 g",
-    price: 14900,
-    mrp: 17900,
     sku: "SN-SC-SHS-100",
     image: "/surakshitam-product-images/shea-butter-soap/shea-butter-soap-01-listing-front-clean.webp",
     images: [
@@ -198,9 +173,6 @@ export const products: Product[] = [
       "/surakshitam-product-images/shea-butter-soap/shea-butter-soap-02-shea-coconut-lifestyle.webp",
       "/surakshitam-product-images/shea-butter-soap/shea-butter-soap-03-unwrapped-texture-detail.webp",
     ],
-    rating: 4.8,
-    reviewCount: 203,
-    stock: 60,
     featured: true,
     bestSeller: true,
   },
@@ -216,7 +188,6 @@ export const products: Product[] = [
     keyIngredients: ["Neem", "Tulsi (holy basil)", "Coconut oil"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     size: "100 g",
-    price: 12900,
     sku: "SN-SC-NTS-100",
     image: "/surakshitam-product-images/neem-tulsi-soap/neem-tulsi-soap-01-listing-front-clean.webp",
     images: [
@@ -224,9 +195,6 @@ export const products: Product[] = [
       "/surakshitam-product-images/neem-tulsi-soap/neem-tulsi-soap-02-neem-tulsi-lifestyle.webp",
       "/surakshitam-product-images/neem-tulsi-soap/neem-tulsi-soap-03-unwrapped-texture-detail.webp",
     ],
-    rating: 4.7,
-    reviewCount: 156,
-    stock: 48,
     featured: true,
     bestSeller: true,
   },
@@ -242,7 +210,6 @@ export const products: Product[] = [
     keyIngredients: ["Papaya extract", "Glycerin", "Coconut oil"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     size: "100 g",
-    price: 13900,
     sku: "SN-SC-PYS-100",
     image: "/surakshitam-product-images/papaya-soap/papaya-soap-01-listing-front-clean.webp",
     images: [
@@ -250,9 +217,6 @@ export const products: Product[] = [
       "/surakshitam-product-images/papaya-soap/papaya-soap-02-papaya-ingredient-lifestyle.webp",
       "/surakshitam-product-images/papaya-soap/papaya-soap-03-unwrapped-texture-detail.webp",
     ],
-    rating: 4.6,
-    reviewCount: 112,
-    stock: 35,
     featured: true,
   },
   {
@@ -267,16 +231,12 @@ export const products: Product[] = [
     keyIngredients: ["Beetroot extract", "Glycerin", "Coconut oil"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     size: "100 g",
-    price: 13900,
     sku: "SN-SC-BTS-100",
     image: "/surakshitam-product-images/beetroot-soap/beetroot-soap-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/beetroot-soap/beetroot-soap-01-listing-front-clean.webp",
       "/surakshitam-product-images/beetroot-soap/beetroot-soap-02-beetroot-ingredient-lifestyle.webp",
     ],
-    rating: 4.5,
-    reviewCount: 74,
-    stock: 22,
     isNew: true,
   },
   {
@@ -291,16 +251,12 @@ export const products: Product[] = [
     keyIngredients: ["Vegetable glycerin", "Coconut oil"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     size: "100 g",
-    price: 14900,
     sku: "SN-SC-GLS-100",
     image: "/surakshitam-product-images/glycerine-soap/glycerine-soap-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/glycerine-soap/glycerine-soap-01-listing-front-clean.webp",
       "/surakshitam-product-images/glycerine-soap/glycerine-soap-02-transparent-texture-lifestyle.webp",
     ],
-    rating: 4.6,
-    reviewCount: 98,
-    stock: 40,
   },
   {
     id: "p-triple-butter-soap",
@@ -314,8 +270,6 @@ export const products: Product[] = [
     keyIngredients: ["Shea butter", "Cocoa butter", "Mango butter"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     size: "100 g",
-    price: 16900,
-    mrp: 19900,
     sku: "SN-SC-TBS-100",
     image: "/surakshitam-product-images/triple-butter-soap/triple-butter-soap-01-listing-front-clean.webp",
     images: [
@@ -323,9 +277,6 @@ export const products: Product[] = [
       "/surakshitam-product-images/triple-butter-soap/triple-butter-soap-02-butter-ingredient-lifestyle.webp",
       "/surakshitam-product-images/triple-butter-soap/triple-butter-soap-03-floral-texture-detail.webp",
     ],
-    rating: 4.9,
-    reviewCount: 187,
-    stock: 5,
     featured: true,
     bestSeller: true,
   },
@@ -341,8 +292,6 @@ export const products: Product[] = [
     keyIngredients: ["Rose extract", "Aloe vera", "Glycerin"],
     usage: "Massage a small amount onto damp skin, then rinse with water.",
     size: "100 ml",
-    price: 24900,
-    mrp: 29900,
     sku: "SN-SC-RFW-100",
     image: "/surakshitam-product-images/rose-face-wash/rose-face-wash-01-listing-front-clean.webp",
     images: [
@@ -350,9 +299,6 @@ export const products: Product[] = [
       "/surakshitam-product-images/rose-face-wash/rose-face-wash-02-rose-aloe-lifestyle.webp",
       "/surakshitam-product-images/rose-face-wash/rose-face-wash-03-pink-gel-texture-detail.webp",
     ],
-    rating: 4.7,
-    reviewCount: 143,
-    stock: 33,
     isNew: true,
   },
   {
@@ -367,7 +313,6 @@ export const products: Product[] = [
     keyIngredients: ["Lavender oil", "Aloe vera", "Glycerin"],
     usage: "Apply to a wet sponge or hand, lather over the body, then rinse.",
     size: "250 ml",
-    price: 32900,
     sku: "SN-SC-LBW-250",
     image: "/surakshitam-product-images/lavender-body-wash/lavender-body-wash-01-listing-front-clean.webp",
     images: [
@@ -375,9 +320,6 @@ export const products: Product[] = [
       "/surakshitam-product-images/lavender-body-wash/lavender-body-wash-02-lavender-aloe-lifestyle.webp",
       "/surakshitam-product-images/lavender-body-wash/lavender-body-wash-03-purple-gel-texture-detail.webp",
     ],
-    rating: 4.8,
-    reviewCount: 96,
-    stock: 18,
     isNew: true,
   },
   {
@@ -392,36 +334,12 @@ export const products: Product[] = [
     keyIngredients: ["Shea butter", "Aloe vera", "Glycerin"],
     usage: "Massage onto clean skin as often as needed.",
     size: "200 ml",
-    price: 29900,
     sku: "SN-SC-LOT-200",
     image: "/surakshitam-product-images/body-lotion/body-lotion-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/body-lotion/body-lotion-01-listing-front-clean.webp",
       "/surakshitam-product-images/body-lotion/body-lotion-02-shea-coconut-lifestyle.webp",
     ],
-    stock: 24,
-    isNew: true,
-  },
-  {
-    id: "p-face-cream",
-    slug: "face-cream",
-    name: "Face Cream",
-    category: "skin-care",
-    shortDescription: "Daily nourishing face cream",
-    description:
-      "A light daily face cream for everyday nourishment, made with plant-forward ingredients.",
-    benefits: ["Daily nourishment", "Light texture", "Everyday use"],
-    keyIngredients: ["Aloe vera", "Plant oils", "Glycerin"],
-    usage: "Apply a small amount to a clean face, morning and night.",
-    size: "50 g",
-    price: 34900,
-    sku: "SN-SC-FCR-050",
-    image: "/surakshitam-product-images/face-cream/face-cream-01-listing-front-clean.webp",
-    images: [
-      "/surakshitam-product-images/face-cream/face-cream-01-listing-front-clean.webp",
-      "/surakshitam-product-images/face-cream/face-cream-02-aloe-daily-care-lifestyle.webp",
-    ],
-    stock: 18,
     isNew: true,
   },
   {
@@ -436,14 +354,12 @@ export const products: Product[] = [
     keyIngredients: ["Herbal blend", "Gram flour"],
     usage: "Mix with a little water into a paste and use as a cleanser, then rinse.",
     size: "100 g",
-    price: 17900,
     sku: "SN-SC-BTP-100",
     image: "/surakshitam-product-images/herbal-bath-powder/herbal-bath-powder-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/herbal-bath-powder/herbal-bath-powder-01-listing-front-clean.webp",
       "/surakshitam-product-images/herbal-bath-powder/herbal-bath-powder-02-herbal-powder-usage.webp",
     ],
-    stock: 30,
   },
   {
     id: "p-foot-cream",
@@ -457,36 +373,12 @@ export const products: Product[] = [
     keyIngredients: ["Shea butter", "Peppermint oil"],
     usage: "Massage into clean, dry feet, ideally before bed.",
     size: "50 g",
-    price: 24900,
     sku: "SN-SC-FTC-050",
     image: "/surakshitam-product-images/foot-cream/foot-cream-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/foot-cream/foot-cream-01-listing-front-clean.webp",
       "/surakshitam-product-images/foot-cream/foot-cream-02-peppermint-care-lifestyle.webp",
     ],
-    stock: 22,
-  },
-  {
-    id: "p-face-pack",
-    slug: "face-pack",
-    name: "Face Pack",
-    category: "skin-care",
-    shortDescription: "Refreshing weekly face pack",
-    description:
-      "A weekly face pack of natural clays and herbs for a fresh, clean feel.",
-    benefits: ["Weekly refresh", "Natural clays & herbs", "Fresh feel"],
-    keyIngredients: ["Multani mitti", "Herbal extracts"],
-    usage: "Apply an even layer, leave for 10–15 minutes, then rinse off.",
-    size: "100 g",
-    price: 27900,
-    sku: "SN-SC-FPK-100",
-    image: "/surakshitam-product-images/face-pack/face-pack-01-listing-front-clean.webp",
-    images: [
-      "/surakshitam-product-images/face-pack/face-pack-01-listing-front-clean.webp",
-      "/surakshitam-product-images/face-pack/face-pack-02-clay-herbal-usage.webp",
-    ],
-    stock: 20,
-    isNew: true,
   },
   {
     id: "p-aloe-vera-gel",
@@ -500,14 +392,12 @@ export const products: Product[] = [
     keyIngredients: ["Aloe vera"],
     usage: "Apply to skin or hair as needed.",
     size: "100 ml",
-    price: 19900,
     sku: "SN-SC-ALG-100",
     image: "/surakshitam-product-images/aloe-vera-gel/aloe-vera-gel-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/aloe-vera-gel/aloe-vera-gel-01-listing-front-clean.webp",
       "/surakshitam-product-images/aloe-vera-gel/aloe-vera-gel-02-aloe-soothing-lifestyle.webp",
     ],
-    stock: 35,
     bestSeller: true,
   },
   {
@@ -522,16 +412,12 @@ export const products: Product[] = [
     keyIngredients: ["Shea butter", "Beeswax", "Strawberry extract"],
     usage: "Apply a thin layer to the lips as often as needed.",
     size: "10 g",
-    price: 14900,
     sku: "SN-SC-SLB-010",
     image: "/surakshitam-product-images/strawberry-lip-balm/strawberry-lip-balm-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/strawberry-lip-balm/strawberry-lip-balm-01-listing-front-clean.webp",
       "/surakshitam-product-images/strawberry-lip-balm/strawberry-lip-balm-02-strawberry-care-lifestyle.webp",
     ],
-    rating: 4.7,
-    reviewCount: 88,
-    stock: 54,
   },
 
   /* ------------------------------ HAIR CARE ------------------------------ */
@@ -547,8 +433,6 @@ export const products: Product[] = [
     keyIngredients: ["Reetha (soapnut)", "Shikakai", "Amla"],
     usage: "Apply to wet hair, massage into the scalp, then rinse thoroughly.",
     size: "200 ml",
-    price: 29900,
-    mrp: 34900,
     sku: "SN-HR-SHP-200",
     image: "/surakshitam-product-images/herbal-shampoo/herbal-shampoo-01-listing-front-clean.webp",
     images: [
@@ -556,9 +440,6 @@ export const products: Product[] = [
       "/surakshitam-product-images/herbal-shampoo/herbal-shampoo-02-amla-reetha-lifestyle.webp",
       "/surakshitam-product-images/herbal-shampoo/herbal-shampoo-03-herbal-texture-detail.webp",
     ],
-    rating: 4.6,
-    reviewCount: 121,
-    stock: 27,
     featured: true,
   },
   {
@@ -573,14 +454,12 @@ export const products: Product[] = [
     keyIngredients: ["Amla", "Shikakai", "Hibiscus"],
     usage: "Apply to damp hair, leave for 20–30 minutes, then rinse.",
     size: "100 g",
-    price: 29900,
     sku: "SN-HR-HPK-100",
     image: "/surakshitam-product-images/herbal-hair-pack/herbal-hair-pack-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/herbal-hair-pack/herbal-hair-pack-01-listing-front-clean.webp",
       "/surakshitam-product-images/herbal-hair-pack/herbal-hair-pack-02-amla-hibiscus-usage.webp",
     ],
-    stock: 18,
     isNew: true,
   },
   {
@@ -595,14 +474,12 @@ export const products: Product[] = [
     keyIngredients: ["Coconut oil", "Amla", "Curry leaf"],
     usage: "Massage into the scalp and lengths; leave for a while before washing.",
     size: "100 ml",
-    price: 24900,
     sku: "SN-HR-OIL-100",
     image: "/surakshitam-product-images/hair-oil/hair-oil-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/hair-oil/hair-oil-01-listing-front-clean.webp",
       "/surakshitam-product-images/hair-oil/hair-oil-02-amla-curry-leaf-lifestyle.webp",
     ],
-    stock: 26,
     bestSeller: true,
   },
   {
@@ -617,14 +494,12 @@ export const products: Product[] = [
     keyIngredients: ["Rosemary water", "Essential oils"],
     usage: "Spray onto the scalp and hair; no need to rinse.",
     size: "100 ml",
-    price: 27900,
     sku: "SN-HR-RMS-100",
     image: "/surakshitam-product-images/rosemary-hair-spray/rosemary-hair-spray-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/rosemary-hair-spray/rosemary-hair-spray-01-listing-front-clean.webp",
       "/surakshitam-product-images/rosemary-hair-spray/rosemary-hair-spray-02-rosemary-scalp-mist-lifestyle.webp",
     ],
-    stock: 20,
     isNew: true,
   },
   {
@@ -639,23 +514,19 @@ export const products: Product[] = [
     keyIngredients: ["Argan oil", "Plant extracts"],
     usage: "Apply a few drops to damp or dry hair, focusing on the ends.",
     size: "50 ml",
-    price: 32900,
-    mrp: 37900,
     sku: "SN-HR-SER-050",
     image: "/surakshitam-product-images/hair-serum/hair-serum-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/hair-serum/hair-serum-01-listing-front-clean.webp",
       "/surakshitam-product-images/hair-serum/hair-serum-02-argan-smoothing-lifestyle.webp",
     ],
-    stock: 16,
     isNew: true,
   },
 
   /* ------------------- ADDED FROM THE REEL-REFERENCE SET -------------------
    * Real products that were photographed but had never been listed. Copy here
    * is deliberately sensory and non-medical, matching the rest of the catalog.
-   * DEMO PRICE + DEMO SIZE — the founders must confirm price, pack size and
-   * every ingredient list before these go live.
+   * Pack sizes and ingredient lists still to be confirmed by the founders.
    * ---------------------------------------------------------------------- */
   {
     id: "p-aloe-vera-soap",
@@ -669,14 +540,12 @@ export const products: Product[] = [
     keyIngredients: ["Aloe vera", "Coconut oil", "Glycerin"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     size: "100 g",
-    price: 13900,
     sku: "SN-SC-ALS-100",
     image: "/surakshitam-product-images/aloe-vera-soap/aloe-vera-soap-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/aloe-vera-soap/aloe-vera-soap-01-listing-front-clean.webp",
       "/surakshitam-product-images/aloe-vera-soap/aloe-vera-soap-02-aloe-ingredient-lifestyle.webp",
     ],
-    stock: 24,
     isNew: true,
   },
   {
@@ -691,14 +560,12 @@ export const products: Product[] = [
     keyIngredients: ["Activated charcoal", "Coconut oil", "Glycerin"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     size: "100 g",
-    price: 14900,
     sku: "SN-SC-CHS-100",
     image: "/surakshitam-product-images/charcoal-soap/charcoal-soap-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/charcoal-soap/charcoal-soap-01-listing-front-clean.webp",
       "/surakshitam-product-images/charcoal-soap/charcoal-soap-02-charcoal-detox-lifestyle.webp",
     ],
-    stock: 24,
     isNew: true,
   },
   {
@@ -713,14 +580,12 @@ export const products: Product[] = [
     keyIngredients: ["Coffee grounds", "Coconut oil", "Glycerin"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     size: "100 g",
-    price: 14900,
     sku: "SN-SC-COS-100",
     image: "/surakshitam-product-images/coffee-soap/coffee-soap-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/coffee-soap/coffee-soap-01-listing-front-clean.webp",
       "/surakshitam-product-images/coffee-soap/coffee-soap-02-coffee-exfoliating-lifestyle.webp",
     ],
-    stock: 24,
     isNew: true,
   },
   {
@@ -735,14 +600,12 @@ export const products: Product[] = [
     keyIngredients: ["Goat milk", "Shea butter", "Coconut oil"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     size: "100 g",
-    price: 16900,
     sku: "SN-SC-GMS-100",
     image: "/surakshitam-product-images/goat-milk-soap/goat-milk-soap-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/goat-milk-soap/goat-milk-soap-01-listing-front-clean.webp",
       "/surakshitam-product-images/goat-milk-soap/goat-milk-soap-02-milk-creamy-lifestyle.webp",
     ],
-    stock: 24,
     isNew: true,
   },
   {
@@ -757,14 +620,12 @@ export const products: Product[] = [
     keyIngredients: ["Honey", "Oats", "Coconut oil"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     size: "100 g",
-    price: 15900,
     sku: "SN-SC-HNS-100",
     image: "/surakshitam-product-images/honey-soap/honey-soap-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/honey-soap/honey-soap-01-listing-front-clean.webp",
       "/surakshitam-product-images/honey-soap/honey-soap-02-honey-oat-lifestyle.webp",
     ],
-    stock: 24,
     isNew: true,
   },
   {
@@ -779,14 +640,12 @@ export const products: Product[] = [
     keyIngredients: ["Manjistha root", "Coconut oil", "Glycerin"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     size: "100 g",
-    price: 15900,
     sku: "SN-SC-MJS-100",
     image: "/surakshitam-product-images/manjista-soap/manjista-soap-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/manjista-soap/manjista-soap-01-listing-front-clean.webp",
       "/surakshitam-product-images/manjista-soap/manjista-soap-02-manjista-root-lifestyle.webp",
     ],
-    stock: 24,
     isNew: true,
   },
   {
@@ -801,14 +660,12 @@ export const products: Product[] = [
     keyIngredients: ["Red wine extract", "Grape seed oil", "Coconut oil"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     size: "100 g",
-    price: 16900,
     sku: "SN-SC-RWS-100",
     image: "/surakshitam-product-images/red-wine-soap/red-wine-soap-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/red-wine-soap/red-wine-soap-01-listing-front-clean.webp",
       "/surakshitam-product-images/red-wine-soap/red-wine-soap-02-grape-botanical-lifestyle.webp",
     ],
-    stock: 24,
     isNew: true,
   },
   {
@@ -823,14 +680,12 @@ export const products: Product[] = [
     keyIngredients: ["Sandalwood", "Coconut oil", "Glycerin"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     size: "100 g",
-    price: 16900,
     sku: "SN-SC-SDS-100",
     image: "/surakshitam-product-images/sandal-soap/sandal-soap-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/sandal-soap/sandal-soap-01-listing-front-clean.webp",
       "/surakshitam-product-images/sandal-soap/sandal-soap-02-sandalwood-lifestyle.webp",
     ],
-    stock: 24,
     isNew: true,
   },
   {
@@ -845,14 +700,12 @@ export const products: Product[] = [
     keyIngredients: ["Henna (Lawsonia inermis)"],
     usage: "Mix with warm water into a paste, apply to hair, leave as preferred, then rinse thoroughly.",
     size: "100 g",
-    price: 17900,
     sku: "SN-HR-HNP-100",
     image: "/surakshitam-product-images/henna-powder/henna-powder-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/henna-powder/henna-powder-01-listing-front-clean.webp",
       "/surakshitam-product-images/henna-powder/henna-powder-02-henna-herbal-usage.webp",
     ],
-    stock: 24,
     isNew: true,
   },
 
@@ -862,92 +715,26 @@ export const products: Product[] = [
    * other resold product belongs here too. Every one
    * of these carries `thirdParty: true` and its own `brand`, which is what the
    * storefront shows — no Surakshitam branding, wording or artwork is applied
-   * to them anywhere. DEMO BRANDS + DEMO PRICES — replace with the real
-   * suppliers' names, packs and MRPs before launch.
+   * to them anywhere. v3: only Homemade Swagruha Kitchen's wheat noodles are
+   * listed (ANSWERS-2026-09-14 §C15).
    * -------------------------------------------------------------------- */
   {
     id: "p-wheat-noodles",
     slug: "homemade-wheat-noodles",
     name: "Homemade Wheat Noodles",
     category: "partner-brands",
-    brand: "Amma's Kitchen",
+    brand: "Homemade Swagruha Kitchen",
     thirdParty: true,
     shortDescription: "Hand-cut wheat noodles, no maida",
     description:
-      "Wheat noodles made in small home batches by Amma's Kitchen — hand-cut, sun-dried and packed without maida or added colour. Cooks in about five minutes.",
+      "Wheat noodles made in small home batches by Homemade Swagruha Kitchen — hand-cut, sun-dried and packed without maida or added colour. Cooks in about five minutes.",
     benefits: ["Whole-wheat base", "No added colour", "Cooks in ~5 minutes"],
     keyIngredients: ["Whole wheat flour", "Edible salt"],
     usage: "Boil in salted water for 4–5 minutes, drain, then toss with your seasoning.",
     size: "250 g",
-    weightGrams: 260,
-    price: 9900,
-    mrp: 11900,
     sku: "AK-PN-WNL-250",
     image: "/products/partners/wheat-noodles.webp",
-    stock: 24,
     isNew: true,
-  },
-  {
-    id: "p-millet-noodles",
-    slug: "millet-hakka-noodles",
-    name: "Millet Hakka Noodles",
-    category: "partner-brands",
-    brand: "Millet Mitra",
-    thirdParty: true,
-    shortDescription: "Millet-based noodles for everyday meals",
-    description:
-      "Hakka-style noodles from Millet Mitra, made on a millet base instead of refined flour. A quick weeknight base for stir-fries and lunchboxes.",
-    benefits: ["Millet-based", "No refined flour", "Quick to cook"],
-    keyIngredients: ["Little millet flour", "Wheat flour", "Edible salt"],
-    usage: "Boil for 5–6 minutes, rinse in cold water, then stir-fry with vegetables.",
-    size: "200 g",
-    weightGrams: 210,
-    price: 12900,
-    sku: "MM-PN-MNL-200",
-    image: "/products/partners/millet-noodles.webp",
-    stock: 18,
-    isNew: true,
-  },
-  {
-    id: "p-ragi-murukku",
-    slug: "roasted-ragi-murukku",
-    name: "Roasted Ragi Murukku",
-    category: "partner-brands",
-    brand: "Amma's Kitchen",
-    thirdParty: true,
-    shortDescription: "Crunchy ragi tea-time snack",
-    description:
-      "A crisp, lightly spiced ragi murukku from Amma's Kitchen — made in small batches for tea time and lunchboxes.",
-    benefits: ["Ragi (finger millet) base", "Small-batch made", "Everyday tea-time snack"],
-    keyIngredients: ["Ragi flour", "Rice flour", "Cumin", "Edible salt"],
-    usage: "Ready to eat. Reseal the pack and finish within a week of opening.",
-    size: "200 g",
-    weightGrams: 215,
-    price: 8900,
-    sku: "AK-PN-RMK-200",
-    image: "/products/partners/ragi-murukku.webp",
-    stock: 30,
-  },
-  {
-    id: "p-groundnut-oil",
-    slug: "wood-pressed-groundnut-oil",
-    name: "Wood-Pressed Groundnut Oil",
-    category: "partner-brands",
-    brand: "Ghani Fresh",
-    thirdParty: true,
-    shortDescription: "Cold, wood-pressed cooking oil",
-    description:
-      "Groundnut oil pressed in a wooden ghani by Ghani Fresh, filtered and bottled without refining — for everyday Indian cooking.",
-    benefits: ["Wood-pressed", "Unrefined", "Everyday cooking oil"],
-    keyIngredients: ["Groundnut"],
-    usage: "Use as your regular cooking oil. Store away from direct sunlight.",
-    size: "1 L",
-    weightGrams: 1020,
-    price: 39900,
-    mrp: 44900,
-    sku: "GF-PN-GNO-1L",
-    image: "/products/partners/groundnut-oil.webp",
-    stock: 12,
   },
 ];
 
@@ -970,10 +757,8 @@ const CONCERN_TAGS: Record<string, string[]> = {
   "p-rose-face-wash": ["sensitive-skin"],
   "p-lavender-body-wash": ["dry-skin", "daily-freshness"],
   "p-body-lotion": ["dry-skin"],
-  "p-face-cream": ["dry-skin"],
   "p-herbal-bath-powder": ["sensitive-skin"],
   "p-foot-cream": ["dry-skin"],
-  "p-face-pack": ["dry-skin"],
   "p-aloe-vera-gel": ["sensitive-skin", "dry-skin"],
   "p-strawberry-lip-balm": ["dry-skin"],
   "p-herbal-shampoo": ["dandruff", "hair-fall"],
@@ -1001,8 +786,8 @@ for (const p of products) {
  * drain feeds soil and waterways instead of loading them with harsh chemistry.
  * Everything else is the general home-care range.
  *
- * DEMO CLASSIFICATION — the founders must confirm which SKUs are genuinely
- * bio-enzyme formulations before this is published; the badge is a claim.
+ * Founders still to confirm which SKUs are genuinely bio-enzyme formulations —
+ * the badge is a product claim.
  */
 const BIO_ENZYME_PRODUCTS = new Set<string>([
   "p-dishwash-liquid",

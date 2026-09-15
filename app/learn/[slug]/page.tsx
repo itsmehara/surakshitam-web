@@ -59,11 +59,6 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
           ))}
         </div>
 
-        <p className="mt-12 rounded-lg bg-parchment px-5 py-4 text-xs text-forest/55">
-          This is demo editorial content for the prototype. Please review with the founders before
-          publishing.
-        </p>
-
         <div className="mt-10">
           <LinkButton href="/shop">
             Shop Products <ArrowRight width={16} />
