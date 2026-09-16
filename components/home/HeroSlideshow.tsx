@@ -23,10 +23,10 @@ import { ArrowRight, ChevronDown, LeafIcon, BeakerIcon, RecycleIcon } from "@/co
  * NOT pause when the mouse rests on the photo — that read as "stuck" — only
  * while the cursor is over the dots/arrows. Static frame under reduced motion.
  *
- * Images (16 Sep): the "-extended" set — the original banners outpainted to
- * 2560×1440 with ~13% background margin on every side and the shampoo label
- * spelling corrected (surakshitam-docs/docs/v3-static/HERO-IMAGE-PROMPT.md).
- * Served as WebP at 1280 and 2048 wide via srcset.
+ * Images (16 Sep): the original 1672×941 banners, except hair-care which uses
+ * the outpainted "-extended" version (the only outpaint that read as one
+ * photograph — see HERO-IMAGE-PROMPT.md). `focus.desktop` keeps caps in
+ * frame on wide viewports; the drift is small enough not to reach a product.
  *
  * Layout: desktop (lg+) — copy left over a horizontal scrim, photo `cover`
  * with a per-slide focal point; the drift (1.04→1.12×, ±2% pan) never eats
@@ -40,8 +40,9 @@ import { ArrowRight, ChevronDown, LeafIcon, BeakerIcon, RecycleIcon } from "@/co
  */
 
 interface Slide {
-  /** Base name in public/banners/ — `${src}-extended-{1280,2048}.webp` */
+  /** Base name in public/banners/. `extended` → `-extended-{1280,2048}.webp`, else `-responsive.webp` */
   src: string;
+  extended?: boolean;
   alt: string;
   /**
    * CSS `object-position` for the crop — `mobile` applies below `lg`
@@ -57,6 +58,7 @@ interface Slide {
 const SLIDES: Slide[] = [
   {
     src: "homepage-hero-home-skin-hair-complete-product-range",
+    focus: { desktop: "center top" },
     alt: "Surakshitam Naturals home, skin and hair care range on a stone slab with neem, hibiscus and lemon",
     eyebrow: "Homemade · Plant-based · Hyderabad",
     title: ["Everyday care,", "thoughtfully formulated."],
@@ -65,6 +67,7 @@ const SLIDES: Slide[] = [
   },
   {
     src: "skin-care-handmade-botanical-soap-collection",
+    focus: { desktop: "center 30%" },
     alt: "Handmade botanical soaps — papaya, shea butter, neem tulasi and triple butter",
     eyebrow: "Skin care",
     title: ["Botanical care,", "made by hand."],
@@ -73,6 +76,8 @@ const SLIDES: Slide[] = [
   },
   {
     src: "hair-care-herbal-shampoo-amla-reetha",
+    extended: true,
+    focus: { desktop: "center" },
     alt: "Herbal shampoo with amla and reetha",
     eyebrow: "Hair care",
     title: ["A stronger ritual", "starts at the roots."],
@@ -81,6 +86,7 @@ const SLIDES: Slide[] = [
   },
   {
     src: "home-care-category-dishwash-floor-cleaner-pitambari",
+    focus: { desktop: "center top" },
     alt: "Natural dishwash liquid, floor cleaner and utensil shine",
     eyebrow: "Home care",
     title: ["A naturally", "cleaner home."],
@@ -89,6 +95,7 @@ const SLIDES: Slide[] = [
   },
   {
     src: "ingredients-botanicals-butters-natural-cleansers",
+    focus: { desktop: "center" },
     alt: "Botanicals, butters and natural cleansers used in the range",
     eyebrow: "Ingredients",
     title: ["What we use,", "and why."],
@@ -102,12 +109,17 @@ const SLIDES: Slide[] = [
     title: ["Lemon-fresh dishes,", "gentle on hands."],
     body: "Our plant-based dishwash liquid lifts grease with lemon and food-grade cleansers — no SLS, no harsh chemicals, kind to hands and drains.",
     cta: { label: "See the dishwash liquid", href: "/product/natural-dishwash-liquid" },
-    focus: { desktop: "center" },
+    focus: { desktop: "center 35%" },
   },
 ];
 
-const srcSet = (base: string) =>
-  `/banners/${base}-extended-1280.webp 1280w, /banners/${base}-extended-2048.webp 2048w`;
+/** Originals are one 1672px WebP; the extended set has 1280/2048 variants. */
+const imgSrc = (s: Slide) =>
+  s.extended ? `/banners/${s.src}-extended-2048.webp` : `/banners/${s.src}-responsive.webp`;
+const srcSet = (s: Slide) =>
+  s.extended
+    ? `/banners/${s.src}-extended-1280.webp 1280w, /banners/${s.src}-extended-2048.webp 2048w`
+    : undefined;
 
 const HOLD_MS = 3800; // time a slide sits before the next crossfade — short enough that a viewer never wonders if it's stuck
 const FADE_MS = 1200; // crossfade duration — long enough to feel like a dissolve, not a cut
@@ -185,8 +197,8 @@ export function HeroSlideshow() {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={`/banners/${s.src}-extended-2048.webp`}
-                srcSet={srcSet(s.src)}
+                src={imgSrc(s)}
+                srcSet={srcSet(s)}
                 sizes="100vw"
                 alt={s.alt}
                 loading={i === 0 ? "eager" : "lazy"}
@@ -202,8 +214,8 @@ export function HeroSlideshow() {
               />
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={`/banners/${s.src}-extended-2048.webp`}
-                srcSet={srcSet(s.src)}
+                src={imgSrc(s)}
+                srcSet={srcSet(s)}
                 sizes="100vw"
                 alt=""
                 loading={i === 0 ? "eager" : "lazy"}

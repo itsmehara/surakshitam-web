@@ -108,19 +108,19 @@
 /* v2 hero slideshow: the photo is never still. Three drift patterns (zoom +
    pan) run infinite-alternate so a slide keeps moving for as long as it is on
    screen — no one-shot Ken-Burns that ends and leaves the picture frozen.
-   16 Sep: capped at 1.12× / ±2% — the extended banners carry ~13% margin, so
-   at these values the drift only ever crops background, never a product. */
+   16 Sep: capped at 1.07× / ±1% — the original banners have products near
+   the edges, so the drift must stay within a few percent. */
 @keyframes sn-drift-a {
-  from { transform: scale(1.04) translate3d(0, 0, 0); }
-  to   { transform: scale(1.12) translate3d(-2%, -1.5%, 0); }
+  from { transform: scale(1.02) translate3d(0, 0, 0); }
+  to   { transform: scale(1.07) translate3d(-1%, -0.8%, 0); }
 }
 @keyframes sn-drift-b {
-  from { transform: scale(1.12) translate3d(1.5%, 1%, 0); }
-  to   { transform: scale(1.04) translate3d(-1%, -0.5%, 0); }
+  from { transform: scale(1.07) translate3d(0.8%, 0.6%, 0); }
+  to   { transform: scale(1.02) translate3d(-0.6%, -0.3%, 0); }
 }
 @keyframes sn-drift-c {
-  from { transform: scale(1.05) translate3d(-1.5%, 1%, 0); }
-  to   { transform: scale(1.11) translate3d(1.5%, -1.5%, 0); }
+  from { transform: scale(1.03) translate3d(-0.8%, 0.6%, 0); }
+  to   { transform: scale(1.065) translate3d(0.8%, -0.8%, 0); }
 }
 .sn-drift-a { animation: sn-drift-a 11s ease-in-out infinite alternate; }
 .sn-drift-b { animation: sn-drift-b 13s ease-in-out infinite alternate; }
