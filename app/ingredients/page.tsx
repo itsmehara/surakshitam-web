@@ -43,7 +43,7 @@ export default function IngredientsPage() {
   return (
     <>
       <BannerIntro
-        src="/banners/ingredients-botanicals-butters-natural-cleansers-responsive.webp"
+        src="/banners/ingredients-botanicals-butters-natural-cleansers-v2-2048.webp"
         alt="Plant butters, herbs, essential oils and natural cleansers used across the range"
         eyebrow="Ingredients"
         title="What we use, and why"

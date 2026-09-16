@@ -23,10 +23,12 @@ import { ArrowRight, ChevronDown, LeafIcon, BeakerIcon, RecycleIcon } from "@/co
  * NOT pause when the mouse rests on the photo — that read as "stuck" — only
  * while the cursor is over the dots/arrows. Static frame under reduced motion.
  *
- * Images (16 Sep): the original 1672×941 banners, except hair-care which uses
- * the outpainted "-extended" version (the only outpaint that read as one
- * photograph — see HERO-IMAGE-PROMPT.md). `focus.desktop` keeps caps in
- * frame on wide viewports; the drift is small enough not to reach a product.
+ * Images (16 Sep, v2): surakshitam-docs/source-assets/banner-masters-v2/ —
+ * four re-framed scenes (camera pulled back, ~13% margin), the outpainted
+ * hair-care banner, and two originals still awaiting a re-frame (range,
+ * dishwash). Served as `-v2-{1280,2048}.webp`; the two originals only have
+ * a 1280 variant at their native width. `focus.desktop` keeps caps in frame
+ * on very wide viewports.
  *
  * Layout: desktop (lg+) — copy left over a horizontal scrim, photo `cover`
  * with a per-slide focal point; the drift (1.04→1.12×, ±2% pan) never eats
@@ -40,9 +42,8 @@ import { ArrowRight, ChevronDown, LeafIcon, BeakerIcon, RecycleIcon } from "@/co
  */
 
 interface Slide {
-  /** Base name in public/banners/. `extended` → `-extended-{1280,2048}.webp`, else `-responsive.webp` */
+  /** Base name in public/banners/ → `${src}-v2-{1280,2048}.webp` */
   src: string;
-  extended?: boolean;
   alt: string;
   /**
    * CSS `object-position` for the crop — `mobile` applies below `lg`
@@ -67,7 +68,7 @@ const SLIDES: Slide[] = [
   },
   {
     src: "skin-care-handmade-botanical-soap-collection",
-    focus: { desktop: "center 30%" },
+    focus: { desktop: "center" },
     alt: "Handmade botanical soaps — papaya, shea butter, neem tulasi and triple butter",
     eyebrow: "Skin care",
     title: ["Botanical care,", "made by hand."],
@@ -76,7 +77,6 @@ const SLIDES: Slide[] = [
   },
   {
     src: "hair-care-herbal-shampoo-amla-reetha",
-    extended: true,
     focus: { desktop: "center" },
     alt: "Herbal shampoo with amla and reetha",
     eyebrow: "Hair care",
@@ -86,7 +86,7 @@ const SLIDES: Slide[] = [
   },
   {
     src: "home-care-category-dishwash-floor-cleaner-pitambari",
-    focus: { desktop: "center top" },
+    focus: { desktop: "center" },
     alt: "Natural dishwash liquid, floor cleaner and utensil shine",
     eyebrow: "Home care",
     title: ["A naturally", "cleaner home."],
@@ -113,13 +113,8 @@ const SLIDES: Slide[] = [
   },
 ];
 
-/** Originals are one 1672px WebP; the extended set has 1280/2048 variants. */
-const imgSrc = (s: Slide) =>
-  s.extended ? `/banners/${s.src}-extended-2048.webp` : `/banners/${s.src}-responsive.webp`;
-const srcSet = (s: Slide) =>
-  s.extended
-    ? `/banners/${s.src}-extended-1280.webp 1280w, /banners/${s.src}-extended-2048.webp 2048w`
-    : undefined;
+const imgSrc = (s: Slide) => `/banners/${s.src}-v2-2048.webp`;
+const srcSet = (s: Slide) => `/banners/${s.src}-v2-1280.webp 1280w, /banners/${s.src}-v2-2048.webp 2048w`;
 
 const HOLD_MS = 3800; // time a slide sits before the next crossfade — short enough that a viewer never wonders if it's stuck
 const FADE_MS = 1200; // crossfade duration — long enough to feel like a dissolve, not a cut
