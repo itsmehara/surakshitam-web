@@ -151,11 +151,23 @@ fruit physics are unchanged.
   headers (`BannerIntro move={n}`) loop the same glide. Open image item: dish-wash tub logo on
   the home-care banner (single-label prompt in the 16 Sep log).
 
+### 🟢 LIVE — 16 Sep 2026, ~21:45 IST
+- https://www.surakshitamnaturals.com serves the `v3-static` build via GitHub Actions (run on
+  every push to `v3-static`). Bare domain → 301 to www. GoDaddy: 4 × A `@` → 185.199.108–111.153,
+  CNAME www → itsmehara.github.io. Certificate issued (Let's Encrypt via GitHub). **Enforce HTTPS
+  still to be ticked** in repo Settings → Pages.
+- Enquiry form → Google Sheet **"Surakshitam Enquiries" in gharanadhgupta@gmail.com** (shared
+  Editor with surakshitamnatural@gmail.com), Apps Script deployed 16 Sep; repo variable
+  `NEXT_PUBLIC_ENQUIRY_URL` set; verified end-to-end from the live site. Local viewer config in
+  `surakshitam-docs/tools/enquiries.config.js` (gitignored).
+- Runbook: `surakshitam-docs/docs/v3-static/DEPLOY-PAGES-DNS.md`. Note: GitHub's "Run workflow"
+  button is absent because the workflow only exists on `v3-static` — trigger with an empty commit
+  (`git commit --allow-empty -m "Trigger Pages deploy" && git push`).
+
 ### Still open for v3 (also logged in `../REGISTRY.md` → "v3-static pending")
-1. Enquiry Sheet + Apps Script deployment (ENQUIRY-SETUP.md steps 1–5), then set the
-   `NEXT_PUBLIC_ENQUIRY_URL` repo variable and re-run the workflow. Redeploy `Code.gs` (new
-   columns) first.
-2. GitHub Pages settings + GoDaddy DNS (records in the WhatsApp message to Supriya, 15 Sep).
+1. ~~Enquiry Sheet + Apps Script~~ done 16 Sep. Transfer to founders' account later if wanted.
+2. ~~GitHub Pages + GoDaddy DNS~~ done 16 Sep. Tick **Enforce HTTPS**; optional: verify the
+   domain (user Settings → Pages → Add a domain, TXT record); delete the 4 red Actions runs.
 3. `public/products/partners/{millet-noodles,ragi-murukku,groundnut-oil}.webp` and
    `public/category-groups/partner-brands-4-product-card-group.webp` still show the dropped
    products — orphaned / stale artwork, delete or re-shoot.
