@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 import { LinkButton } from "@/components/ui/Button";
 import { FallingBotanicals } from "@/components/ui/FallingBotanicals";
 import { FallingFruitPhysics } from "@/components/ui/FallingFruitPhysics";
+import { moveStyle } from "@/lib/hero-motion";
 import { ArrowRight, ChevronDown, LeafIcon, BeakerIcon, RecycleIcon } from "@/components/icons";
 
 /**
@@ -18,10 +19,12 @@ import { ArrowRight, ChevronDown, LeafIcon, BeakerIcon, RecycleIcon } from "@/co
  * more to scroll. Leaves + the falling-fruit solver run over the photo, as on
  * the v1 hero.
  *
- * Motion: crossfade every HOLD_MS; every slide drifts continuously (zoom +
- * pan, `.sn-drift-*` in globals.css) so the picture is never frozen. It does
- * NOT pause when the mouse rests on the photo — that read as "stuck" — only
- * while the cursor is over the dots/arrows. Static frame under reduced motion.
+ * Motion (16 Sep): crossfade every HOLD_MS; each slide plays its own camera
+ * move (lib/hero-motion.ts — pan, push-in, corner reveal, rise, diagonal) from
+ * the moment it becomes active, restarting on every visit (the img wrapper is
+ * re-keyed with a run counter), and keeps moving through the fade-out so there
+ * is never a snap. It does NOT pause when the mouse rests on the photo — that
+ * read as "stuck" — only over the dots/arrows. Static frame under reduced motion.
  *
  * Images (16 Sep, v2): surakshitam-docs/source-assets/banner-masters-v2/ —
  * four re-framed scenes (camera pulled back, ~13% margin), the outpainted
@@ -31,8 +34,8 @@ import { ArrowRight, ChevronDown, LeafIcon, BeakerIcon, RecycleIcon } from "@/co
  * on very wide viewports.
  *
  * Layout: desktop (lg+) — copy left over a horizontal scrim, photo `cover`
- * with a per-slide focal point; the drift (1.04→1.12×, ±2% pan) never eats
- * more than the new margin, so no product is ever cropped. Below lg — the
+ * with a per-slide focal point; the moves stay inside the banners' margin
+ * (see hero-motion.ts), so no product is ever cropped. Below lg — the
  * WHOLE image is shown (`object-contain`, top-aligned, a blurred copy of
  * itself filling the letterbox) with the copy beneath it, so nothing is
  * cropped on phones at all.
@@ -116,9 +119,10 @@ const SLIDES: Slide[] = [
 const imgSrc = (s: Slide) => `/banners/${s.src}-v2-2048.webp`;
 const srcSet = (s: Slide) => `/banners/${s.src}-v2-1280.webp 1280w, /banners/${s.src}-v2-2048.webp 2048w`;
 
-const HOLD_MS = 3800; // time a slide sits before the next crossfade — short enough that a viewer never wonders if it's stuck
-const FADE_MS = 1200; // crossfade duration — long enough to feel like a dissolve, not a cut
-const DRIFT = ["sn-drift-a", "sn-drift-b", "sn-drift-c"]; // rotate so neighbours move differently
+const HOLD_MS = 5000; // time a slide sits before the next crossfade — long enough for the camera move to read
+const FADE_MS = 1400; // crossfade duration — long enough to feel like a dissolve, not a cut
+/** The camera move runs hold + fade, so the outgoing slide is still gliding while it fades. */
+const MOVE_MS = HOLD_MS + FADE_MS + 400;
 
 const trust = [
   { icon: LeafIcon, label: "Plant-forward ingredients" },
@@ -134,6 +138,9 @@ export function HeroSlideshow() {
   // Which slides have their <img> mounted. Starts with the first two; every
   // change of slide mounts the one after it so it is decoded before its turn.
   const [mounted, setMounted] = useState<Set<number>>(() => new Set([0, 1]));
+  // Per-slide visit counter: bumping it re-keys the slide's images, which
+  // restarts its camera move from the beginning each time it comes round.
+  const [runs, setRuns] = useState<number[]>(() => SLIDES.map(() => 0));
 
   const go = useCallback((n: number) => setIndex((i) => (i + n + SLIDES.length) % SLIDES.length), []);
 
@@ -159,6 +166,7 @@ export function HeroSlideshow() {
   useEffect(() => {
     const next = (index + 1) % SLIDES.length;
     setMounted((m) => (m.has(next) ? m : new Set(m).add(next)));
+    setRuns((r) => r.map((n, i) => (i === index ? n + 1 : n)));
   }, [index]);
 
   const slide = SLIDES[index];
@@ -175,9 +183,10 @@ export function HeroSlideshow() {
       <div className="absolute inset-0">
         {SLIDES.map((s, i) => {
           const active = i === index;
-          const drift = !reduced && DRIFT[i % DRIFT.length];
+          const move = !reduced ? "sn-move" : undefined;
           const focus = {
             "--focus-d": s.focus?.desktop ?? "center right",
+            "--mv-dur": `${MOVE_MS}ms`,
           } as React.CSSProperties;
           if (!mounted.has(i)) return <div key={s.src} aria-hidden="true" className="absolute inset-0" />;
           return (
@@ -190,36 +199,54 @@ export function HeroSlideshow() {
               )}
               style={{ transitionDuration: `${FADE_MS}ms` }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={imgSrc(s)}
-                srcSet={srcSet(s)}
-                sizes="100vw"
-                alt={s.alt}
-                loading={i === 0 ? "eager" : "lazy"}
-                fetchPriority={i === 0 ? "high" : "low"}
-                decoding="async"
-                style={focus}
-                className={cn(
-                  // desktop: cover with focal point; below lg: this is the blurred letterbox fill
-                  "absolute inset-0 h-full w-full object-cover will-change-transform",
-                  "scale-110 blur-2xl brightness-105 saturate-[0.85] lg:scale-100 lg:blur-0 lg:brightness-100 lg:saturate-100 lg:object-[var(--focus-d)]",
-                  drift,
-                )}
-              />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={imgSrc(s)}
-                srcSet={srcSet(s)}
-                sizes="100vw"
-                alt=""
-                loading={i === 0 ? "eager" : "lazy"}
-                decoding="async"
-                className={cn(
-                  "absolute inset-0 h-full w-full object-contain object-top origin-top will-change-transform lg:hidden",
-                  drift,
-                )}
-              />
+              {/* re-keyed per visit so the move restarts; the fading-out copy keeps its own run */}
+              <span key={runs[i]} className="absolute inset-0 block">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={imgSrc(s)}
+                  srcSet={srcSet(s)}
+                  sizes="100vw"
+                  alt={s.alt}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  fetchPriority={i === 0 ? "high" : "low"}
+                  decoding="async"
+                  style={{ ...focus, ...moveStyle(i, 1) }}
+                  className={cn(
+                    // desktop: cover with focal point + camera move; below lg: the blurred letterbox fill
+                    "absolute inset-0 hidden h-full w-full object-cover will-change-transform lg:block lg:object-[var(--focus-d)]",
+                    move,
+                  )}
+                />
+                {/* blurred fill behind the mobile band — same move at low amplitude */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={imgSrc(s)}
+                  srcSet={srcSet(s)}
+                  sizes="100vw"
+                  alt=""
+                  loading={i === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                  style={{ ...focus, ...moveStyle(i, 0.4) }}
+                  className={cn(
+                    "absolute inset-0 h-full w-full scale-110 object-cover blur-2xl brightness-105 saturate-[0.85] will-change-transform lg:hidden",
+                    move,
+                  )}
+                />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={imgSrc(s)}
+                  srcSet={srcSet(s)}
+                  sizes="100vw"
+                  alt={s.alt}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                  style={{ ...focus, ...moveStyle(i, 0.6) }}
+                  className={cn(
+                    "absolute inset-0 h-full w-full object-contain object-top origin-top will-change-transform lg:hidden",
+                    move,
+                  )}
+                />
+              </span>
             </div>
           );
         })}

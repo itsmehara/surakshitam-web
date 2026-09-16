@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { FallingBotanicals } from "./FallingBotanicals";
 import { FallingFruitPhysics } from "./FallingFruitPhysics";
+import { moveStyle } from "@/lib/hero-motion";
 
 /**
  * v2 page intro with a fixed photo banner — the same look as the homepage
@@ -19,7 +20,7 @@ export function BannerIntro({
   title,
   intro,
   children,
-  drift = "sn-drift-a",
+  move = 0,
 }: {
   src: string;
   alt: string;
@@ -27,8 +28,8 @@ export function BannerIntro({
   title: string;
   intro?: string;
   children?: ReactNode;
-  /** Which of the three drift patterns from globals.css to run. */
-  drift?: "sn-drift-a" | "sn-drift-b" | "sn-drift-c";
+  /** Index into lib/hero-motion MOVES (0 = pan right→left). Loops slowly. */
+  move?: number;
 }) {
   return (
     <section className="relative overflow-hidden border-b border-forest/8 bg-[#F1F3E6]">
@@ -38,7 +39,8 @@ export function BannerIntro({
         fill
         priority
         sizes="100vw"
-        className={cn("object-cover object-[center_right] will-change-transform", drift)}
+        style={{ ...moveStyle(move, 0.5), "--mv-dur": "16s" } as React.CSSProperties}
+        className={cn("object-cover object-[center_right] will-change-transform", "sn-move-loop")}
       />
       {/* readability scrim, light on the left where the copy sits */}
       <div

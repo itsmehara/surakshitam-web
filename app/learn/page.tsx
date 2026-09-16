@@ -18,7 +18,7 @@ export default function LearnPage() {
       <BannerIntro
         src="/banners/our-story-hyderabad-small-batch-workspace-responsive.webp"
         alt="Small-batch workspace in Hyderabad — herbs, oils and soaps being made by hand"
-        drift="sn-drift-c"
+        move={2}
         eyebrow="Learn"
         title="Care guides & ingredient stories"
         intro="Short, useful reads on ingredients, product care and how our formulations come together."

@@ -105,28 +105,24 @@
 .sn-sway  { animation: sn-sway var(--sn-swaydur) ease-in-out var(--sn-delay) infinite; }
 
 
-/* v2 hero slideshow: the photo is never still. Three drift patterns (zoom +
-   pan) run infinite-alternate so a slide keeps moving for as long as it is on
-   screen — no one-shot Ken-Burns that ends and leaves the picture frozen.
-   16 Sep: capped at 1.07× / ±1% — the original banners have products near
-   the edges, so the drift must stay within a few percent. */
-@keyframes sn-drift-a {
-  from { transform: scale(1.02) translate3d(0, 0, 0); }
-  to   { transform: scale(1.07) translate3d(-1%, -0.8%, 0); }
+/* Hero camera move (16 Sep): one keyframe, per-slide start/end framing in
+   --mv-from / --mv-to (lib/hero-motion.ts), plays once over --mv-dur and holds
+   the end frame (forwards) so the outgoing slide keeps gliding as it fades.
+   Ease-out: a quick departure that settles, which is what a drone glide feels
+   like; linear reads mechanical. */
+@keyframes sn-move {
+  from { transform: var(--mv-from); }
+  to   { transform: var(--mv-to); }
 }
-@keyframes sn-drift-b {
-  from { transform: scale(1.07) translate3d(0.8%, 0.6%, 0); }
-  to   { transform: scale(1.02) translate3d(-0.6%, -0.3%, 0); }
+.sn-move {
+  animation: sn-move var(--mv-dur, 6.8s) cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
-@keyframes sn-drift-c {
-  from { transform: scale(1.03) translate3d(-0.8%, 0.6%, 0); }
-  to   { transform: scale(1.065) translate3d(0.8%, -0.8%, 0); }
+/* BannerIntro (fixed page headers): the same glide, but slow and looping. */
+.sn-move-loop {
+  animation: sn-move var(--mv-dur, 14s) ease-in-out infinite alternate;
 }
-.sn-drift-a { animation: sn-drift-a 11s ease-in-out infinite alternate; }
-.sn-drift-b { animation: sn-drift-b 13s ease-in-out infinite alternate; }
-.sn-drift-c { animation: sn-drift-c 12s ease-in-out infinite alternate; }
 @media (prefers-reduced-motion: reduce) {
-  .sn-drift-a, .sn-drift-b, .sn-drift-c { animation: none; }
+  .sn-move, .sn-move-loop { animation: none; transform: var(--mv-to); }
 }
 
 /* Horizontal chip rows (shop filters): scroll sideways on phones without a scrollbar. */
