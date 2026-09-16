@@ -136,6 +136,10 @@ fruit physics are unchanged.
   + srcset, slide 0 eager and each next slide mounted one hold ahead; drift 1.04→1.12× / ±2%;
   below `lg` the whole image shows (`object-contain`, top) over a blurred copy with the copy
   beneath. Full brief + prompt: `surakshitam-docs/docs/v3-static/HERO-IMAGE-PROMPT.md`.
+  The raw outpaints showed a texture/tone step at the join ("image placed on image"), so
+  `scripts/blend-hero.mjs` keeps the original sharp and lets the outer band fall out of focus
+  with a 200px feather (`<name>-blended.png` are what is exported). Re-run it after any
+  re-outpaint: `node scripts/blend-hero.mjs in.png out.png 7 200`.
   Old `*-responsive.webp` files in `public/banners/` are now unused except `our-story-…`
   (Learn header) — safe to delete the rest.
 
