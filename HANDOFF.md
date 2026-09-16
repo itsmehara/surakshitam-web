@@ -143,6 +143,14 @@ fruit physics are unchanged.
   Old `*-responsive.webp` files in `public/banners/` are now unused except `our-story-…`
   (Learn header) — safe to delete the rest.
 
+- **Hero v2 final (16 Sep)**: images from `surakshitam-docs/source-assets/banner-masters-v2/`
+  (5 re-framed via the brand-guard skill + hair-care outpaint; README there has provenance),
+  served as `public/banners/<name>-v2-{1280,2048}.webp`. Motion = `lib/hero-motion.ts`: six
+  drone-style camera moves, one per slide, restarted on each visit, 6.8 s ease-out, amplitude
+  budgeted to the banners' margin; mobile 60% / blurred fill 40%. Hold 5 s, fade 1.4 s. Page
+  headers (`BannerIntro move={n}`) loop the same glide. Open image item: dish-wash tub logo on
+  the home-care banner (single-label prompt in the 16 Sep log).
+
 ### Still open for v3 (also logged in `../REGISTRY.md` → "v3-static pending")
 1. Enquiry Sheet + Apps Script deployment (ENQUIRY-SETUP.md steps 1–5), then set the
    `NEXT_PUBLIC_ENQUIRY_URL` repo variable and re-run the workflow. Redeploy `Code.gs` (new
