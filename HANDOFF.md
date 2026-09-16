@@ -129,6 +129,16 @@ fruit physics are unchanged.
 - **Ground line**: physics floor = section bottom edge (`GROUND_FRACTION = 1`), sprites rest
   their drawn bottom on it.
 
+- **Hero images v2 (16 Sep)**: the five originals + the dishwash product hero were *outpainted*
+  (not regenerated) to 2560×1440 via the brand-guard skill — labels untouched except the
+  shampoo's "SURAKASHITAM" → "SURAKSHITAM" fix. Masters `surakshitam-docs/source-assets/hero-v2/`;
+  served `public/banners/<name>-extended-{1280,2048}.webp`. Slideshow: 6 slides, plain `<img>`
+  + srcset, slide 0 eager and each next slide mounted one hold ahead; drift 1.04→1.12× / ±2%;
+  below `lg` the whole image shows (`object-contain`, top) over a blurred copy with the copy
+  beneath. Full brief + prompt: `surakshitam-docs/docs/v3-static/HERO-IMAGE-PROMPT.md`.
+  Old `*-responsive.webp` files in `public/banners/` are now unused except `our-story-…`
+  (Learn header) — safe to delete the rest.
+
 ### Still open for v3 (also logged in `../REGISTRY.md` → "v3-static pending")
 1. Enquiry Sheet + Apps Script deployment (ENQUIRY-SETUP.md steps 1–5), then set the
    `NEXT_PUBLIC_ENQUIRY_URL` repo variable and re-run the workflow. Redeploy `Code.gs` (new
@@ -140,7 +150,6 @@ fruit physics are unchanged.
 4. Content the founders have not yet confirmed (§8 below still applies minus prices): "plant-based"
    wording vs honey/goat-milk/beeswax, bio-enzyme badge, packaging-concept photos, ingredient lists.
 5. Analytics — deferred (ANSWERS §F30).
-6. Hero banner images — Hara to supply the new set + per-slide preferences; then set `focus`.
 
 ---
 
