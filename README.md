@@ -94,8 +94,8 @@ page, in filename order, each page sized to match its screenshot exactly.
 ## Demo credentials
 
 - **Customer:** mobile + OTP login — any 10-digit mobile, OTP `1234` (any 4–6 digits works). Use
-  `9849116181` (blank name) to load as the seeded customer Bhavesh Allapati. Password login also
-  works: username `bhavesh`, password `demo123`. Customers can also set/change their own password
+  `9000000001` (blank name) to load as the seeded customer Demo Customer. Password login also
+  works: username `democustomer`, password `demo123`. Customers can also set/change their own password
   from Account → Security.
 - **Founders (admin):** sign in at **`/studio`** — username `srikanthnaturals` or
   `supriyanaturals`, password `demo123`. Any signed-in founder can add/edit/remove admin accounts

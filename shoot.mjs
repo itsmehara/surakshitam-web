@@ -5,11 +5,11 @@ const BASE = 'http://localhost:3000';
 const OUT = '/sessions/tender-clever-brown/mnt/outputs/SN-review-screenshots';
 fs.mkdirSync(OUT, { recursive: true });
 
-const ORDER = '[{"orderNumber":"SURK-2026-482913","createdAt":"2026-08-16T11:13:09.373Z","items":[{"productId":"p-shea-butter-soap","slug":"shea-butter-soap","nameSnapshot":"Shea Butter Soap","skuSnapshot":"SN-SC-SHS-100","priceSnapshot":14900,"qty":1,"image":"/products/shea-butter-soap.webp","size":"100 g"},{"productId":"p-hair-oil","slug":"hair-oil","nameSnapshot":"Hair Oil","skuSnapshot":"SN-HR-OIL-100","priceSnapshot":24900,"qty":2,"image":"/products/hair-oil.webp","size":"100 ml"}],"subtotal":64700,"shipping":0,"total":64700,"address":{"fullName":"Bhavesh Allapati","phone":"9849116181","line1":"Nagole","city":"Hyderabad","state":"Telangana","postalCode":"500068","type":"Home"},"paymentStatus":"PAID","paymentId":"pay_demo_a1b2c3d4e5","fulfillmentStatus":"PACKED"}]';
-const NOTIFS = '[{"id":"ntf_1","channel":"whatsapp","recipient":"9849116181","template":"customer_order_placed","status":"sent","createdAt":"2026-08-16T11:13:09.375Z","message":"Hi Bhavesh Allapati, thank you for ordering from Surakshitam Naturals 🌿\\n\\nOrder: SURK-2026-482913\\nAmount: ₹647\\n\\nWe\'ll notify you once your order is ready for dispatch.\\nTrack: https://surakshitamnaturals.example/track-order"},{"id":"ntf_2","channel":"whatsapp","recipient":"Admin (+91 74163 94594)","template":"admin_new_order","status":"sent","createdAt":"2026-08-16T11:13:09.375Z","message":"🌿 New Surakshitam Naturals order\\n\\nOrder: SURK-2026-482913\\nCustomer: Bhavesh Allapati\\nPhone: 9849116181\\nItems: Shea Butter Soap × 1, Hair Oil × 2\\nTotal: ₹647\\nPayment: PAID\\nPacking status: Pending\\n\\nOpen Admin: https://surakshitamnaturals.example/admin/orders/SURK-2026-482913"}]';
+const ORDER = '[{"orderNumber":"SURK-2026-482913","createdAt":"2026-08-16T11:13:09.373Z","items":[{"productId":"p-shea-butter-soap","slug":"shea-butter-soap","nameSnapshot":"Shea Butter Soap","skuSnapshot":"SN-SC-SHS-100","priceSnapshot":14900,"qty":1,"image":"/products/shea-butter-soap.webp","size":"100 g"},{"productId":"p-hair-oil","slug":"hair-oil","nameSnapshot":"Hair Oil","skuSnapshot":"SN-HR-OIL-100","priceSnapshot":24900,"qty":2,"image":"/products/hair-oil.webp","size":"100 ml"}],"subtotal":64700,"shipping":0,"total":64700,"address":{"fullName":"Demo Customer","phone":"9000000001","line1":"Nagole","city":"Hyderabad","state":"Telangana","postalCode":"500068","type":"Home"},"paymentStatus":"PAID","paymentId":"pay_demo_a1b2c3d4e5","fulfillmentStatus":"PACKED"}]';
+const NOTIFS = '[{"id":"ntf_1","channel":"whatsapp","recipient":"9000000001","template":"customer_order_placed","status":"sent","createdAt":"2026-08-16T11:13:09.375Z","message":"Hi Demo Customer, thank you for ordering from Surakshitam Naturals 🌿\\n\\nOrder: SURK-2026-482913\\nAmount: ₹647\\n\\nWe\'ll notify you once your order is ready for dispatch.\\nTrack: https://surakshitamnaturals.example/track-order"},{"id":"ntf_2","channel":"whatsapp","recipient":"Admin (+91 74163 94594)","template":"admin_new_order","status":"sent","createdAt":"2026-08-16T11:13:09.375Z","message":"🌿 New Surakshitam Naturals order\\n\\nOrder: SURK-2026-482913\\nCustomer: Demo Customer\\nPhone: 9000000001\\nItems: Shea Butter Soap × 1, Hair Oil × 2\\nTotal: ₹647\\nPayment: PAID\\nPacking status: Pending\\n\\nOpen Admin: https://surakshitamnaturals.example/admin/orders/SURK-2026-482913"}]';
 const CART = '[{"id":"p-shea-butter-soap","qty":1},{"id":"p-hair-oil","qty":2},{"id":"p-dishwash-liquid","qty":1}]';
-const ADDR = '{"fullName":"Bhavesh Allapati","phone":"9849116181","altPhone":"","line1":"Nagole","line2":"","landmark":"","city":"Hyderabad","state":"Telangana","postalCode":"500068","type":"Home"}';
-const PROFILE = '{"name":"Bhavesh Allapati","mobile":"+91 98491 16181","email":"srikanth.alapati@yahoo.com","address":"Nagole, Hyderabad, Telangana – 500068"}';
+const ADDR = '{"fullName":"Demo Customer","phone":"9000000001","altPhone":"","line1":"Nagole","line2":"","landmark":"","city":"Hyderabad","state":"Telangana","postalCode":"500068","type":"Home"}';
+const PROFILE = '{"name":"Demo Customer","mobile":"+91 98491 16181","email":"demo.customer@example.com","address":"Nagole, Hyderabad, Telangana – 500068"}';
 
 function seedScript(withAdmin) {
   return `(function(){try{
@@ -96,8 +96,8 @@ const run = async () => {
     await page.evaluate(() => {
       document.querySelectorAll('input').forEach((i) => {
         if (i.value) return;
-        if (i.type === 'email') i.value = 'bhavesh@example.com';
-        else if (i.type === 'tel') i.value = '9849116181';
+        if (i.type === 'email') i.value = 'democustomer@example.com';
+        else if (i.type === 'tel') i.value = '9000000001';
       });
     });
     await clickText(/continue/i); await page.waitForTimeout(600);

@@ -204,7 +204,7 @@ Inter). `next/image`. Design system "Botanical Laboratory": cream/forest/moss/cl
   - **Mobile OTP** — a registered mobile signs straight in; an unknown mobile registers on the spot
     if a name is given (otherwise it points you to add a name / use the Register new tab).
   - **Password** — mobile, email or username + password.
-  Seeded demo customer: mobile `9849116181` / username `bhavesh` / password `demo123` (**Bhavesh
+  Seeded demo customer: mobile `9000000001` / username `democustomer` / password `demo123` (**Bhavesh
   Allapati**, `SN-CU-00001`). Every new customer gets the next `SN-CU-xxxxx`. Duplicate mobile/email is
   refused. Customers set/change their own password from Account → Security (per account now).
 - **Founders (admin):** at **`/studio`** — `srikanthnaturals` or `supriyanaturals`, password `demo123`.

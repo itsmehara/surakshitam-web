@@ -31,24 +31,24 @@ export const CART_FREE_DELIVERY = [
 ];
 
 const PROFILE = {
-  name: "Bhavesh Allapati",
+  name: "Demo Customer",
   mobile: "+91 98491 16181",
-  email: "srikanth.alapati@yahoo.com",
+  email: "demo.customer@example.com",
   address: "Nagole, Hyderabad, Telangana – 500068",
 };
 
 const AUTH = {
-  id: "9849116181",
+  id: "9000000001",
   mobile: "+91 98491 16181",
-  name: "Bhavesh Allapati",
-  email: "srikanth.alapati@yahoo.com",
+  name: "Demo Customer",
+  email: "demo.customer@example.com",
   method: "otp",
   loggedInAt: "2026-08-16T11:00:00.000Z",
 };
 
 const ADDR = {
-  fullName: "Bhavesh Allapati",
-  phone: "9849116181",
+  fullName: "Demo Customer",
+  phone: "9000000001",
   altPhone: "",
   line1: "Nagole",
   line2: "",
@@ -63,7 +63,7 @@ const ORDERS = [
   {
     orderNumber: ORDER_BIKE,
     createdAt: "2026-08-22T06:40:00.000Z",
-    userId: "9849116181",
+    userId: "9000000001",
     items: [
       { productId: "p-dishwash-liquid", slug: "natural-dishwash-liquid", nameSnapshot: "Natural Dishwash Liquid", skuSnapshot: "SN-HC-DWL-500", priceSnapshot: 19900, qty: 1, image: "/surakshitam-product-images/natural-dishwash-liquid/natural-dishwash-liquid-01-listing-front-clean.webp", size: "500 ml" },
       { productId: "p-floor-cleaner", slug: "natural-floor-cleaner", nameSnapshot: "Natural Floor Cleaner", skuSnapshot: "SN-HC-FLC-500", priceSnapshot: 21900, qty: 1, image: "/surakshitam-product-images/natural-floor-cleaner/natural-floor-cleaner-01-listing-front-clean.webp", size: "500 ml" },
@@ -74,7 +74,7 @@ const ORDERS = [
     total: 56600,
     weightGrams: 1400,
     deliveryQuote: { zone: "local", distanceKm: 5, area: "Dilsukhnagar", baseFee: 4900, distanceSurcharge: 0, freeApplied: false },
-    address: { fullName: "Bhavesh Allapati", phone: "9849116181", line1: "Flat 301, Sai Residency", line2: "Road No 13", city: "Hyderabad", state: "Telangana", postalCode: "500060", type: "Home" },
+    address: { fullName: "Demo Customer", phone: "9000000001", line1: "Flat 301, Sai Residency", line2: "Road No 13", city: "Hyderabad", state: "Telangana", postalCode: "500060", type: "Home" },
     paymentStatus: "PAID",
     paymentId: "pay_demo_b7c2e1f9d3",
     fulfillmentStatus: "SHIPPED",
@@ -87,7 +87,7 @@ const ORDERS = [
   {
     orderNumber: ORDER_COURIER,
     createdAt: "2026-08-16T11:13:09.373Z",
-    userId: "9849116181",
+    userId: "9000000001",
     items: [
       { productId: "p-shea-butter-soap", slug: "shea-butter-soap", nameSnapshot: "Shea Butter Soap", skuSnapshot: "SN-SC-SHS-100", priceSnapshot: 14900, qty: 1, image: "/surakshitam-product-images/shea-butter-soap/shea-butter-soap-01-listing-front-clean.webp", size: "100 g" },
       { productId: "p-hair-oil", slug: "hair-oil", nameSnapshot: "Hair Oil", skuSnapshot: "SN-HR-OIL-100", priceSnapshot: 24900, qty: 2, image: "/surakshitam-product-images/hair-oil/hair-oil-01-listing-front-clean.webp", size: "100 ml" },
@@ -97,7 +97,7 @@ const ORDERS = [
     total: 64700,
     weightGrams: 424,
     deliveryQuote: { zone: "local", distanceKm: 1, area: "Nagole", baseFee: 0, distanceSurcharge: 0, freeApplied: true },
-    address: { fullName: "Bhavesh Allapati", phone: "9849116181", line1: "Nagole", city: "Hyderabad", state: "Telangana", postalCode: "500068", type: "Home" },
+    address: { fullName: "Demo Customer", phone: "9000000001", line1: "Nagole", city: "Hyderabad", state: "Telangana", postalCode: "500068", type: "Home" },
     paymentStatus: "PAID",
     paymentId: "pay_demo_a1b2c3d4e5",
     fulfillmentStatus: "PACKED",

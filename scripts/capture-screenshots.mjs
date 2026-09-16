@@ -20,20 +20,20 @@ const VIEWPORT = { width: 1440, height: 960 };
 
 /* ------------------------------- seed data ------------------------------- */
 const CART = [{ id: "p-shea-butter-soap", qty: 1 }, { id: "p-hair-oil", qty: 2 }, { id: "p-dishwash-liquid", qty: 1 }];
-const PROFILE = { name: "Bhavesh Allapati", mobile: "+91 98491 16181", email: "srikanth.alapati@yahoo.com", address: "Nagole, Hyderabad, Telangana – 500068" };
-const AUTH = { id: "9849116181", mobile: "+91 98491 16181", name: "Bhavesh Allapati", email: "srikanth.alapati@yahoo.com", method: "otp", loggedInAt: "2026-08-16T11:00:00.000Z" };
+const PROFILE = { name: "Demo Customer", mobile: "+91 98491 16181", email: "demo.customer@example.com", address: "Nagole, Hyderabad, Telangana – 500068" };
+const AUTH = { id: "9000000001", mobile: "+91 98491 16181", name: "Demo Customer", email: "demo.customer@example.com", method: "otp", loggedInAt: "2026-08-16T11:00:00.000Z" };
 const ADMIN = { username: "srikanthnaturals", name: "Srikanth" };
-const ADDR = { fullName: "Bhavesh Allapati", phone: "9849116181", altPhone: "", line1: "Nagole", line2: "", landmark: "", city: "Hyderabad", state: "Telangana", postalCode: "500068", type: "Home" };
-const ORDER = [{ orderNumber: "SURK-2026-482913", createdAt: "2026-08-16T11:13:09.373Z", userId: "9849116181", items: [{ productId: "p-shea-butter-soap", slug: "shea-butter-soap", nameSnapshot: "Shea Butter Soap", skuSnapshot: "SN-SC-SHS-100", priceSnapshot: 14900, qty: 1, image: "/products/shea-butter-soap.webp", size: "100 g" }, { productId: "p-hair-oil", slug: "hair-oil", nameSnapshot: "Hair Oil", skuSnapshot: "SN-HR-OIL-100", priceSnapshot: 24900, qty: 2, image: "/products/hair-oil.webp", size: "100 ml" }], subtotal: 64700, shipping: 0, total: 64700, address: { fullName: "Bhavesh Allapati", phone: "9849116181", line1: "Nagole", city: "Hyderabad", state: "Telangana", postalCode: "500068", type: "Home" }, paymentStatus: "PAID", paymentId: "pay_demo_a1b2c3d4e5", fulfillmentStatus: "PACKED" }];
+const ADDR = { fullName: "Demo Customer", phone: "9000000001", altPhone: "", line1: "Nagole", line2: "", landmark: "", city: "Hyderabad", state: "Telangana", postalCode: "500068", type: "Home" };
+const ORDER = [{ orderNumber: "SURK-2026-482913", createdAt: "2026-08-16T11:13:09.373Z", userId: "9000000001", items: [{ productId: "p-shea-butter-soap", slug: "shea-butter-soap", nameSnapshot: "Shea Butter Soap", skuSnapshot: "SN-SC-SHS-100", priceSnapshot: 14900, qty: 1, image: "/products/shea-butter-soap.webp", size: "100 g" }, { productId: "p-hair-oil", slug: "hair-oil", nameSnapshot: "Hair Oil", skuSnapshot: "SN-HR-OIL-100", priceSnapshot: 24900, qty: 2, image: "/products/hair-oil.webp", size: "100 ml" }], subtotal: 64700, shipping: 0, total: 64700, address: { fullName: "Demo Customer", phone: "9000000001", line1: "Nagole", city: "Hyderabad", state: "Telangana", postalCode: "500068", type: "Home" }, paymentStatus: "PAID", paymentId: "pay_demo_a1b2c3d4e5", fulfillmentStatus: "PACKED" }];
 const NOTIFS = [
-  { id: "ntf_1", channel: "whatsapp", audience: "customer", recipient: "Customer · Bhavesh Allapati", to: "9849116181", template: "customer_order_placed", status: "sent", createdAt: "2026-08-16T11:13:09.375Z", archived: false, message: "Hi Bhavesh Allapati, thank you for ordering from Surakshitam Naturals 🌿\n\nOrder: SURK-2026-482913\nAmount: ₹647\n\nWe'll notify you once your order is ready for dispatch.\nTrack: https://surakshitamnaturals.example/track-order" },
-  { id: "ntf_2", channel: "whatsapp", audience: "admin", recipient: "Admin · Founders", to: "+91 74163 94594", template: "admin_new_order", status: "sent", createdAt: "2026-08-16T11:13:09.375Z", archived: false, message: "🌿 New Surakshitam Naturals order\n\nOrder: SURK-2026-482913\nCustomer: Bhavesh Allapati\nPhone: 9849116181\nItems: Shea Butter Soap × 1, Hair Oil × 2\nTotal: ₹647\nPayment: PAID" },
-  { id: "ntf_3", channel: "whatsapp", audience: "customer", recipient: "Customer · Bhavesh Allapati", to: "9849116181", template: "customer_status_packed", status: "sent", createdAt: "2026-08-16T09:00:00.000Z", archived: true, message: "Hi Bhavesh Allapati, an update on your order 🌿\n\nOrder: SURK-2026-482913\nYour order is packed and ready for dispatch." },
+  { id: "ntf_1", channel: "whatsapp", audience: "customer", recipient: "Customer · Demo Customer", to: "9000000001", template: "customer_order_placed", status: "sent", createdAt: "2026-08-16T11:13:09.375Z", archived: false, message: "Hi Demo Customer, thank you for ordering from Surakshitam Naturals 🌿\n\nOrder: SURK-2026-482913\nAmount: ₹647\n\nWe'll notify you once your order is ready for dispatch.\nTrack: https://surakshitamnaturals.example/track-order" },
+  { id: "ntf_2", channel: "whatsapp", audience: "admin", recipient: "Admin · Founders", to: "+91 74163 94594", template: "admin_new_order", status: "sent", createdAt: "2026-08-16T11:13:09.375Z", archived: false, message: "🌿 New Surakshitam Naturals order\n\nOrder: SURK-2026-482913\nCustomer: Demo Customer\nPhone: 9000000001\nItems: Shea Butter Soap × 1, Hair Oil × 2\nTotal: ₹647\nPayment: PAID" },
+  { id: "ntf_3", channel: "whatsapp", audience: "customer", recipient: "Customer · Demo Customer", to: "9000000001", template: "customer_status_packed", status: "sent", createdAt: "2026-08-16T09:00:00.000Z", archived: true, message: "Hi Demo Customer, an update on your order 🌿\n\nOrder: SURK-2026-482913\nYour order is packed and ready for dispatch." },
 ];
 const AUDIT = [
   { id: "ev_1", ts: "2026-08-16T10:55:00.000Z", type: "page_view", actor: { kind: "guest" }, visitorId: "v_guest99", path: "/product/hair-oil", userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) Mobile Safari" },
   { id: "ev_2", ts: "2026-08-16T10:56:00.000Z", type: "cart_add", actor: { kind: "guest" }, visitorId: "v_guest99", productId: "p-hair-oil", productName: "Hair Oil", qty: 1, userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) Mobile Safari" },
-  { id: "ev_3", ts: "2026-08-16T10:58:00.000Z", type: "page_view", actor: { kind: "customer", id: "9849116181", name: "Bhavesh Allapati" }, visitorId: "v_demo12ab", path: "/shop", userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X) Chrome/120 Safari" },
+  { id: "ev_3", ts: "2026-08-16T10:58:00.000Z", type: "page_view", actor: { kind: "customer", id: "9000000001", name: "Demo Customer" }, visitorId: "v_demo12ab", path: "/shop", userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X) Chrome/120 Safari" },
 ];
 
 function seedScript({ customer = false, admin = false } = {}) {
@@ -138,7 +138,7 @@ const run = async () => {
   await single(cp, "/cart", "10-Cart-Checkout-Payment", "01-cart");
   await cp.goto(BASE + "/checkout", { waitUntil: "domcontentloaded" }); await settle(cp);
   await shot(cp, "10-Cart-Checkout-Payment", "02-checkout-contact");
-  await cp.evaluate(() => document.querySelectorAll("input").forEach((i) => { if (!i.value) { if (i.type === "email") i.value = "bhavesh@example.com"; else if (i.type === "tel") i.value = "9849116181"; } }));
+  await cp.evaluate(() => document.querySelectorAll("input").forEach((i) => { if (!i.value) { if (i.type === "email") i.value = "democustomer@example.com"; else if (i.type === "tel") i.value = "9000000001"; } }));
   await clickText(cp, /continue/i); await cp.waitForTimeout(500);
   await shot(cp, "10-Cart-Checkout-Payment", "03-checkout-address");
   await clickText(cp, /continue to review/i); await cp.waitForTimeout(500);

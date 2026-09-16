@@ -191,7 +191,7 @@ export async function run(browser) {
   await shot(bp, "cart-free-delivery-unlocked");
   await gotoAndWait(cp, BASE, "/checkout", PAGE_WAIT);
   await shot(cp, "checkout-contact");
-  await cp.evaluate(() => document.querySelectorAll("input").forEach((i) => { if (!i.value) { if (i.type === "email") i.value = "bhavesh@example.com"; else if (i.type === "tel") i.value = "9849116181"; } }));
+  await cp.evaluate(() => document.querySelectorAll("input").forEach((i) => { if (!i.value) { if (i.type === "email") i.value = "democustomer@example.com"; else if (i.type === "tel") i.value = "9000000001"; } }));
   await clickText(cp, "button", /continue/i);
   await cp.waitForTimeout(800);
   await shot(cp, "checkout-address");
