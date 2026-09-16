@@ -6,13 +6,14 @@ import { ArrowRight } from "@/components/icons";
 export function FeaturedProducts() {
   const products = getFeaturedProducts(8);
 
+  // Sits right under the compact category tiles (same parchment), so the top
+  // padding is kept short — a full section gap here just reads as empty space.
   return (
-    <section className="bg-parchment py-16 sm:py-20 lg:py-24">
+    <section className="bg-parchment pb-16 pt-8 sm:pb-20 sm:pt-10 lg:pb-24">
       <div className="container">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-xl">
-            <p className="eyebrow">Founder&rsquo;s favourites</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
               Everyday essentials to start with
             </h2>
             <p className="mt-2 text-sm text-forest/60">
@@ -24,7 +25,7 @@ export function FeaturedProducts() {
           </Link>
         </div>
 
-        <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
           {products.map((product, i) => (
             <ProductCard key={product.id} product={product} priority={i < 4} />
           ))}

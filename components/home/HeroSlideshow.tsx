@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
@@ -24,15 +23,24 @@ import { ArrowRight, ChevronDown, LeafIcon, BeakerIcon, RecycleIcon } from "@/co
  * NOT pause when the mouse rests on the photo — that read as "stuck" — only
  * while the cursor is over the dots/arrows. Static frame under reduced motion.
  *
- * Layout (15 Sep): on phones the banner is cropped to portrait, so the copy
- * sits at the BOTTOM over a vertical scrim and the photo shows through the top
- * half; on desktop the copy sits left over a horizontal scrim and the photo
- * fills the right. Each slide can set its own focal point per breakpoint
- * (`focus`) — the 16:9 banners keep the products on the right, so the mobile
- * crop is nudged right of centre. Swap `SLIDES` when the new images arrive.
+ * Images (16 Sep): the "-extended" set — the original banners outpainted to
+ * 2560×1440 with ~13% background margin on every side and the shampoo label
+ * spelling corrected (surakshitam-docs/docs/v3-static/HERO-IMAGE-PROMPT.md).
+ * Served as WebP at 1280 and 2048 wide via srcset.
+ *
+ * Layout: desktop (lg+) — copy left over a horizontal scrim, photo `cover`
+ * with a per-slide focal point; the drift (1.04→1.12×, ±2% pan) never eats
+ * more than the new margin, so no product is ever cropped. Below lg — the
+ * WHOLE image is shown (`object-contain`, top-aligned, a blurred copy of
+ * itself filling the letterbox) with the copy beneath it, so nothing is
+ * cropped on phones at all.
+ *
+ * Loading: only slide 0 is fetched eagerly; each next slide's <img> is
+ * mounted one hold before it is due, so six slides cost one image up front.
  */
 
 interface Slide {
+  /** Base name in public/banners/ — `${src}-extended-{1280,2048}.webp` */
   src: string;
   alt: string;
   /**
@@ -48,7 +56,7 @@ interface Slide {
 
 const SLIDES: Slide[] = [
   {
-    src: "/banners/homepage-hero-home-skin-hair-complete-product-range-responsive.webp",
+    src: "homepage-hero-home-skin-hair-complete-product-range",
     alt: "Surakshitam Naturals home, skin and hair care range on a stone slab with neem, hibiscus and lemon",
     eyebrow: "Homemade · Plant-based · Hyderabad",
     title: ["Everyday care,", "thoughtfully formulated."],
@@ -56,7 +64,7 @@ const SLIDES: Slide[] = [
     cta: { label: "Shop all products", href: "/shop" },
   },
   {
-    src: "/banners/skin-care-handmade-botanical-soap-collection-responsive.webp",
+    src: "skin-care-handmade-botanical-soap-collection",
     alt: "Handmade botanical soaps — papaya, shea butter, neem tulasi and triple butter",
     eyebrow: "Skin care",
     title: ["Botanical care,", "made by hand."],
@@ -64,7 +72,7 @@ const SLIDES: Slide[] = [
     cta: { label: "Shop skin care", href: "/shop?category=skin-care" },
   },
   {
-    src: "/banners/hair-care-herbal-shampoo-amla-reetha-responsive.webp",
+    src: "hair-care-herbal-shampoo-amla-reetha",
     alt: "Herbal shampoo with amla and reetha",
     eyebrow: "Hair care",
     title: ["A stronger ritual", "starts at the roots."],
@@ -72,7 +80,7 @@ const SLIDES: Slide[] = [
     cta: { label: "Shop hair care", href: "/shop?category=hair-care" },
   },
   {
-    src: "/banners/home-care-category-dishwash-floor-cleaner-pitambari-responsive.webp",
+    src: "home-care-category-dishwash-floor-cleaner-pitambari",
     alt: "Natural dishwash liquid, floor cleaner and utensil shine",
     eyebrow: "Home care",
     title: ["A naturally", "cleaner home."],
@@ -80,14 +88,26 @@ const SLIDES: Slide[] = [
     cta: { label: "Shop home care", href: "/shop?category=home-care" },
   },
   {
-    src: "/banners/ingredients-botanicals-butters-natural-cleansers-responsive.webp",
+    src: "ingredients-botanicals-butters-natural-cleansers",
     alt: "Botanicals, butters and natural cleansers used in the range",
     eyebrow: "Ingredients",
     title: ["What we use,", "and why."],
     body: "Every formulation starts with the ingredient list — plant butters, herbs, essential oils and food-grade cleansers you can read and recognise.",
     cta: { label: "See our ingredients", href: "/ingredients" },
   },
+  {
+    src: "natural-dishwash-liquid-lemon-product-hero",
+    alt: "Natural dishwash liquid with fresh lemons",
+    eyebrow: "Home care · Most loved",
+    title: ["Lemon-fresh dishes,", "gentle on hands."],
+    body: "Our plant-based dishwash liquid lifts grease with lemon and food-grade cleansers — no SLS, no harsh chemicals, kind to hands and drains.",
+    cta: { label: "See the dishwash liquid", href: "/product/natural-dishwash-liquid" },
+    focus: { desktop: "center" },
+  },
 ];
+
+const srcSet = (base: string) =>
+  `/banners/${base}-extended-1280.webp 1280w, /banners/${base}-extended-2048.webp 2048w`;
 
 const HOLD_MS = 3800; // time a slide sits before the next crossfade — short enough that a viewer never wonders if it's stuck
 const FADE_MS = 1200; // crossfade duration — long enough to feel like a dissolve, not a cut
@@ -104,6 +124,9 @@ export function HeroSlideshow() {
   const [paused, setPaused] = useState(false);
   const [reduced, setReduced] = useState(false);
   const timer = useRef<number | null>(null);
+  // Which slides have their <img> mounted. Starts with the first two; every
+  // change of slide mounts the one after it so it is decoded before its turn.
+  const [mounted, setMounted] = useState<Set<number>>(() => new Set([0, 1]));
 
   const go = useCallback((n: number) => setIndex((i) => (i + n + SLIDES.length) % SLIDES.length), []);
 
@@ -126,6 +149,11 @@ export function HeroSlideshow() {
     };
   }, [index, paused, reduced, go]);
 
+  useEffect(() => {
+    const next = (index + 1) % SLIDES.length;
+    setMounted((m) => (m.has(next) ? m : new Set(m).add(next)));
+  }, [index]);
+
   const slide = SLIDES[index];
 
   return (
@@ -134,10 +162,17 @@ export function HeroSlideshow() {
       aria-roledescription="carousel"
       aria-label="Surakshitam Naturals highlights"
     >
-      {/* ---- photo layer: every slide is mounted; only the active one is opaque ---- */}
+      {/* ---- photo layer: one wrapper per slide, only the active one is opaque.
+              Desktop: a single cover image. Below lg: a blurred cover behind a
+              contain image, so the whole banner is visible above the copy. ---- */}
       <div className="absolute inset-0">
         {SLIDES.map((s, i) => {
           const active = i === index;
+          const drift = !reduced && DRIFT[i % DRIFT.length];
+          const focus = {
+            "--focus-d": s.focus?.desktop ?? "center right",
+          } as React.CSSProperties;
+          if (!mounted.has(i)) return <div key={s.src} aria-hidden="true" className="absolute inset-0" />;
           return (
             <div
               key={s.src}
@@ -148,22 +183,34 @@ export function HeroSlideshow() {
               )}
               style={{ transitionDuration: `${FADE_MS}ms` }}
             >
-              <Image
-                src={s.src}
-                alt={s.alt}
-                fill
-                priority={i === 0}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`/banners/${s.src}-extended-2048.webp`}
+                srcSet={srcSet(s.src)}
                 sizes="100vw"
-                style={
-                  {
-                    "--focus-m": s.focus?.mobile ?? "62% center",
-                    "--focus-d": s.focus?.desktop ?? "center right",
-                  } as React.CSSProperties
-                }
+                alt={s.alt}
+                loading={i === 0 ? "eager" : "lazy"}
+                fetchPriority={i === 0 ? "high" : "low"}
+                decoding="async"
+                style={focus}
                 className={cn(
-                  "object-cover object-[var(--focus-m)] will-change-transform lg:object-[var(--focus-d)]",
-                  // Continuous drift on every slide, so the one fading in is already moving.
-                  !reduced && DRIFT[i % DRIFT.length],
+                  // desktop: cover with focal point; below lg: this is the blurred letterbox fill
+                  "absolute inset-0 h-full w-full object-cover will-change-transform",
+                  "scale-110 blur-2xl brightness-105 saturate-[0.85] lg:scale-100 lg:blur-0 lg:brightness-100 lg:saturate-100 lg:object-[var(--focus-d)]",
+                  drift,
+                )}
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`/banners/${s.src}-extended-2048.webp`}
+                srcSet={srcSet(s.src)}
+                sizes="100vw"
+                alt=""
+                loading={i === 0 ? "eager" : "lazy"}
+                decoding="async"
+                className={cn(
+                  "absolute inset-0 h-full w-full object-contain object-top origin-top will-change-transform lg:hidden",
+                  drift,
                 )}
               />
             </div>
@@ -176,7 +223,7 @@ export function HeroSlideshow() {
           desktop: copy is on the left, so fade rightward and leave the products clear. */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-gradient-to-t from-[#F4F6EA] via-[#F4F6EA]/85 via-45% to-[#F4F6EA]/10 lg:hidden"
+        className="absolute inset-x-0 bottom-0 top-[56.25vw] bg-gradient-to-t from-[#F4F6EA] via-[#F4F6EA]/80 via-60% to-transparent lg:hidden"
       />
       <div
         aria-hidden="true"
@@ -193,7 +240,7 @@ export function HeroSlideshow() {
       <FallingFruitPhysics />
 
       {/* ---- copy ---- */}
-      <div className="container relative flex min-h-[72svh] flex-col justify-end pb-20 pt-56 sm:min-h-[76svh] sm:pt-64 lg:min-h-[80svh] lg:justify-center lg:py-20">
+      <div className="container relative flex min-h-[72svh] flex-col justify-end pb-20 pt-[calc(56.25vw+0.75rem)] sm:min-h-[76svh] lg:min-h-[80svh] lg:justify-center lg:py-20">
         <div key={index} className="max-w-xl animate-fade-up">
           <p className="eyebrow">{slide.eyebrow}</p>
           <h1 className="mt-3 text-hero font-semibold text-forest lg:mt-4">

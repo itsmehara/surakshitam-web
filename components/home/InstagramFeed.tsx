@@ -4,14 +4,55 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { site } from "@/lib/site";
 import type { Reel } from "@/lib/instagram";
-import { InstagramIcon, ArrowRight, CloseIcon } from "@/components/icons";
+import { InstagramIcon, ArrowRight, CloseIcon, ChevronDown } from "@/components/icons";
 
-function PlayIcon() {
+/** Reel-style play badge: sits in the middle of the card, translucent so the photo still reads through it. */
+function PlayBadge() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="12" fill="rgba(255,255,255,0.92)" />
-      <path d="M10 8.3l6.2 3.7-6.2 3.7z" fill="#bc1888" />
-    </svg>
+    <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/55 shadow-[0_2px_12px_rgba(0,0,0,0.25)] ring-1 ring-white/60 backdrop-blur-[2px] transition-transform duration-300 group-hover:scale-110 group-hover:bg-white/75 sm:h-14 sm:w-14">
+        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" className="ml-1">
+          <path d="M8 5.5l11 6.5-11 6.5z" fill="#bc1888" />
+        </svg>
+      </span>
+    </span>
+  );
+}
+
+/** Brand watermark on every reel — small emblem + handle, the way a creator's handle sits on a reel. */
+function Watermark() {
+  return (
+    <span className="pointer-events-none absolute left-2 top-2 flex max-w-[calc(100%-1rem)] items-center gap-1 rounded-full bg-black/25 py-0.5 pl-0.5 pr-1 backdrop-blur-[2px] sm:pr-1.5">
+      <Image
+        src="/brand/logo.png"
+        alt=""
+        width={18}
+        height={18}
+        className="h-4 w-4 shrink-0 rounded-full bg-white object-contain sm:h-[18px] sm:w-[18px]"
+      />
+      {/* 21 chars must fit a 132px card on phones — small and tight, with an ellipsis as the last resort */}
+      <span className="truncate text-[0.48rem] font-semibold text-white/90 drop-shadow sm:text-[0.56rem]">
+        @{site.instagramHandle}
+      </span>
+    </span>
+  );
+}
+
+/** Faint like / comment / share rail on the right edge — the visual shorthand for "this is a reel". */
+function ActionRail() {
+  const icon = "h-4 w-4 text-white/85 drop-shadow";
+  return (
+    <span className="pointer-events-none absolute bottom-12 right-1.5 flex flex-col items-center gap-2.5">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={icon}>
+        <path d="M12 20s-7-4.4-9.2-8.2A4.6 4.6 0 0 1 12 6a4.6 4.6 0 0 1 9.2 5.8C19 15.6 12 20 12 20z" />
+      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" aria-hidden="true" className={icon}>
+        <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.2-4.4A8 8 0 1 1 21 12z" />
+      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" aria-hidden="true" className={icon}>
+        <path d="M21 3L10 14M21 3l-7 18-4-7-7-4z" />
+      </svg>
+    </span>
   );
 }
 
@@ -28,16 +69,18 @@ function ReelCard({ reel, onOpen }: { reel: Reel; onOpen: () => void }) {
       <span className="block overflow-hidden rounded-[1.4rem] bg-gradient-to-br from-fuchsia-400 via-rose-400 to-amber-300 p-[6px] shadow-card">
         <span className="block rounded-[1.05rem] bg-white p-2">
           <span className="relative block aspect-[9/16] overflow-hidden rounded-[0.7rem] bg-cream">
+            {/* The reel stills carry a letterboxed photo inside a blurred 9:16 frame; zooming
+                in fills the card with the photo itself so it reads like a real reel thumbnail. */}
             <Image
               src={reel.image}
               alt={reel.caption}
               fill
               sizes="(max-width: 640px) 40vw, 180px"
-              className="scale-[1.12] object-cover object-[50%_50%] transition-transform duration-500 ease-smooth group-hover:scale-[1.2]"
+              className="scale-[1.32] object-cover object-[50%_50%] transition-transform duration-500 ease-smooth group-hover:scale-[1.4]"
             />
-            <span className="absolute right-2 top-2 drop-shadow">
-              <PlayIcon />
-            </span>
+            <Watermark />
+            <PlayBadge />
+            <ActionRail />
             <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-fuchsia-900/70 to-transparent p-2.5 pt-8">
               <span className="line-clamp-2 text-[0.72rem] font-medium text-white">
                 {reel.caption}
@@ -70,6 +113,8 @@ export function InstagramFeed({ reels }: { reels: Reel[] }) {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const [index, setIndex] = useState(reels.length);
   const [transitionOn, setTransitionOn] = useState(true);
+  // bumped on every manual arrow press so the auto-advance timer restarts from that moment
+  const [manualNudge, setManualNudge] = useState(0);
 
   useEffect(() => {
     if (!active) return;
@@ -111,7 +156,15 @@ export function InstagramFeed({ reels }: { reels: Reel[] }) {
     if (!canSlide || paused || !inView) return;
     const id = setInterval(() => setIndex((i) => i + 1), HOLD_MS + MOVE_MS);
     return () => clearInterval(id);
-  }, [canSlide, paused, inView]);
+  }, [canSlide, paused, inView, manualNudge]);
+
+  // Arrow buttons: step one reel either way. The wrap-around effect below already
+  // handles both directions, so going left from the first copy is safe.
+  const go = (dir: 1 | -1) => {
+    // clamp to the tripled track so a burst of clicks can't outrun the wrap and show empty space
+    setIndex((i) => Math.max(0, Math.min(reels.length * 3 - 1, i + dir)));
+    setManualNudge((n) => n + 1);
+  };
 
   // Wrap around a 3x-duplicated track without a visible jump (transition off for one frame).
   useEffect(() => {
@@ -164,24 +217,48 @@ export function InstagramFeed({ reels }: { reels: Reel[] }) {
         </div>
       </div>
 
-      {/* Glides one reel left, holds ~3s, glides again — pauses on hover/off-screen */}
+      {/* Glides one reel left, holds ~3s, glides again — pauses on hover/off-screen.
+          Arrow buttons on either edge let the visitor step through by hand. */}
       <div
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
-        className="mt-10 overflow-hidden px-6"
+        className="relative mt-10"
       >
-        <div
-          ref={trackRef}
-          className="flex gap-6"
-          style={{
-            transform: `translateX(-${index * cardStep}px)`,
-            transition: transitionOn ? `transform ${MOVE_MS}ms cubic-bezier(0.65,0,0.35,1)` : "none",
-          }}
-        >
-          {tripled.map((reel, i) => (
-            <ReelCard key={`${reel.url}-${i}`} reel={reel} onOpen={() => setActive(reel.url)} />
-          ))}
+        <div className="overflow-hidden px-6">
+          <div
+            ref={trackRef}
+            className="flex gap-6"
+            style={{
+              transform: `translateX(-${index * cardStep}px)`,
+              transition: transitionOn ? `transform ${MOVE_MS}ms cubic-bezier(0.65,0,0.35,1)` : "none",
+            }}
+          >
+            {tripled.map((reel, i) => (
+              <ReelCard key={`${reel.url}-${i}`} reel={reel} onOpen={() => setActive(reel.url)} />
+            ))}
+          </div>
         </div>
+
+        {canSlide && (
+          <>
+            <button
+              type="button"
+              onClick={() => go(-1)}
+              aria-label="Previous reels"
+              className="absolute left-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-forest/15 bg-cream/90 text-forest shadow-card backdrop-blur transition-colors hover:bg-forest hover:text-cream sm:left-4"
+            >
+              <ChevronDown width={16} className="rotate-90" />
+            </button>
+            <button
+              type="button"
+              onClick={() => go(1)}
+              aria-label="Next reels"
+              className="absolute right-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-forest/15 bg-cream/90 text-forest shadow-card backdrop-blur transition-colors hover:bg-forest hover:text-cream sm:right-4"
+            >
+              <ChevronDown width={16} className="-rotate-90" />
+            </button>
+          </>
+        )}
       </div>
 
       <div className="container mt-6">

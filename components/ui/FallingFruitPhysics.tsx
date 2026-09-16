@@ -73,6 +73,11 @@ const AIR = 0.999;
 const GROUND_FRACTION = 1;
 const REST_SPEED = 26;     // below this, a body on the floor is considered settled
 const RESPAWN_AFTER = 2.6; // seconds a body rests before it falls again
+// The very first fall: each body waits a random 0.3–6 s before it's released,
+// so the section opens with fruit trickling in one at a time instead of all
+// eight landing in the same second. Respawns keep the existing height stagger.
+const FIRST_FALL_MIN = 0.3;
+const FIRST_FALL_SPREAD = 5.7;
 const STEP = 1 / 60;
 
 type Body = {
@@ -81,17 +86,19 @@ type Body = {
   vx: number; vy: number;
   angle: number; spin: number;
   restFor: number;
+  hold: number;   // seconds still to wait, parked above the top edge, before this body is released
   el?: HTMLSpanElement | null;
 };
 
-function seedBody(b: Body, width: number, i: number) {
-  // spread the drop points, and stagger the first fall so they don't arrive together
+function seedBody(b: Body, width: number, i: number, hold = 0) {
+  // spread the drop points, and stagger the start heights so they don't arrive together
   b.x = ((i + 0.5) / SPECS.length) * width + (i % 3) * 14 - 14;
   b.y = -b.spec.r - 40 - ((i * 137) % 520);
   b.vx = ((i % 5) - 2) * 9;
   b.vy = 0;
   b.spin = ((i % 7) - 3) * 0.9;
   b.restFor = 0;
+  b.hold = hold;
 }
 
 export function FallingFruitPhysics({ className }: { className?: string }) {
@@ -104,7 +111,7 @@ export function FallingFruitPhysics({ className }: { className?: string }) {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const bodies: Body[] = SPECS.map((spec) => ({
-      spec, x: 0, y: 0, vx: 0, vy: 0, angle: 0, spin: 0, restFor: 0,
+      spec, x: 0, y: 0, vx: 0, vy: 0, angle: 0, spin: 0, restFor: 0, hold: 0,
     }));
     bodiesRef.current = bodies;
 
@@ -112,7 +119,7 @@ export function FallingFruitPhysics({ className }: { className?: string }) {
     let height = host.clientHeight;
     bodies.forEach((b, i) => {
       b.el = host.children[i] as HTMLSpanElement;
-      seedBody(b, width, i);
+      seedBody(b, width, i, FIRST_FALL_MIN + Math.random() * FIRST_FALL_SPREAD);
     });
 
     let raf = 0;
@@ -124,6 +131,7 @@ export function FallingFruitPhysics({ className }: { className?: string }) {
       const ground = height * GROUND_FRACTION;
 
       for (const b of bodies) {
+        if (b.hold > 0) { b.hold -= STEP; continue; }   // not released yet — stays parked off-screen
         b.vy += GRAVITY * STEP;
         b.vx *= AIR;
         b.x += b.vx * STEP;
@@ -154,6 +162,7 @@ export function FallingFruitPhysics({ className }: { className?: string }) {
         for (let i = 0; i < bodies.length; i++) {
           for (let j = i + 1; j < bodies.length; j++) {
             const a = bodies[i], c = bodies[j];
+            if (a.hold > 0 || c.hold > 0) continue;   // parked bodies don't take part
             const dx = c.x - a.x, dy = c.y - a.y;
             const min = a.spec.r + c.spec.r;
             const d2 = dx * dx + dy * dy;
