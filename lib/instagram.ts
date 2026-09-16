@@ -65,10 +65,14 @@ interface IgMedia {
   caption?: string;
 }
 
-export async function getInstagramReels(limit = 24): Promise<Reel[]> {
+/**
+ * 18 is enough for the strip (it is duplicated 3x for the wrap-around, so 54
+ * cards); the full 41-item fallback made the home page DOM ~120 cards.
+ */
+export async function getInstagramReels(limit = 18): Promise<Reel[]> {
   const token = process.env.INSTAGRAM_ACCESS_TOKEN;
   const userId = process.env.INSTAGRAM_USER_ID || "me";
-  if (!token) return fallbackReels;
+  if (!token) return fallbackReels.slice(0, limit);
   try {
     const fields = "media_type,media_url,thumbnail_url,permalink,caption";
     const endpoint = `https://graph.instagram.com/${userId}/media?fields=${fields}&limit=${limit}&access_token=${token}`;
@@ -82,8 +86,8 @@ export async function getInstagramReels(limit = 24): Promise<Reel[]> {
         caption: (m.caption?.split("\n")[0] || "Watch on Instagram").slice(0, 48),
       }))
       .filter((r) => r.url && r.image);
-    return reels.length ? reels : fallbackReels;
+    return reels.length ? reels.slice(0, limit) : fallbackReels.slice(0, limit);
   } catch {
-    return fallbackReels;
+    return fallbackReels.slice(0, limit);
   }
 }

@@ -38,8 +38,8 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
   alternates: { canonical: "/" },
   icons: {
-    icon: "/brand/logo.png",
-    apple: "/brand/logo.png",
+    icon: "/brand/favicon-64.png",
+    apple: "/brand/apple-touch-180.png",
   },
 };
 

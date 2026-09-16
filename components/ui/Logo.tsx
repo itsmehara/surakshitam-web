@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 
@@ -18,12 +17,16 @@ export function Logo({
       aria-label="Surakshitam Naturals — home"
       className={cn("group inline-flex items-center gap-2.5", className)}
     >
-      <Image
-        src="/brand/logo.png"
+      {/* 96px + 192px (2x) WebP — the 512px source PNG was 252 KB on every page for a 44px mark */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/brand/logo-96.webp"
+        srcSet="/brand/logo-96.webp 1x, /brand/logo-192.webp 2x"
         alt="Surakshitam Naturals"
         width={48}
         height={48}
-        priority
+        fetchPriority="high"
+        decoding="async"
         className="h-11 w-11 object-contain sm:h-12 sm:w-12"
       />
       <span className="flex flex-col leading-none">
