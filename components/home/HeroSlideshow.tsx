@@ -19,11 +19,10 @@ import { ArrowRight, ChevronDown, LeafIcon, BeakerIcon, RecycleIcon } from "@/co
  * more to scroll. Leaves + the falling-fruit solver run over the photo, as on
  * the v1 hero.
  *
- * Motion (16 Sep): crossfade every HOLD_MS; each slide plays its own camera
- * move (lib/hero-motion.ts — pan, push-in, corner reveal, rise, diagonal) from
- * the moment it becomes active, restarting on every visit (the img wrapper is
- * re-keyed with a run counter), and keeps moving through the fade-out so there
- * is never a snap. It does NOT pause when the mouse rests on the photo — that
+ * Motion (16 Sep): each slide plays its own camera move (lib/hero-motion.ts —
+ * pan, push-in, corner reveal, rise, diagonal) from the moment it becomes
+ * active, restarting on every visit (the img wrapper is re-keyed with a run
+ * counter), eases to a stop, rests, then crossfades (see MOVE/REST/FADE). It does NOT pause when the mouse rests on the photo — that
  * read as "stuck" — only over the dots/arrows. Static frame under reduced motion.
  *
  * Images (16 Sep, v2): surakshitam-docs/source-assets/banner-masters-v2/ —
@@ -119,10 +118,16 @@ const SLIDES: Slide[] = [
 const imgSrc = (s: Slide) => `/banners/${s.src}-v2-2048.webp`;
 const srcSet = (s: Slide) => `/banners/${s.src}-v2-1280.webp 1280w, /banners/${s.src}-v2-2048.webp 2048w`;
 
-const HOLD_MS = 5000; // time a slide sits before the next crossfade — long enough for the camera move to read
-const FADE_MS = 1400; // crossfade duration — long enough to feel like a dissolve, not a cut
-/** The camera move runs hold + fade, so the outgoing slide is still gliding while it fades. */
-const MOVE_MS = HOLD_MS + FADE_MS + 400;
+/**
+ * Rhythm per slide: glide → settle → rest → fade. The camera move eases to a
+ * stop, the frame then sits still for REST_MS so the eye gets a composed,
+ * settled picture, and only then does the crossfade begin (16 Sep — running
+ * the move straight into the fade read as one image being swapped mid-flight).
+ */
+const MOVE_MS = 4400; // camera glide, ease-out — visibly comes to rest
+const REST_MS = 3000; // still frame before the next slide is introduced
+const HOLD_MS = MOVE_MS + REST_MS;
+const FADE_MS = 1400; // crossfade — long enough to feel like a dissolve, not a cut
 
 const trust = [
   { icon: LeafIcon, label: "Plant-forward ingredients" },
