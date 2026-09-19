@@ -6,6 +6,27 @@ need to re-read the whole codebase. Complements `../surakshitam-docs/docs/`
 
 ---
 
+## 0a. v4-whatsapp-orders — current work (read this first on `v4-whatsapp-orders`)
+
+**Branch:** `v4-whatsapp-orders`, cut 19 Sep 2026 from tag `v3.0-live`. **Built, verified locally, NOT
+deployed** — `pages.yml` still publishes `v3-static`; go-live only when Hara says so.
+
+**What v4 adds (still a static export, no backend):** every product carries `sizes[]` with an MRP per
+pack (`lib/types.ts` → `ProductSize`; bigger pack is `default`); the "enquiry list" became a **cart**
+whose line is *product × pack* (`lib/cart/CartContext.tsx`, localStorage `sn-cart-v2`); size pills +
+"MRP ₹…" + "Add to cart" live in `components/ui/BuyBox.tsx` (card and product page); the drawer's
+**"Order on WhatsApp"** goes to **`/checkout/`** (`components/checkout/CheckoutView.tsx`) which collects
+name / mobile / address / city / pincode / email, makes an order ID on the device (`SN-YYMMDD-XXXX`),
+opens WhatsApp *synchronously* with the full message (ID first, "Deliver to" last — `lib/order.ts`),
+POSTs the order to the Apps Script (`kind: "order"` → **Orders** tab with a Status dropdown) alongside,
+clears the cart only once WhatsApp opened, and lands on **`/order-sent/?id=…`** (re-open, copy, soft
+warning if the Sheet save failed). Customer details are remembered in `sn-customer-v1`. Catalog: 52
+products from Supriya's notebook (`surakshitam-docs/docs/v3-static/PRODUCT-CATALOG-NOTES-2026-09-19.md`).
+
+**Commits:** `4dd8cfe` data + size filter · `d532e40` cart · `96209bc` checkout + Orders tab.
+**Before go-live:** re-deploy `Code.gs` + run `setup()`; settle Sheet ownership; review with Supriya.
+**Everything open:** `../surakshitam-docs/docs/PENDING.md`.
+
 ## 0. v3-static — what this branch is (read this first on `v3-static`)
 
 **Branch:** `v3-static`, cut from `v2/full-screen-hero` on 2026-09-15. Version naming
