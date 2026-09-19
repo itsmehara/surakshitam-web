@@ -45,7 +45,7 @@ export function OrderSummary({ lines }: { lines: CartLine[] }) {
         </span>
       </div>
       <p className="border-t border-forest/8 px-4 py-2 text-[0.7rem] leading-snug text-forest/50">
-        MRP, inclusive of all taxes. Delivery charges, if any, are confirmed on WhatsApp before you pay.
+        MRP, inclusive of all taxes. Delivery across India — Hyderabad by local delivery, elsewhere by courier; charges confirmed on WhatsApp before you pay.
       </p>
     </section>
   );

@@ -10,6 +10,7 @@
 
 import type { CartLine } from "@/lib/cart/CartContext";
 import { ENQUIRY_URL } from "@/lib/enquiry";
+import { isIndianPincode, isIndianState } from "@/lib/india";
 
 const WA_NUMBER = "917416394594";
 const waLink = (text: string) => `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`;
@@ -47,11 +48,13 @@ export type Customer = {
   phone: string;
   address: string;
   city: string;
+  /** One of INDIAN_STATES (lib/india.ts) — the founders pick the courier by where it goes. */
+  state: string;
   pincode: string;
   email: string;
 };
 
-export const EMPTY_CUSTOMER: Customer = { name: "", phone: "", address: "", city: "", pincode: "", email: "" };
+export const EMPTY_CUSTOMER: Customer = { name: "", phone: "", address: "", city: "", state: "", pincode: "", email: "" };
 
 const CUSTOMER_KEY = "sn-customer-v1";
 
@@ -62,7 +65,7 @@ export function loadCustomer(): Customer | null {
     if (!raw) return null;
     const c = JSON.parse(raw) as Partial<Customer>;
     const pick = (k: keyof Customer) => (typeof c[k] === "string" ? (c[k] as string) : "");
-    return { name: pick("name"), phone: pick("phone"), address: pick("address"), city: pick("city"), pincode: pick("pincode"), email: pick("email") };
+    return { name: pick("name"), phone: pick("phone"), address: pick("address"), city: pick("city"), state: pick("state"), pincode: pick("pincode"), email: pick("email") };
   } catch {
     return null;
   }
@@ -104,8 +107,9 @@ export function validateCustomer(c: Customer): CustomerErrors {
   const address = c.address.trim();
   if (address.length < 8) e.address = "Please enter the full delivery address.";
   else if (address.length > 200) e.address = "Address is too long (200 characters max).";
-  if (c.city.trim().length < 2) e.city = "Please enter your city.";
-  if (!/^\d{6}$/.test(c.pincode.trim())) e.pincode = "Enter a 6-digit pincode.";
+  if (c.city.trim().length < 2) e.city = "Please enter your city or town.";
+  if (!isIndianState(c.state)) e.state = "Please pick your state.";
+  if (!isIndianPincode(c.pincode)) e.pincode = "Enter a valid 6-digit Indian pincode.";
   const email = c.email.trim();
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = "That email doesn't look right.";
   return e;
@@ -156,7 +160,7 @@ export function formatDeliverTo(c: Customer): string {
   return [
     `${c.name.trim()} · ${pretty}`,
     c.address.trim(),
-    `${c.city.trim()} — ${c.pincode.trim()}`,
+    `${c.city.trim()}, ${c.state.trim()} — ${c.pincode.trim()}`,
     c.email.trim(),
   ]
     .filter(Boolean)
@@ -210,6 +214,7 @@ export async function submitOrder(input: {
     email: c.email.trim(),
     address: c.address.trim(),
     city: c.city.trim(),
+    state: c.state.trim(),
     pincode: c.pincode.trim(),
     items: formatOrderLines(input.lines),
     subtotal,

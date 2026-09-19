@@ -25,6 +25,7 @@ import { trackWhatsAppClick } from "@/lib/enquiry";
 import { OrderSummary } from "./OrderSummary";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { Field, inputClass } from "@/components/ui/FormField";
+import { INDIAN_STATES, deliveryHint, stateFromPincode } from "@/lib/india";
 import { WhatsAppIcon, CartIcon, ArrowRight } from "@/components/icons";
 import { cn } from "@/lib/cn";
 
@@ -58,8 +59,17 @@ export function CheckoutView() {
     }
   }, []);
 
-  const set = (k: keyof Customer) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setCustomer((c) => ({ ...c, [k]: e.target.value }));
+  const set = (k: keyof Customer) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const value = e.target.value;
+    setCustomer((c) => {
+      const next = { ...c, [k]: value };
+      // Pincode encodes the state — pre-select it when the customer hasn't chosen one (still editable).
+      if (k === "pincode" && !c.state) {
+        const guess = stateFromPincode(value);
+        if (guess) next.state = guess;
+      }
+      return next;
+    });
     if (errors[k]) setErrors((er) => ({ ...er, [k]: undefined }));
   };
 
@@ -127,7 +137,7 @@ export function CheckoutView() {
       <PageIntro
         eyebrow="Checkout"
         title="Where should we deliver?"
-        intro="Your order goes to us on WhatsApp with these details. We confirm availability and delivery, you pay on WhatsApp, we pack and deliver."
+        intro="We deliver across India — Hyderabad by local delivery, elsewhere by courier. Your order goes to us on WhatsApp with these details; we confirm availability and delivery charges, you pay on WhatsApp, we pack and send."
       />
       <div className="container grid gap-8 py-8 sm:py-12 lg:grid-cols-[1fr_1.2fr] lg:gap-12">
         <div className="lg:order-2">
@@ -187,8 +197,7 @@ export function CheckoutView() {
             {errors.address && <p className="mt-1 text-xs text-clay">{errors.address}</p>}
           </div>
 
-          <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
-            <Field idPrefix="co" label="City" name="city" required autoComplete="address-level2" value={customer.city} onChange={set("city")} error={errors.city} />
+          <div className="grid gap-x-3 gap-y-3 sm:grid-cols-3">
             <Field
               idPrefix="co"
               label="Pincode"
@@ -200,8 +209,30 @@ export function CheckoutView() {
               value={customer.pincode}
               onChange={set("pincode")}
               error={errors.pincode}
-              hint="Delivery charges, if any, are confirmed on WhatsApp."
             />
+            <Field idPrefix="co" label="City / town" name="city" required autoComplete="address-level2" value={customer.city} onChange={set("city")} error={errors.city} />
+            <div>
+              <label htmlFor="co-state" className="mb-1 block text-sm font-medium text-forest">
+                State <span className="text-clay">*</span>
+              </label>
+              <select
+                id="co-state"
+                name="state"
+                required
+                autoComplete="address-level1"
+                value={customer.state}
+                onChange={set("state")}
+                aria-invalid={errors.state ? true : undefined}
+                className={cn(inputClass, "h-10", errors.state && "border-clay focus:border-clay")}
+              >
+                <option value="">Select state</option>
+                {INDIAN_STATES.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+              {errors.state && <p className="mt-1 text-xs text-clay">{errors.state}</p>}
+            </div>
+            <p className="text-xs text-forest/55 sm:col-span-3">{deliveryHint(customer.pincode)}</p>
           </div>
 
           <Field idPrefix="co" label="Email (optional)" name="email" type="email" autoComplete="email" value={customer.email} onChange={set("email")} error={errors.email} />
