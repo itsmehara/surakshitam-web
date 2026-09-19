@@ -6,14 +6,15 @@ import { useEffect, useRef } from "react";
 import { useCart, MAX_NOTE, lineKey } from "@/lib/cart/CartContext";
 import { productImage } from "@/lib/catalog";
 import { rupees } from "@/lib/order";
-import { CartIcon, CloseIcon, WhatsAppIcon, ArrowRight } from "@/components/icons";
+import { CartIcon, CloseIcon, ArrowRight } from "@/components/icons";
 import { cn } from "@/lib/cn";
 
 /**
  * Slide-in cart. Rows are deliberately compact (44px thumbnail, one control
  * row) so a phone shows 8+ lines without scrolling. Below the list: subtotal,
- * a one-line note that grows as you type, then "Order on WhatsApp" — which
- * goes to /checkout/ for the delivery details — and "ask a question instead".
+ * a one-line note that grows as you type, then "Checkout" — which goes to
+ * /checkout/ for the delivery details; WhatsApp opens from *that* page, so the
+ * button here never claims to send — and "ask a question instead".
  * "Clear" lives in the header.
  */
 export function CartDrawer() {
@@ -64,7 +65,7 @@ export function CartDrawer() {
             <h2 className="font-serif text-lg font-semibold leading-tight text-forest">
               Your cart {count > 0 && <span className="text-forest/50">({count})</span>}
             </h2>
-            <p className="truncate text-[0.7rem] text-forest/55">Order on WhatsApp — pay there once we confirm.</p>
+            <p className="truncate text-[0.7rem] text-forest/55">Checkout sends the order to us on WhatsApp.</p>
           </div>
           <div className="flex shrink-0 items-center gap-1">
             {count > 0 && (
@@ -197,12 +198,12 @@ export function CartDrawer() {
               <Link
                 href="/checkout/"
                 onClick={closeDrawer}
-                className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] text-sm font-semibold text-white shadow-soft transition-transform duration-200 hover:scale-[1.02]"
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-forest text-sm font-semibold text-cream shadow-soft transition-colors hover:bg-ink"
               >
-                <WhatsAppIcon width={20} height={20} /> Order on WhatsApp
+                Checkout — delivery details <ArrowRight width={16} />
               </Link>
               <p className="text-center text-[0.7rem] leading-snug text-forest/55">
-                Next: your delivery details. Pay on WhatsApp and send us the payment screenshot — we pack and deliver.
+                Next: where to deliver, then the order goes to us on WhatsApp. Pay there once we confirm — we pack and deliver.
               </p>
               <div className="flex items-center justify-center text-xs font-medium text-forest/70">
                 <Link

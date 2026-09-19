@@ -26,7 +26,7 @@ import { WhatsAppIcon, CartIcon, ArrowRight } from "@/components/icons";
 import { cn } from "@/lib/cn";
 
 /**
- * /checkout/ — order summary, delivery details, one button
+ * /checkout/ — order summary, delivery details, one button ("Order on WhatsApp")
  * (PRODUCT-CATALOG-NOTES-2026-09-19 §7.3). A page rather than the drawer: an
  * address needs room on a phone.
  *
@@ -226,7 +226,7 @@ export function CheckoutView() {
             disabled={sending}
             className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] text-sm font-semibold text-white shadow-soft transition-transform duration-200 hover:scale-[1.02] disabled:opacity-60 disabled:hover:scale-100"
           >
-            <WhatsAppIcon width={20} height={20} /> {sending ? "Opening WhatsApp…" : "Send order on WhatsApp"}
+            <WhatsAppIcon width={20} height={20} /> {sending ? "Opening WhatsApp…" : "Order on WhatsApp"}
           </button>
           <p className="text-center text-xs leading-relaxed text-forest/55">
             No payment here. Pay on WhatsApp once we confirm, and send us the payment screenshot — we pack and deliver.

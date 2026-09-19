@@ -72,7 +72,7 @@ export function OrderSent() {
               onClick={() => trackWhatsAppClick({ cta: "order-resend", product: mine.orderId })}
               className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] text-sm font-semibold text-white shadow-soft transition-transform duration-200 hover:scale-[1.02]"
             >
-              <WhatsAppIcon width={20} height={20} /> {blocked ? "Send order on WhatsApp" : "Open WhatsApp again"}
+              <WhatsAppIcon width={20} height={20} /> {blocked ? "Order on WhatsApp" : "Open WhatsApp again"}
             </a>
             <div className="mt-2 text-center text-xs font-medium text-forest/70">
               <button type="button" onClick={copy} className="inline-flex items-center gap-1 hover:text-forest">
