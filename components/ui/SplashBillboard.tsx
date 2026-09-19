@@ -22,13 +22,24 @@ import { CloseIcon } from "@/components/icons";
  * get the same timing without the scale/blur, just a plain fade.
  */
 
-type Splash = { src: string; width: number; height: number; alt: string };
+type Splash = {
+  src: string;
+  width: number;
+  height: number;
+  alt: string;
+  /** Cut-out on a transparent background: no card frame, the pack floats over the dimmed page. */
+  transparent?: boolean;
+  /** Set on artworks not yet approved for the random rotation — reachable only via ?splash=N. */
+  previewOnly?: boolean;
+};
 
 /**
  * The set. Masters + hand-off notes live in
  * surakshitam-docs/source-assets/splash-masters/. Portrait artworks (the two
  * hair-oil "museum" pieces, 19 Sep) are sized by height so the whole bottle
  * and pedestal stay in view; the landscape one is sized by width as before.
+ * The three "3d transparent" cut-outs (20 Sep) float frameless over the dimmed
+ * page. All six rotate (approved by Hara, 20 Sep).
  */
 const SPLASHES: Splash[] = [
   {
@@ -49,6 +60,27 @@ const SPLASHES: Splash[] = [
     height: 1402,
     alt: "Surakshitam Naturals Herbal Hair Oil as a marble botanical museum sculpture",
   },
+  {
+    src: "/splash/dishwash-liquid-3d-transparent-splash.webp",
+    width: 1024,
+    height: 1536,
+    alt: "Surakshitam Naturals Dish Washing Liquid bottle",
+    transparent: true,
+  },
+  {
+    src: "/splash/floor-cleaner-3d-transparent-splash.webp",
+    width: 1024,
+    height: 1536,
+    alt: "Surakshitam Naturals Floor Cleaner bottle",
+    transparent: true,
+  },
+  {
+    src: "/splash/herbal-shampoo-3d-transparent-splash.webp",
+    width: 1024,
+    height: 1536,
+    alt: "Surakshitam Naturals Herbal Shampoo bottle",
+    transparent: true,
+  },
 ];
 
 const LAST_INDEX_KEY = "sn-splash-last-index";
@@ -63,7 +95,7 @@ function pickSplash(): Splash {
   } catch {
     /* ignore */
   }
-  const candidates = SPLASHES.map((_, i) => i).filter((i) => i !== last);
+  const candidates = SPLASHES.map((_, i) => i).filter((i) => i !== last && !SPLASHES[i].previewOnly);
   const idx = candidates[Math.floor(Math.random() * candidates.length)];
   try {
     localStorage.setItem(LAST_INDEX_KEY, String(idx));
@@ -185,7 +217,11 @@ export function SplashBillboard() {
           type="button"
           onClick={() => setPhase("out")}
           aria-label="Close"
-          className="absolute -right-3 -top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white text-forest shadow-card"
+          className={
+            splash.transparent
+              ? "absolute right-0 top-0 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white text-forest shadow-card"
+              : "absolute -right-3 -top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white text-forest shadow-card"
+          }
         >
           <CloseIcon width={18} />
         </button>
@@ -196,7 +232,11 @@ export function SplashBillboard() {
           height={splash.height}
           priority
           sizes={portrait ? "(max-width: 640px) 90vw, 680px" : "(max-width: 640px) 94vw, (max-width: 1024px) 78vw, 58vw"}
-          className="h-auto w-full rounded-2xl shadow-[0_24px_60px_rgba(20,30,15,0.45)] ring-1 ring-white/20"
+          className={
+            splash.transparent
+              ? "h-auto w-full drop-shadow-[0_30px_40px_rgba(20,30,15,0.55)]"
+              : "h-auto w-full rounded-2xl shadow-[0_24px_60px_rgba(20,30,15,0.45)] ring-1 ring-white/20"
+          }
         />
       </div>
     </div>
