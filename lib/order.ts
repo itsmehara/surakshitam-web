@@ -111,6 +111,29 @@ export function validateCustomer(c: Customer): CustomerErrors {
   return e;
 }
 
+// ---------- payment (optional, at order time) ----------
+
+/**
+ * Most customers pay on WhatsApp *after* the founders confirm. A repeat
+ * customer who has already paid by UPI can say so and give the transaction
+ * reference, so the founders can match it in the Sheet. Never auto-marks the
+ * order Paid — the founders verify and change Status themselves.
+ */
+export type Payment = { paid: boolean; ref: string };
+export const NO_PAYMENT: Payment = { paid: false, ref: "" };
+
+/** UPI transaction IDs / UTRs are 12–22 alphanumerics; allow a little slack either side. */
+export function validatePayment(p: Payment): string | undefined {
+  if (!p.paid) return undefined;
+  const ref = p.ref.trim();
+  if (ref.length < 6 || ref.length > 40 || !/^[A-Za-z0-9 -]+$/.test(ref)) return "Paste the UPI transaction ID / UTR (6–40 letters or digits).";
+  return undefined;
+}
+
+export function formatPayment(p: Payment): string {
+  return p.paid ? `Payment: already paid by UPI — ref ${p.ref.trim()}` : "Payment: on WhatsApp once you confirm";
+}
+
 // ---------- order ----------
 
 /** `SN-260920-4K7Q` — date + 4 chars from an alphabet with no 0/O/1/I, generated on the device. */
@@ -141,12 +164,19 @@ export function formatDeliverTo(c: Customer): string {
 }
 
 /** The full order message — starts with the order ID, ends with the delivery details (§7.3). */
-export function orderMessage(orderId: string, lines: CartLine[], customer: Customer, note?: string): string {
+export function orderMessage(
+  orderId: string,
+  lines: CartLine[],
+  customer: Customer,
+  note?: string,
+  payment: Payment = NO_PAYMENT,
+): string {
   const trimmed = note?.trim();
   return (
     `Order ${orderId} — Surakshitam Naturals\n\n` +
     formatOrderLines(lines) +
     `\n${formatSubtotal(lines)}` +
+    `\n${formatPayment(payment)}` +
     (trimmed ? `\n\nNote: ${trimmed}` : "") +
     `\n\nDeliver to:\n${formatDeliverTo(customer)}`
   );
@@ -166,6 +196,7 @@ export async function submitOrder(input: {
   lines: CartLine[];
   customer: Customer;
   note: string;
+  payment?: Payment;
   website?: string;
 }): Promise<OrderResult> {
   if (!ENQUIRY_URL) return { ok: false, error: "Order service is not configured (NEXT_PUBLIC_ENQUIRY_URL)." };
@@ -184,6 +215,8 @@ export async function submitOrder(input: {
     subtotal,
     priceOnRequest: hasPriceOnRequest,
     note: input.note.trim(),
+    paid: !!input.payment?.paid,
+    paymentRef: input.payment?.paid ? input.payment.ref.trim() : "",
     website: input.website ?? "",
     page: typeof window !== "undefined" ? window.location.href : "",
     ua: typeof navigator !== "undefined" ? navigator.userAgent : "",

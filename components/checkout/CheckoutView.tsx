@@ -9,6 +9,9 @@ import {
   clearCustomer,
   loadCustomer,
   newOrderId,
+  NO_PAYMENT,
+  validatePayment,
+  type Payment,
   orderMessage,
   rememberSentOrder,
   saveCustomer,
@@ -43,6 +46,8 @@ export function CheckoutView() {
   const [customer, setCustomer] = useState<Customer>(EMPTY_CUSTOMER);
   const [remembered, setRemembered] = useState(false);
   const [errors, setErrors] = useState<CustomerErrors>({});
+  const [payment, setPayment] = useState<Payment>(NO_PAYMENT);
+  const [paymentError, setPaymentError] = useState<string | undefined>();
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
@@ -69,16 +74,18 @@ export function CheckoutView() {
     if (sending || lines.length === 0) return;
     const website = String(new FormData(e.currentTarget).get("website") ?? "");
     const errs = validateCustomer(customer);
-    if (Object.keys(errs).length) {
+    const payErr = validatePayment(payment);
+    if (Object.keys(errs).length || payErr) {
       setErrors(errs);
-      const first = Object.keys(errs)[0];
+      setPaymentError(payErr);
+      const first = Object.keys(errs)[0] ?? "paymentRef";
       document.getElementById(`co-${first}`)?.focus();
       return;
     }
     setSending(true);
 
     const orderId = newOrderId();
-    const message = orderMessage(orderId, lines, customer, note);
+    const message = orderMessage(orderId, lines, customer, note, payment);
     const href = whatsAppOrderHref(message);
 
     // 1. WhatsApp first, inside the user gesture.
@@ -90,7 +97,7 @@ export function CheckoutView() {
     rememberSentOrder({ orderId, message, href, sheet: "pending", at: Date.now() });
 
     // 3. Save to the Orders tab — not awaited; the result lands in sessionStorage.
-    void submitOrder({ orderId, lines, customer, note, website }).then((r) => {
+    void submitOrder({ orderId, lines, customer, note, payment, website }).then((r) => {
       rememberSentOrder({ orderId, message, href, sheet: r.ok ? "ok" : "failed", at: Date.now() });
     });
 
@@ -213,6 +220,50 @@ export function CheckoutView() {
               onChange={(e) => setNote(e.target.value)}
               className={inputClass}
             />
+          </div>
+
+          {/* Already paid? Optional — the normal flow is pay after we confirm on WhatsApp. */}
+          <div className="rounded-lg border border-forest/10 bg-white/70 p-3">
+            <label className="flex cursor-pointer items-start gap-2.5 text-sm text-forest">
+              <input
+                type="checkbox"
+                name="paid"
+                checked={payment.paid}
+                onChange={(e) => {
+                  setPayment((p) => ({ ...p, paid: e.target.checked }));
+                  setPaymentError(undefined);
+                }}
+                className="mt-0.5 h-4 w-4 accent-moss"
+              />
+              <span>
+                <span className="font-medium">I&apos;ve already paid by UPI</span>
+                <span className="block text-xs text-forest/55">
+                  Usually you pay on WhatsApp after we confirm availability and delivery. Paid already? Paste the
+                  transaction ID so we can match it.
+                </span>
+              </span>
+            </label>
+            {payment.paid && (
+              <div className="mt-3">
+                <Field
+                  idPrefix="co"
+                  label="UPI transaction ID / UTR"
+                  name="paymentRef"
+                  required
+                  autoComplete="off"
+                  inputMode="text"
+                  placeholder="e.g. 412345678901"
+                  maxLength={40}
+                  value={payment.ref}
+                  onChange={(e) => {
+                    setPayment((p) => ({ ...p, ref: e.target.value }));
+                    setPaymentError(undefined);
+                  }}
+                  error={paymentError}
+                  hint="From your UPI app's payment details. We confirm it on WhatsApp before packing."
+                />
+              </div>
+            )}
           </div>
 
           {/* Honeypot — hidden from humans, filled by bots. */}
