@@ -1,15 +1,15 @@
 import { cn } from "@/lib/cn";
 
 /**
- * The small "online ordering coming soon" line agreed for v3 (ANSWERS §G33),
- * updated 15 Sep for the enquiry list. Shown on the shop and product pages so
- * nobody looks for a cart that isn't there.
+ * The one-line "how ordering works" note (v4: cart → WhatsApp → pay on
+ * WhatsApp). Shown on the shop and product pages so nobody looks for a
+ * card-payment step that isn't there.
  */
 export function OrderingNote({ className }: { className?: string }) {
   return (
     <p className={cn("text-xs text-forest/55", className)}>
-      Online ordering coming soon — add products to your enquiry list and send us one WhatsApp
-      message; we&apos;ll confirm price, availability and delivery.
+      Add to cart, then order on WhatsApp — we confirm availability and delivery, you pay on
+      WhatsApp, we pack and deliver.
     </p>
   );
 }

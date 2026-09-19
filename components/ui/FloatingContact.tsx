@@ -1,10 +1,10 @@
 import { site } from "@/lib/site";
 import { WhatsAppIcon, InstagramIcon } from "@/components/icons";
 import { WhatsAppLink } from "@/components/ui/WhatsAppLink";
-import { EnquiryListFab } from "@/components/enquiry/EnquiryListFab";
+import { CartFab } from "@/components/cart/CartFab";
 
 /**
- * Stacked floating buttons (bottom-right): enquiry list (only when it has
+ * Stacked floating buttons (bottom-right): cart (only when it has
  * items), Instagram (tablet and up — three stacked buttons crowd a phone, and
  * Instagram is in the footer and on /contact anyway), then WhatsApp.
  * Labels expand leftward on hover so they never clip the viewport edge.
@@ -13,7 +13,7 @@ import { EnquiryListFab } from "@/components/enquiry/EnquiryListFab";
 export function FloatingContact() {
   return (
     <div className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
-      <EnquiryListFab />
+      <CartFab />
 
       {/* Instagram */}
       <a

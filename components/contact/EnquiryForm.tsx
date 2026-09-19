@@ -12,8 +12,7 @@ import {
   type EnquiryFields,
   type EnquiryType,
 } from "@/lib/enquiry";
-import { useEnquiryList } from "@/lib/enquiry-list/EnquiryListContext";
-import { defaultSize } from "@/lib/catalog";
+import { useCart } from "@/lib/cart/CartContext";
 import { SlotPicker, formatSlot } from "./SlotPicker";
 import { CheckIcon, WhatsAppIcon } from "@/components/icons";
 import { cn } from "@/lib/cn";
@@ -29,7 +28,7 @@ type Status =
  * booking (15 Sep brief). `?type=` (from the Contact submenu) pre-selects the
  * type; the type drives which extra field shows, the placeholder copy and the
  * success message. A product enquiry pre-fills the product lines from the
- * enquiry list, so the drawer's "send as a form" hands over cleanly.
+ * cart, so the drawer's "ask a question instead" hands over cleanly.
  *
  * Submission goes to the Apps Script (Sheet row + email alert). If that fails
  * — or the URL isn't configured — the error state offers the same content as
@@ -67,18 +66,18 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
   const requested = params.get("type");
   const [type, setType] = useState<EnquiryType>(isEnquiryType(requested) ? requested : "product");
   const [status, setStatus] = useState<Status>({ kind: "idle" });
-  const { lines, ready, note } = useEnquiryList();
+  const { lines, ready, note } = useCart();
 
   // Follow the URL if the visitor switches submenu while already on /contact.
   useEffect(() => {
     if (isEnquiryType(requested)) setType(requested);
   }, [requested]);
 
-  // Product lines from the enquiry list (or the single product a PDP passed in).
+  // Product lines from the cart (or the single product a PDP passed in).
   const listedProducts = useMemo(
     () =>
       lines.length
-        ? formatEnquiryLines(lines.map((l) => ({ name: l.product.name, size: defaultSize(l.product).label, qty: l.qty })))
+        ? formatEnquiryLines(lines.map((l) => ({ name: l.product.name, size: l.size.label, qty: l.qty })))
         : product,
     [lines, product],
   );
@@ -88,7 +87,7 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
   useEffect(() => {
     if (!ready) return;
     setProducts(listedProducts);
-    // The drawer's note becomes the product-enquiry message so nothing typed there is lost.
+    // The cart note becomes the product-enquiry message so nothing typed there is lost.
     if (type === "product" && note && lines.length) setMessage((m) => m || note);
   }, [ready, listedProducts, note, lines.length, type]);
 
@@ -218,7 +217,7 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
             className={inputClass}
           />
           {lines.length > 0 && (
-            <p className="mt-1 text-xs text-forest/50">Filled from your enquiry list — edit freely.</p>
+            <p className="mt-1 text-xs text-forest/50">Filled from your cart — edit freely.</p>
           )}
         </div>
       )}

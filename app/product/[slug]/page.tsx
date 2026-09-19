@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { products, getProductBySlug, getProductsByCategory, productImage, defaultSize, formatMrp } from "@/lib/catalog";
+import { products, getProductBySlug, getProductsByCategory, productImage, defaultSize } from "@/lib/catalog";
 import { ProductGallery } from "@/components/ui/ProductGallery";
 import { ProductCard } from "@/components/ui/ProductCard";
-import { AddToEnquiryButton } from "@/components/ui/AddToEnquiryButton";
+import { BuyBox } from "@/components/ui/BuyBox";
 import { OrderingNote } from "@/components/ui/OrderingNote";
 import { CheckIcon, LeafIcon, ChevronDown } from "@/components/icons";
 import { site } from "@/lib/site";
@@ -129,29 +129,9 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                 delivered by {site.name}. This is a brand-partner product, not one of ours.
               </p>
             )}
-            {/* Pack sizes with MRP — the bigger pack is the default (Supriya, 19 Sep) */}
-            <div className="mt-5">
-              <p className="font-serif text-2xl font-semibold text-forest">
-                {formatMrp(pack)}
-                <span className="ml-2 text-sm font-normal text-forest/55">· {pack.label}</span>
-              </p>
-              {product.sizes.length > 1 && (
-                <ul className="mt-2 flex flex-wrap gap-2 text-xs text-forest/70">
-                  {product.sizes.map((s) => (
-                    <li key={s.id} className="rounded-full border border-forest/15 px-3 py-1">
-                      {s.label} · {formatMrp(s).replace("MRP ", "")}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {pack.mrp != null && (
-                <p className="mt-1.5 text-xs text-forest/50">MRP inclusive of all taxes. Delivery charges, if any, confirmed on WhatsApp.</p>
-              )}
-            </div>
-
-            {/* Actions — v3: collect products in the enquiry list, send one message */}
+            {/* Pack pills + MRP + add to cart — the bigger pack is pre-selected (Supriya, 19 Sep) */}
             <div className="mt-6 sm:max-w-sm">
-              <AddToEnquiryButton productId={product.id} name={product.name} variant="page" className="w-full" />
+              <BuyBox product={product} variant="page" />
             </div>
             <OrderingNote className="mt-3" />
 

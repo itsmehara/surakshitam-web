@@ -183,7 +183,7 @@ export const YouTubeIcon = (p: IconProps) => (
   </svg>
 );
 
-/** Clipboard with a list — the enquiry-list glyph (distinct from the old cart). */
+/** Clipboard with a list — used for the v3 enquiry list; kept for the contact page. */
 export const ClipboardIcon = (p: IconProps) => (
   <svg {...base} {...p}>
     <rect x="5" y="4" width="14" height="17" rx="2" />

@@ -3,21 +3,22 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { useEnquiryList, MAX_NOTE } from "@/lib/enquiry-list/EnquiryListContext";
-import { productImage, defaultSize } from "@/lib/catalog";
-import { enquiryListMessage, whatsAppListHref, trackWhatsAppClick } from "@/lib/enquiry";
-import { ClipboardIcon, CloseIcon, WhatsAppIcon, ArrowRight, CheckIcon, ChevronDown } from "@/components/icons";
+import { useCart, MAX_NOTE, lineKey } from "@/lib/cart/CartContext";
+import { productImage } from "@/lib/catalog";
+import { trackWhatsAppClick } from "@/lib/enquiry";
+import { cartMessage, whatsAppCartHref, rupees } from "@/lib/order";
+import { CartIcon, CloseIcon, WhatsAppIcon, ArrowRight, CheckIcon, ChevronDown } from "@/components/icons";
 import { cn } from "@/lib/cn";
 
 /**
- * Slide-in panel for the enquiry list. Rows are deliberately compact (48px
- * thumbnail, one control row) so a phone shows 8+ products without scrolling.
- * Below the list: a one-line note that grows as you type, the exact WhatsApp
- * text (open by default on tablet+, collapsed on phones to keep the list
- * tall), then send / copy / send-as-form. "Clear" lives in the header.
+ * Slide-in cart. Rows are deliberately compact (44px thumbnail, one control
+ * row) so a phone shows 8+ lines without scrolling. Below the list: subtotal,
+ * a one-line note that grows as you type, the exact WhatsApp text (open by
+ * default on tablet+, collapsed on phones to keep the list tall), then
+ * "Order on WhatsApp" / copy / enquire-instead. "Clear" lives in the header.
  */
-export function EnquiryListDrawer() {
-  const { lines, count, setQty, remove, clear, note, setNote, drawerOpen, closeDrawer } = useEnquiryList();
+export function CartDrawer() {
+  const { lines, count, subtotal, hasPriceOnRequest, setQty, remove, clear, note, setNote, drawerOpen, closeDrawer } = useCart();
   const [copied, setCopied] = useState(false);
   // Preview starts open where there is room for it; phones get it collapsed.
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -43,9 +44,8 @@ export function EnquiryListDrawer() {
     };
   }, [drawerOpen, closeDrawer]);
 
-  const plain = lines.map((l) => ({ name: l.product.name, size: defaultSize(l.product).label, qty: l.qty }));
-  const message = enquiryListMessage(plain, note);
-  const waHref = whatsAppListHref(plain, note);
+  const message = cartMessage(lines, note);
+  const waHref = whatsAppCartHref(lines, note);
 
   async function copyMessage() {
     try {
@@ -72,7 +72,7 @@ export function EnquiryListDrawer() {
       <aside
         role="dialog"
         aria-modal="true"
-        aria-label="Enquiry list"
+        aria-label="Your cart"
         className={cn(
           "absolute right-0 top-0 flex h-full w-[92%] max-w-md flex-col bg-cream shadow-xl transition-transform duration-300 ease-smooth",
           drawerOpen ? "translate-x-0" : "translate-x-full",
@@ -81,9 +81,9 @@ export function EnquiryListDrawer() {
         <header className="flex items-center justify-between gap-2 border-b border-forest/10 px-4 py-2.5">
           <div className="min-w-0">
             <h2 className="font-serif text-lg font-semibold leading-tight text-forest">
-              Enquiry list {count > 0 && <span className="text-forest/50">({count})</span>}
+              Your cart {count > 0 && <span className="text-forest/50">({count})</span>}
             </h2>
-            <p className="truncate text-[0.7rem] text-forest/55">No payment — we reply with price &amp; availability.</p>
+            <p className="truncate text-[0.7rem] text-forest/55">Order on WhatsApp — pay there once we confirm.</p>
           </div>
           <div className="flex shrink-0 items-center gap-1">
             {count > 0 && (
@@ -98,7 +98,7 @@ export function EnquiryListDrawer() {
             <button
               type="button"
               onClick={closeDrawer}
-              aria-label="Close enquiry list"
+              aria-label="Close cart"
               className="flex h-9 w-9 items-center justify-center rounded-full text-forest hover:bg-forest/5"
             >
               <CloseIcon width={18} />
@@ -109,12 +109,12 @@ export function EnquiryListDrawer() {
         {lines.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
             <span className="flex h-14 w-14 items-center justify-center rounded-full bg-parchment text-forest/50">
-              <ClipboardIcon width={26} />
+              <CartIcon width={26} />
             </span>
-            <p className="font-serif text-lg text-forest">Your enquiry list is empty</p>
+            <p className="font-serif text-lg text-forest">Your cart is empty</p>
             <p className="text-sm text-forest/60">
-              Tap <span className="font-medium text-forest">Add to enquiry</span> on any product, then send
-              us everything in one message.
+              Tap <span className="font-medium text-forest">Add to cart</span> on any product, then order
+              everything in one WhatsApp message.
             </p>
             <Link
               href="/shop"
@@ -128,8 +128,8 @@ export function EnquiryListDrawer() {
           <>
             {/* ---- items: compact rows ---- */}
             <ul className="divide-y divide-forest/8 overflow-y-auto px-4">
-              {lines.map(({ product, qty }) => (
-                <li key={product.id} className="flex items-center gap-2.5 py-1.5">
+              {lines.map(({ product, size, qty }) => (
+                <li key={lineKey(product.id, size.id)} className="flex items-center gap-2.5 py-1.5">
                   <Link
                     href={`/product/${product.slug}`}
                     onClick={closeDrawer}
@@ -151,13 +151,17 @@ export function EnquiryListDrawer() {
                     >
                       {product.name}
                     </Link>
-                    <p className="text-[0.7rem] text-forest/50">{defaultSize(product).label}</p>
+                    <p className="text-[0.7rem] text-forest/50">
+                      {size.label}
+                      <span className="text-forest/30"> · </span>
+                      {size.mrp == null ? "price on request" : `${rupees(size.mrp)} × ${qty} = ${rupees(size.mrp * qty)}`}
+                    </p>
                   </div>
                   <div className="flex shrink-0 items-center rounded-full border border-forest/15 text-forest">
                     <button
                       type="button"
-                      onClick={() => setQty(product.id, qty - 1)}
-                      aria-label={`Decrease quantity of ${product.name}`}
+                      onClick={() => setQty(product.id, size.id, qty - 1)}
+                      aria-label={`Decrease quantity of ${product.name} ${size.label}`}
                       className="flex h-7 w-7 items-center justify-center rounded-full text-base leading-none hover:bg-forest/5"
                     >
                       −
@@ -165,8 +169,8 @@ export function EnquiryListDrawer() {
                     <span className="min-w-5 text-center text-sm tabular-nums">{qty}</span>
                     <button
                       type="button"
-                      onClick={() => setQty(product.id, qty + 1)}
-                      aria-label={`Increase quantity of ${product.name}`}
+                      onClick={() => setQty(product.id, size.id, qty + 1)}
+                      aria-label={`Increase quantity of ${product.name} ${size.label}`}
                       className="flex h-7 w-7 items-center justify-center rounded-full text-base leading-none hover:bg-forest/5"
                     >
                       +
@@ -174,8 +178,8 @@ export function EnquiryListDrawer() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => remove(product.id)}
-                    aria-label={`Remove ${product.name}`}
+                    onClick={() => remove(product.id, size.id)}
+                    aria-label={`Remove ${product.name} ${size.label}`}
                     className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-forest/40 hover:bg-clay/10 hover:text-clay"
                   >
                     <CloseIcon width={14} />
@@ -184,8 +188,18 @@ export function EnquiryListDrawer() {
               ))}
             </ul>
 
-            {/* ---- note + preview + actions ---- */}
+            {/* ---- subtotal + note + preview + actions ---- */}
             <div className="mt-auto space-y-2 border-t border-forest/10 px-4 pb-3 pt-2.5">
+              <div className="flex items-baseline justify-between">
+                <span className="text-sm text-forest/70">
+                  Subtotal
+                  <span className="ml-1 text-[0.7rem] text-forest/45">MRP, incl. taxes</span>
+                </span>
+                <span className="font-serif text-lg font-semibold tabular-nums text-forest">
+                  {rupees(subtotal)}
+                  {hasPriceOnRequest && <span className="ml-1 text-xs font-normal text-forest/50">+ on request</span>}
+                </span>
+              </div>
               <textarea
                 ref={noteRef}
                 id="enq-list-note"
@@ -194,7 +208,7 @@ export function EnquiryListDrawer() {
                 onChange={(e) => setNote(e.target.value)}
                 rows={1}
                 maxLength={MAX_NOTE}
-                placeholder="Add a note — delivery area, questions… (optional)"
+                placeholder="Add a note — gift wrap, questions… (optional)"
                 className="w-full resize-none rounded-lg border border-forest/15 bg-white px-3 py-2 text-sm text-forest placeholder:text-forest/40 focus:border-moss focus:outline-none"
               />
 
@@ -218,14 +232,17 @@ export function EnquiryListDrawer() {
                 rel="noopener noreferrer"
                 onClick={() =>
                   trackWhatsAppClick({
-                    cta: "enquiry-list",
-                    product: plain.map((l) => `${l.name} ×${l.qty}`).join("; "),
+                    cta: "cart",
+                    product: lines.map((l) => `${l.product.name} ${l.size.label} ×${l.qty}`).join("; "),
                   })
                 }
                 className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] text-sm font-semibold text-white shadow-soft transition-transform duration-200 hover:scale-[1.02]"
               >
-                <WhatsAppIcon width={20} height={20} /> Send on WhatsApp
+                <WhatsAppIcon width={20} height={20} /> Order on WhatsApp
               </a>
+              <p className="text-center text-[0.7rem] leading-snug text-forest/55">
+                Pay on WhatsApp and send us the payment screenshot — we pack and deliver.
+              </p>
               <div className="flex items-center justify-center gap-4 text-xs font-medium text-forest/70">
                 <button type="button" onClick={copyMessage} className="inline-flex items-center gap-1 hover:text-forest">
                   {copied ? (
@@ -242,7 +259,7 @@ export function EnquiryListDrawer() {
                   onClick={closeDrawer}
                   className="inline-flex items-center gap-1 hover:text-forest"
                 >
-                  Send as a form <ArrowRight width={13} />
+                  Ask a question instead <ArrowRight width={13} />
                 </Link>
               </div>
             </div>
