@@ -2,28 +2,22 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useCart, MAX_NOTE, lineKey } from "@/lib/cart/CartContext";
 import { productImage } from "@/lib/catalog";
-import { trackWhatsAppClick } from "@/lib/enquiry";
-import { cartMessage, whatsAppCartHref, rupees } from "@/lib/order";
-import { CartIcon, CloseIcon, WhatsAppIcon, ArrowRight, CheckIcon, ChevronDown } from "@/components/icons";
+import { rupees } from "@/lib/order";
+import { CartIcon, CloseIcon, WhatsAppIcon, ArrowRight } from "@/components/icons";
 import { cn } from "@/lib/cn";
 
 /**
  * Slide-in cart. Rows are deliberately compact (44px thumbnail, one control
  * row) so a phone shows 8+ lines without scrolling. Below the list: subtotal,
- * a one-line note that grows as you type, the exact WhatsApp text (open by
- * default on tablet+, collapsed on phones to keep the list tall), then
- * "Order on WhatsApp" / copy / enquire-instead. "Clear" lives in the header.
+ * a one-line note that grows as you type, then "Order on WhatsApp" — which
+ * goes to /checkout/ for the delivery details — and "ask a question instead".
+ * "Clear" lives in the header.
  */
 export function CartDrawer() {
   const { lines, count, subtotal, hasPriceOnRequest, setQty, remove, clear, note, setNote, drawerOpen, closeDrawer } = useCart();
-  const [copied, setCopied] = useState(false);
-  // Preview starts open where there is room for it; phones get it collapsed.
-  const [previewOpen, setPreviewOpen] = useState(false);
-  useEffect(() => setPreviewOpen(window.matchMedia("(min-width: 640px)").matches), []);
-
   // The note textarea grows with its text (1–4 lines) — also on open, for a saved note.
   const noteRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
@@ -43,19 +37,6 @@ export function CartDrawer() {
       document.removeEventListener("keydown", onKey);
     };
   }, [drawerOpen, closeDrawer]);
-
-  const message = cartMessage(lines, note);
-  const waHref = whatsAppCartHref(lines, note);
-
-  async function copyMessage() {
-    try {
-      await navigator.clipboard.writeText(message);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1800);
-    } catch {
-      /* clipboard blocked — the preview text is selectable anyway */
-    }
-  }
 
   return (
     <div
@@ -212,48 +193,18 @@ export function CartDrawer() {
                 className="w-full resize-none rounded-lg border border-forest/15 bg-white px-3 py-2 text-sm text-forest placeholder:text-forest/40 focus:border-moss focus:outline-none"
               />
 
-              <details
-                open={previewOpen}
-                onToggle={(e) => setPreviewOpen(e.currentTarget.open)}
-                className="group rounded-lg border border-forest/10 bg-parchment/60"
-              >
-                <summary className="flex cursor-pointer list-none items-center justify-between px-3 py-1.5 text-xs font-medium text-forest">
-                  {previewOpen ? "Your WhatsApp message" : "Preview your WhatsApp message"}
-                  <ChevronDown width={14} className="text-moss transition-transform group-open:rotate-180" />
-                </summary>
-                <pre className="max-h-28 overflow-y-auto whitespace-pre-wrap border-t border-forest/8 px-3 py-2 font-sans text-xs leading-relaxed text-forest/75">
-                  {message}
-                </pre>
-              </details>
 
-              <a
-                href={waHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() =>
-                  trackWhatsAppClick({
-                    cta: "cart",
-                    product: lines.map((l) => `${l.product.name} ${l.size.label} ×${l.qty}`).join("; "),
-                  })
-                }
+              <Link
+                href="/checkout/"
+                onClick={closeDrawer}
                 className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] text-sm font-semibold text-white shadow-soft transition-transform duration-200 hover:scale-[1.02]"
               >
                 <WhatsAppIcon width={20} height={20} /> Order on WhatsApp
-              </a>
+              </Link>
               <p className="text-center text-[0.7rem] leading-snug text-forest/55">
-                Pay on WhatsApp and send us the payment screenshot — we pack and deliver.
+                Next: your delivery details. Pay on WhatsApp and send us the payment screenshot — we pack and deliver.
               </p>
-              <div className="flex items-center justify-center gap-4 text-xs font-medium text-forest/70">
-                <button type="button" onClick={copyMessage} className="inline-flex items-center gap-1 hover:text-forest">
-                  {copied ? (
-                    <>
-                      <CheckIcon width={14} className="text-moss" /> Copied
-                    </>
-                  ) : (
-                    "Copy message"
-                  )}
-                </button>
-                <span aria-hidden="true" className="text-forest/25">·</span>
+              <div className="flex items-center justify-center text-xs font-medium text-forest/70">
                 <Link
                   href="/contact/?type=product"
                   onClick={closeDrawer}

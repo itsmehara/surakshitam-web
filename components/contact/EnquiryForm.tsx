@@ -16,6 +16,7 @@ import { useCart } from "@/lib/cart/CartContext";
 import { SlotPicker, formatSlot } from "./SlotPicker";
 import { CheckIcon, WhatsAppIcon } from "@/components/icons";
 import { cn } from "@/lib/cn";
+import { Field, inputClass } from "@/components/ui/FormField";
 
 type Status =
   | { kind: "idle" }
@@ -186,10 +187,11 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
       </fieldset>
 
       <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
-        <Field label="Name" name="name" required autoComplete="name" />
-        <Field label="Phone / WhatsApp" name="phone" type="tel" required autoComplete="tel" inputMode="tel" />
+        <Field idPrefix="enq" label="Name" name="name" required autoComplete="name" />
+        <Field idPrefix="enq" label="Phone / WhatsApp" name="phone" type="tel" required autoComplete="tel" inputMode="tel" />
         {/* Partner: email and brand share the second row; other types get a full-width email */}
         <Field
+          idPrefix="enq"
           label="Email (optional)"
           name="email"
           type="email"
@@ -197,7 +199,7 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
           className={type === "partner" ? undefined : "sm:col-span-2"}
         />
         {type === "partner" && (
-          <Field label="Brand / business name" name="business" required autoComplete="organization" />
+          <Field idPrefix="enq" label="Brand / business name" name="business" required autoComplete="organization" />
         )}
       </div>
 
@@ -277,23 +279,3 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
 }
 
 /** 40px boxes, 4px label gap — one rhythm for every input, select and textarea in the form. */
-const inputClass =
-  "w-full rounded-lg border border-forest/15 bg-white px-3 py-2 text-sm leading-6 text-forest placeholder:text-forest/35 focus:border-moss focus:outline-none";
-
-function Field({
-  label,
-  name,
-  required,
-  className,
-  ...rest
-}: { label: string; name: string; required?: boolean; className?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
-  const id = `enq-${name}`;
-  return (
-    <div className={className}>
-      <label htmlFor={id} className="mb-1 block text-sm font-medium text-forest">
-        {label} {required && <span className="text-clay">*</span>}
-      </label>
-      <input id={id} name={name} required={required} className={cn(inputClass, "h-10")} {...rest} />
-    </div>
-  );
-}
