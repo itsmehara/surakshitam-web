@@ -5,8 +5,10 @@ import { useEffect, useState } from "react";
 import { CloseIcon } from "@/components/icons";
 
 /**
- * Billboard splash: the campaign artwork rises over the page for ten seconds,
- * then slowly dissolves. Shown at most once every 15 minutes per browser — the last
+ * Billboard splash: one of the campaign artworks rises over the page for ten
+ * seconds, then slowly dissolves. Which one is picked at random on each showing
+ * (never the same as the previous showing, so a repeat visitor sees the set
+ * rotate). Shown at most once every 15 minutes per browser — the last
  * showing is stamped in localStorage, so a visitor bouncing between pages
  * doesn't get it on every load.
  *
@@ -20,12 +22,56 @@ import { CloseIcon } from "@/components/icons";
  * get the same timing without the scale/blur, just a plain fade.
  */
 
-const SPLASH = {
-  src: "/splash/rose-face-wash-billboard.webp",
-  width: 1400,
-  height: 934,
-  alt: "Surakshitam Naturals — Rose Face Wash billboard",
-};
+type Splash = { src: string; width: number; height: number; alt: string };
+
+/**
+ * The set. Masters + hand-off notes live in
+ * surakshitam-docs/source-assets/splash-masters/. Portrait artworks (the two
+ * hair-oil "museum" pieces, 19 Sep) are sized by height so the whole bottle
+ * and pedestal stay in view; the landscape one is sized by width as before.
+ */
+const SPLASHES: Splash[] = [
+  {
+    src: "/splash/rose-face-wash-billboard.webp",
+    width: 1400,
+    height: 934,
+    alt: "Surakshitam Naturals — Rose Face Wash billboard",
+  },
+  {
+    src: "/splash/herbal-hair-oil-museum-gold-splash.webp",
+    width: 1122,
+    height: 1402,
+    alt: "Surakshitam Naturals Herbal Hair Oil with a gold cap on a botanical museum pedestal",
+  },
+  {
+    src: "/splash/herbal-hair-oil-museum-marble-splash.webp",
+    width: 1122,
+    height: 1402,
+    alt: "Surakshitam Naturals Herbal Hair Oil as a marble botanical museum sculpture",
+  },
+];
+
+const LAST_INDEX_KEY = "sn-splash-last-index";
+
+/** Random pick that avoids the previous showing's artwork. `?splash=N` forces index N (preview). */
+function pickSplash(): Splash {
+  const forced = Number(new URLSearchParams(window.location.search).get("splash"));
+  if (forced >= 1 && forced <= SPLASHES.length) return SPLASHES[forced - 1];
+  let last = -1;
+  try {
+    last = Number(localStorage.getItem(LAST_INDEX_KEY) ?? -1);
+  } catch {
+    /* ignore */
+  }
+  const candidates = SPLASHES.map((_, i) => i).filter((i) => i !== last);
+  const idx = candidates[Math.floor(Math.random() * candidates.length)];
+  try {
+    localStorage.setItem(LAST_INDEX_KEY, String(idx));
+  } catch {
+    /* ignore */
+  }
+  return SPLASHES[idx];
+}
 
 const STORAGE_KEY = "sn-splash-last-shown";
 const EVERY_MS = 15 * 60 * 1000; // once every 15 minutes
@@ -35,9 +81,9 @@ const DISSOLVE_MS = 2_500;
 const HOLD_MS = TOTAL_MS - DISSOLVE_MS;
 
 function dueNow(): boolean {
-  // `?splash=1` forces it regardless of the 15-minute stamp — for previewing the
-  // artwork or showing a client without clearing site data first.
-  if (new URLSearchParams(window.location.search).get("splash") === "1") return true;
+  // `?splash=1` (or 2, 3 …) forces it regardless of the 15-minute stamp — for
+  // previewing an artwork or showing a client without clearing site data first.
+  if (new URLSearchParams(window.location.search).get("splash")) return true;
   try {
     const last = Number(localStorage.getItem(STORAGE_KEY) ?? 0);
     return !last || Date.now() - last > EVERY_MS;
@@ -54,13 +100,18 @@ function stamp() {
   }
 }
 
-// Decided once per page load. React StrictMode runs effects twice in dev, and
-// the second run must not see its own stamp from the first and bail out.
+// Decided (and picked) once per page load. React StrictMode runs effects twice
+// in dev: the second run must not see its own stamp from the first and bail
+// out, nor re-roll the artwork and land back on the previous showing's.
 let decided: boolean | null = null;
+let picked: Splash | null = null;
 function shouldShow(): boolean {
   if (decided === null) {
     decided = dueNow();
-    if (decided) stamp();
+    if (decided) {
+      stamp();
+      picked = pickSplash();
+    }
   }
   return decided;
 }
@@ -70,9 +121,11 @@ type Phase = "hidden" | "pre" | "in" | "out";
 
 export function SplashBillboard() {
   const [phase, setPhase] = useState<Phase>("hidden");
+  const [splash, setSplash] = useState<Splash | null>(null);
 
   useEffect(() => {
     if (!shouldShow()) return;
+    setSplash(picked);
     // mount in the pre-enter state, then flip to "in" a beat later so the transition plays.
     // Timeouts rather than requestAnimationFrame: rAF never fires in a background tab,
     // which would leave the billboard mounted but invisible until the visitor tabs back.
@@ -97,8 +150,9 @@ export function SplashBillboard() {
     return () => clearTimeout(t);
   }, [phase]);
 
-  if (phase === "hidden") return null;
+  if (phase === "hidden" || !splash) return null;
   const visible = phase === "in";
+  const portrait = splash.height > splash.width;
 
   return (
     <div
@@ -111,11 +165,17 @@ export function SplashBillboard() {
         transition: `opacity ${visible ? 600 : DISSOLVE_MS}ms ease`,
       }}
     >
-      {/* ~58% of the viewport on desktop; phones get most of the width or the artwork is unreadable */}
+      {/* Landscape: ~58% of the viewport on desktop, most of the width on phones.
+          Portrait: capped by height (84svh) so bottle + pedestal are never cropped. */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-[94vw] max-w-[1200px] sm:w-[78vw] lg:w-[58vw] motion-reduce:!transform-none motion-reduce:!filter-none"
+        className={
+          portrait
+            ? "relative motion-reduce:!transform-none motion-reduce:!filter-none"
+            : "relative w-[94vw] max-w-[1200px] sm:w-[78vw] lg:w-[58vw] motion-reduce:!transform-none motion-reduce:!filter-none"
+        }
         style={{
+          width: portrait ? `min(90vw, calc(84svh * ${splash.width} / ${splash.height}), 680px)` : undefined,
           transform: visible ? "scale(1) translateY(0)" : "scale(0.96) translateY(10px)",
           filter: visible ? "blur(0)" : "blur(6px)",
           transition: `transform ${visible ? 600 : DISSOLVE_MS}ms cubic-bezier(0.22,1,0.36,1), filter ${visible ? 600 : DISSOLVE_MS}ms ease`,
@@ -130,12 +190,12 @@ export function SplashBillboard() {
           <CloseIcon width={18} />
         </button>
         <Image
-          src={SPLASH.src}
-          alt={SPLASH.alt}
-          width={SPLASH.width}
-          height={SPLASH.height}
+          src={splash.src}
+          alt={splash.alt}
+          width={splash.width}
+          height={splash.height}
           priority
-          sizes="(max-width: 640px) 94vw, (max-width: 1024px) 78vw, 58vw"
+          sizes={portrait ? "(max-width: 640px) 90vw, 680px" : "(max-width: 640px) 94vw, (max-width: 1024px) 78vw, 58vw"}
           className="h-auto w-full rounded-2xl shadow-[0_24px_60px_rgba(20,30,15,0.45)] ring-1 ring-white/20"
         />
       </div>
