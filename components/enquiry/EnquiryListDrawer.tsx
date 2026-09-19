@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useEnquiryList, MAX_NOTE } from "@/lib/enquiry-list/EnquiryListContext";
-import { productImage } from "@/lib/catalog";
+import { productImage, defaultSize } from "@/lib/catalog";
 import { enquiryListMessage, whatsAppListHref, trackWhatsAppClick } from "@/lib/enquiry";
 import { ClipboardIcon, CloseIcon, WhatsAppIcon, ArrowRight, CheckIcon, ChevronDown } from "@/components/icons";
 import { cn } from "@/lib/cn";
@@ -43,7 +43,7 @@ export function EnquiryListDrawer() {
     };
   }, [drawerOpen, closeDrawer]);
 
-  const plain = lines.map((l) => ({ name: l.product.name, size: l.product.size, qty: l.qty }));
+  const plain = lines.map((l) => ({ name: l.product.name, size: defaultSize(l.product).label, qty: l.qty }));
   const message = enquiryListMessage(plain, note);
   const waHref = whatsAppListHref(plain, note);
 
@@ -151,7 +151,7 @@ export function EnquiryListDrawer() {
                     >
                       {product.name}
                     </Link>
-                    <p className="text-[0.7rem] text-forest/50">{product.size}</p>
+                    <p className="text-[0.7rem] text-forest/50">{defaultSize(product).label}</p>
                   </div>
                   <div className="flex shrink-0 items-center rounded-full border border-forest/15 text-forest">
                     <button

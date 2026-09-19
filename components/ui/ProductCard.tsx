@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/lib/types";
-import { productImage } from "@/lib/catalog";
+import { productImage, defaultSize, formatMrp } from "@/lib/catalog";
 import { AddToEnquiryButton } from "./AddToEnquiryButton";
+import { cn } from "@/lib/cn";
 
 const categoryLabel: Record<Product["category"], string> = {
   "home-care": "Home Care",
@@ -12,11 +13,11 @@ const categoryLabel: Record<Product["category"], string> = {
 };
 
 /**
- * Listing card. v3-static shows no price, stock or rating — the card leads to
- * the product page and adds the product to the enquiry list.
+ * Listing card. Shows the default pack (the bigger one) and its MRP; the card
+ * leads to the product page and adds the product to the enquiry list.
  */
 export function ProductCard({ product, priority }: { product: Product; priority?: boolean }) {
-  const isBioEnzyme = product.homeCareType === "bio-enzyme";
+  const pack = defaultSize(product);
   // Other companies' stock is never shown in our own house styling: the brand
   // replaces the category eyebrow, and the pack sits on a plain, uncropped tile.
   const partnerBrand = product.thirdParty ? product.brand : undefined;
@@ -32,11 +33,6 @@ export function ProductCard({ product, priority }: { product: Product; priority?
           {product.isNew && (
             <span className="rounded-full bg-moss px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-cream">
               New
-            </span>
-          )}
-          {isBioEnzyme && (
-            <span className="rounded-full bg-moss/90 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-cream">
-              Bio-Enzyme
             </span>
           )}
         </div>
@@ -72,7 +68,15 @@ export function ProductCard({ product, priority }: { product: Product; priority?
           <p className="mt-0.5 text-[0.65rem] text-forest/40">Brand partner · sold by us</p>
         )}
 
-        <p className="mt-1 text-[0.7rem] text-forest/50">{product.size}</p>
+        <p className="mt-1.5 flex items-baseline justify-between gap-2">
+          <span className="text-[0.7rem] text-forest/50">
+            {pack.label}
+            {product.sizes.length > 1 && <span className="text-forest/35"> · {product.sizes.length} sizes</span>}
+          </span>
+          <span className={cn("text-xs font-semibold tabular-nums", pack.mrp == null ? "text-forest/50" : "text-forest")}>
+            {formatMrp(pack)}
+          </span>
+        </p>
         {/* z-10 keeps the tap on the button, above the card-wide overlay link. */}
         <div className="mt-auto pt-3">
           <AddToEnquiryButton productId={product.id} name={product.name} />

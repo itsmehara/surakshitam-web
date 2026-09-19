@@ -3,17 +3,28 @@
  * Designed to map cleanly onto a future database / CMS schema
  * (see docs/DATA_MODEL.md).
  *
- * v3-static: no price, MRP, stock or ratings — the site is a listing and every
- * order goes through WhatsApp. Those fields come back with the backend (v4).
+ * v4-whatsapp-orders: every product carries its pack sizes with an MRP each
+ * (PRODUCT-CATALOG-NOTES-2026-09-19 §7.1). Still no stock or ratings — the
+ * order itself goes through WhatsApp; a real backend is v5.
  */
 
 export type CategorySlug = "home-care" | "skin-care" | "hair-care" | "partner-brands";
 
 /**
- * Home care splits into two shelves: bio-enzyme formulations (fermented plant
- * waste — biodegradable, safe for drains and soil) and the general range.
+ * One pack size of a product. Price lives here, never on the product, so a
+ * card always shows the price of a specific pack. Exactly one size per product
+ * is `default` — the bigger pack, per Supriya (19 Sep) — and a product with a
+ * single size is still an array of one. `mrp` missing = "price on request".
  */
-export type HomeCareType = "bio-enzyme" | "general";
+export interface ProductSize {
+  /** Stable key used in cart lines and URLs — "500ml", "1l", "100g", "box". */
+  id: string;
+  /** What the customer sees — "500 ml", "1 L", "100 g". */
+  label: string;
+  /** Maximum retail price in whole rupees, inclusive of taxes. */
+  mrp?: number;
+  default?: boolean;
+}
 
 export interface Category {
   id: string;
@@ -39,11 +50,15 @@ export interface Product {
   description: string;
   /** Key benefits — supportable, non-medical claims only. */
   benefits: string[];
-  /** Human-readable hero ingredients (demo content). */
+  /**
+   * Ingredient list as printed on the pack. Home Care and the hair oil are
+   * Supriya's lists (19 Sep 2026); the rest still await hers.
+   */
   keyIngredients: string[];
   /** How to use — demo content, founder verification recommended. */
   usage: string;
-  size: string;
+  /** Pack sizes with MRP; see ProductSize. */
+  sizes: ProductSize[];
   sku: string;
   image: string;
   /** Optional gallery of additional images (Amazon-style). Falls back to [image]. */
@@ -55,8 +70,6 @@ export interface Product {
   isNew?: boolean;
   /** Customer-concern tags (see lib/site.ts `concerns`) for "shop by concern" browsing. */
   concerns?: string[];
-  /** Home-care only: which shelf this belongs to. Defaults to "general". */
-  homeCareType?: HomeCareType;
   /**
    * Set for stock we resell rather than make — other companies' foods, pantry
    * staples and everyday goods. The brand is shown instead of our own so nothing

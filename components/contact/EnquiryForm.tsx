@@ -13,6 +13,7 @@ import {
   type EnquiryType,
 } from "@/lib/enquiry";
 import { useEnquiryList } from "@/lib/enquiry-list/EnquiryListContext";
+import { defaultSize } from "@/lib/catalog";
 import { SlotPicker, formatSlot } from "./SlotPicker";
 import { CheckIcon, WhatsAppIcon } from "@/components/icons";
 import { cn } from "@/lib/cn";
@@ -77,7 +78,7 @@ export function EnquiryForm({ product = "" }: { product?: string }) {
   const listedProducts = useMemo(
     () =>
       lines.length
-        ? formatEnquiryLines(lines.map((l) => ({ name: l.product.name, size: l.product.size, qty: l.qty })))
+        ? formatEnquiryLines(lines.map((l) => ({ name: l.product.name, size: defaultSize(l.product).label, qty: l.qty })))
         : product,
     [lines, product],
   );

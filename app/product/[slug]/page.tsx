@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { products, getProductBySlug, getProductsByCategory, productImage } from "@/lib/catalog";
+import { products, getProductBySlug, getProductsByCategory, productImage, defaultSize, formatMrp } from "@/lib/catalog";
 import { ProductGallery } from "@/components/ui/ProductGallery";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { AddToEnquiryButton } from "@/components/ui/AddToEnquiryButton";
@@ -38,7 +38,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
   const product = getProductBySlug(params.slug);
   if (!product) notFound();
 
-  const isBioEnzyme = product.homeCareType === "bio-enzyme";
+  const pack = defaultSize(product);
   // Resold stock is attributed to its own maker, never to us.
   const partnerBrand = product.thirdParty ? product.brand : undefined;
   const cover = productImage(product);
@@ -80,7 +80,10 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
     sku: product.sku,
     image: cover,
     brand: { "@type": "Brand", name: partnerBrand ?? site.name },
-    // No `offers` block: v3 lists no prices, orders go through WhatsApp.
+    // MRP of the default pack. Orders still go through WhatsApp, so no URL/availability.
+    ...(pack.mrp != null && {
+      offers: { "@type": "Offer", price: pack.mrp, priceCurrency: "INR", itemCondition: "https://schema.org/NewCondition" },
+    }),
   };
 
   return (
@@ -126,13 +129,25 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                 delivered by {site.name}. This is a brand-partner product, not one of ours.
               </p>
             )}
-            {isBioEnzyme && (
-              <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-moss/12 px-3 py-1 text-xs font-medium text-moss">
-                <LeafIcon width={14} /> Bio-enzyme formulation — breaks down after use
+            {/* Pack sizes with MRP — the bigger pack is the default (Supriya, 19 Sep) */}
+            <div className="mt-5">
+              <p className="font-serif text-2xl font-semibold text-forest">
+                {formatMrp(pack)}
+                <span className="ml-2 text-sm font-normal text-forest/55">· {pack.label}</span>
               </p>
-            )}
-
-            <p className="mt-5 text-sm text-forest/55">Pack size · {product.size}</p>
+              {product.sizes.length > 1 && (
+                <ul className="mt-2 flex flex-wrap gap-2 text-xs text-forest/70">
+                  {product.sizes.map((s) => (
+                    <li key={s.id} className="rounded-full border border-forest/15 px-3 py-1">
+                      {s.label} · {formatMrp(s).replace("MRP ", "")}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {pack.mrp != null && (
+                <p className="mt-1.5 text-xs text-forest/50">MRP inclusive of all taxes. Delivery charges, if any, confirmed on WhatsApp.</p>
+              )}
+            </div>
 
             {/* Actions — v3: collect products in the enquiry list, send one message */}
             <div className="mt-6 sm:max-w-sm">

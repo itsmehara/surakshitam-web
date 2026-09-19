@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { products, categories } from "@/lib/catalog";
+import { products, categories, sizeLabels, defaultSize } from "@/lib/catalog";
 import { concernsForCategory } from "@/lib/site";
 import type { Product } from "@/lib/types";
 import { ProductCard } from "@/components/ui/ProductCard";
@@ -10,18 +10,26 @@ import { BotanicalBackdrop } from "@/components/ui/BotanicalBackdrop";
 import { OrderingNote } from "@/components/ui/OrderingNote";
 import { cn } from "@/lib/cn";
 
-/** v3: no price sorts (there are no prices) and no "best selling" (no orders). */
+/** Price sorts use the default pack's MRP; "price on request" packs sort last. No "best selling" (no order data). */
 const sortOptions = [
   { value: "featured", label: "Featured" },
   { value: "newest", label: "Newest" },
+  { value: "price-asc", label: "Price: low to high" },
+  { value: "price-desc", label: "Price: high to low" },
   { value: "a-z", label: "A–Z" },
 ];
+
+const mrpOf = (p: Product) => defaultSize(p).mrp ?? Number.POSITIVE_INFINITY;
 
 function sortProducts(list: Product[], sort?: string): Product[] {
   const copy = [...list];
   switch (sort) {
     case "newest":
       return copy.sort((a, b) => Number(!!b.isNew) - Number(!!a.isNew));
+    case "price-asc":
+      return copy.sort((a, b) => mrpOf(a) - mrpOf(b));
+    case "price-desc":
+      return copy.sort((a, b) => (mrpOf(b) === Infinity ? -1 : mrpOf(a) === Infinity ? 1 : mrpOf(b) - mrpOf(a)));
     case "a-z":
       return copy.sort((a, b) => a.name.localeCompare(b.name));
     default:
@@ -33,14 +41,9 @@ type SearchParams = {
   category?: string;
   sort?: string;
   concern?: string;
-  shelf?: string;
+  /** A pack-size label ("500 ml", "1 L") — replaces v3's bio-enzyme/general shelf (Supriya, 19 Sep). */
+  size?: string;
 };
-
-/** Home Care's two shelves — see lib/catalog.ts for how products are classified. */
-const homeCareShelves = [
-  { slug: "bio-enzyme", name: "Bio-Enzyme" },
-  { slug: "general", name: "General Home Care" },
-] as const;
 
 /**
  * Slugs that have been renamed. Old links (bookmarks, shared URLs, the odd
@@ -59,14 +62,12 @@ export function ShopView() {
     category: sp.get("category") ?? undefined,
     sort: sp.get("sort") ?? undefined,
     concern: sp.get("concern") ?? undefined,
-    shelf: sp.get("shelf") ?? undefined,
+    size: sp.get("size") ?? undefined,
   };
   const activeCategory = searchParams.category
     ? (CATEGORY_ALIASES[searchParams.category] ?? searchParams.category)
     : undefined;
   const activeSort = searchParams.sort ?? "featured";
-  const activeShelf =
-    activeCategory === "home-care" ? searchParams.shelf : undefined;
 
   // Only offer concerns that belong to the shelf being browsed — Home Care must
   // never show skin/hair filters like "Dry Skin" or "Dandruff".
@@ -80,11 +81,14 @@ export function ShopView() {
   let filtered = activeCategory
     ? products.filter((p) => p.category === activeCategory)
     : products;
-  if (activeShelf) {
-    filtered = filtered.filter(
-      (p) => (p.homeCareType ?? "general") === activeShelf,
-    );
-  }
+  // Size chips are offered only inside a category — across all 50+ products the
+  // list of labels is noise. A multi-size product matches if any pack matches.
+  const availableSizes = activeCategory ? sizeLabels(filtered) : [];
+  const activeSize = availableSizes.includes(searchParams.size ?? "")
+    ? searchParams.size
+    : undefined;
+  if (activeSize)
+    filtered = filtered.filter((p) => p.sizes.some((s) => s.label === activeSize));
   if (activeConcern)
     filtered = filtered.filter((p) => p.concerns?.includes(activeConcern));
   const list = sortProducts(filtered, activeSort);
@@ -103,15 +107,15 @@ export function ShopView() {
       : "concern" in next
         ? next.concern
         : activeConcern;
-    const shelf = categoryChanged
+    const size = categoryChanged
       ? undefined
-      : "shelf" in next
-        ? next.shelf
-        : activeShelf;
+      : "size" in next
+        ? next.size
+        : activeSize;
     if (category) params.set("category", category);
     if (sort && sort !== "featured") params.set("sort", sort);
     if (concern) params.set("concern", concern);
-    if (shelf) params.set("shelf", shelf);
+    if (size) params.set("size", size);
     const qs = params.toString();
     return qs ? `/shop?${qs}` : "/shop";
   }
@@ -197,34 +201,21 @@ export function ShopView() {
         </div>
       </div>
 
-      {/* Home Care shelves — bio-enzyme vs the general range */}
-      {activeCategory === "home-care" && (
+      {/* Pack size — chips derived from the products on this shelf */}
+      {availableSizes.length > 1 && (
         <div className="border-b border-forest/8 bg-cream">
           <div
-            className="container flex flex-wrap items-center gap-2 py-2.5"
+            className="container sn-scroll-x flex items-center gap-2 py-2.5"
             role="group"
-            aria-label="Home care type"
+            aria-label="Filter by pack size"
           >
-            <span className="hidden shrink-0 text-xs text-forest/50 sm:inline">
-              Type
-            </span>
-            <Link
-              href={href({ shelf: "" })}
-              className={cn(
-                "whitespace-nowrap rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                !activeShelf
-                  ? "border-forest bg-forest text-cream"
-                  : "border-forest/12 text-forest/60 hover:border-forest/30",
-              )}
-            >
-              All home care
-            </Link>
-            {homeCareShelves.map((shelf) => {
-              const active = activeShelf === shelf.slug;
+            <span className="shrink-0 text-xs text-forest/50">Size</span>
+            {availableSizes.map((label) => {
+              const active = activeSize === label;
               return (
                 <Link
-                  key={shelf.slug}
-                  href={href({ shelf: active ? "" : shelf.slug })}
+                  key={label}
+                  href={href({ size: active ? "" : label })}
                   className={cn(
                     "whitespace-nowrap rounded-full border px-3 py-1 text-xs font-medium transition-colors",
                     active
@@ -232,15 +223,10 @@ export function ShopView() {
                       : "border-forest/12 text-forest/60 hover:border-forest/30",
                   )}
                 >
-                  {shelf.name}
+                  {label}
                 </Link>
               );
             })}
-            <p className="hidden basis-full text-xs leading-relaxed text-forest/55 sm:block sm:basis-auto sm:border-l sm:border-forest/10 sm:pl-3">
-              Bio-enzyme cleaners are built on fermented plant peels — they
-              break down after use, so what goes down the drain feeds the soil
-              instead of harming it.
-            </p>
           </div>
         </div>
       )}
