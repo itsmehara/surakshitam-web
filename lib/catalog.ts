@@ -206,7 +206,8 @@ export const products: Product[] = [
       { id: "140g", label: "140 g", mrp: 140, default: true },
     ],
     sku: "SN-HC-TBP-140",
-    image: "/products/placeholder.webp",
+    image: "/surakshitam-product-images/toilet-bathroom-cleaning-powder/toilet-bathroom-cleaning-powder-01-listing-front-clean.webp",
+    images: ["/surakshitam-product-images/toilet-bathroom-cleaning-powder/toilet-bathroom-cleaning-powder-01-listing-front-clean.webp"],
     isNew: true,
   },
   {
