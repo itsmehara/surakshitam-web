@@ -1010,7 +1010,11 @@ export const products: Product[] = [
       { id: "100g", label: "100 g", mrp: 175, default: true },
     ],
     sku: "SN-HR-ADP-100",
-    image: "/products/placeholder.webp",
+    image: "/surakshitam-product-images/anti-dandruff-pack/anti-dandruff-pack-01-listing-front-clean.webp",
+    images: [
+      "/surakshitam-product-images/anti-dandruff-pack/anti-dandruff-pack-01-listing-front-clean.webp",
+      "/surakshitam-product-images/anti-dandruff-pack/anti-dandruff-pack-02-ingredients-lifestyle.webp",
+    ],
     isNew: true,
   },
   {
@@ -1025,10 +1029,15 @@ export const products: Product[] = [
     keyIngredients: ["Indigo (Indigofera tinctoria)"],
     usage: "Mix with warm water into a paste and apply over henna-treated hair; leave as preferred, then rinse thoroughly.",
     sizes: [
+      { id: "100g", label: "100 g", mrp: 125 },
       { id: "200g", label: "200 g", mrp: 225, default: true },
     ],
     sku: "SN-HR-IND-200",
-    image: "/products/placeholder.webp",
+    image: "/surakshitam-product-images/indigo-powder/indigo-powder-01-listing-front-clean.webp",
+    images: [
+      "/surakshitam-product-images/indigo-powder/indigo-powder-01-listing-front-clean.webp",
+      "/surakshitam-product-images/indigo-powder/indigo-powder-02-ingredients-lifestyle.webp",
+    ],
     isNew: true,
   },
   {
@@ -1061,10 +1070,17 @@ export const products: Product[] = [
     keyIngredients: ["Soapnut (Sapindus)"],
     usage: "Mix with water, curd or your hair oil into a paste, apply to the scalp and hair, leave for 20–30 minutes, then rinse.",
     sizes: [
+      // 100 g is out of stock (founders, 2 Oct) and has never had a price of its
+      // own — shown so people know the size exists, but not purchasable.
+      { id: "100g", label: "100 g", soldOut: true },
       { id: "250g", label: "250 g", mrp: 100, default: true },
     ],
     sku: "SN-HR-SNP-250",
-    image: "/products/placeholder.webp",
+    image: "/surakshitam-product-images/soap-nut-powder/soap-nut-powder-01-listing-front-clean.webp",
+    images: [
+      "/surakshitam-product-images/soap-nut-powder/soap-nut-powder-01-listing-front-clean.webp",
+      "/surakshitam-product-images/soap-nut-powder/soap-nut-powder-02-ingredients-lifestyle.webp",
+    ],
     isNew: true,
   },
   {
@@ -1118,7 +1134,11 @@ export const products: Product[] = [
       { id: "100g", label: "100 g", mrp: 80, default: true },
     ],
     sku: "SN-HR-HLP-100",
-    image: "/products/placeholder.webp",
+    image: "/surakshitam-product-images/hibiscus-leaf-powder/hibiscus-leaf-powder-01-listing-front-clean.webp",
+    images: [
+      "/surakshitam-product-images/hibiscus-leaf-powder/hibiscus-leaf-powder-01-listing-front-clean.webp",
+      "/surakshitam-product-images/hibiscus-leaf-powder/hibiscus-leaf-powder-02-ingredients-lifestyle.webp",
+    ],
     isNew: true,
   },
   {
@@ -1136,7 +1156,11 @@ export const products: Product[] = [
       { id: "100g", label: "100 g", mrp: 110, default: true },
     ],
     sku: "SN-HR-HFP-100",
-    image: "/products/placeholder.webp",
+    image: "/surakshitam-product-images/hibiscus-flower-powder/hibiscus-flower-powder-01-listing-front-clean.webp",
+    images: [
+      "/surakshitam-product-images/hibiscus-flower-powder/hibiscus-flower-powder-01-listing-front-clean.webp",
+      "/surakshitam-product-images/hibiscus-flower-powder/hibiscus-flower-powder-02-ingredients-lifestyle.webp",
+    ],
     isNew: true,
   },
 
@@ -1234,17 +1258,23 @@ for (const p of products) {
 
 /* ------------------------------- helpers ------------------------------- */
 
-/** The pack pre-selected on a card — the one marked `default`, else the first. */
+/**
+ * The pack pre-selected on a card — the one marked `default`, else the first.
+ * A sold-out pack is never pre-selected: the customer would land on a dead
+ * "Sold out" button with no hint that another size is available.
+ */
 export function defaultSize(product: Pick<Product, "sizes">): ProductSize {
-  return product.sizes.find((s) => s.default) ?? product.sizes[0];
+  const marked = product.sizes.find((s) => s.default && !s.soldOut);
+  return marked ?? product.sizes.find((s) => !s.soldOut) ?? product.sizes.find((s) => s.default) ?? product.sizes[0];
 }
 
 export function getSize(product: Pick<Product, "sizes">, sizeId: string): ProductSize | undefined {
   return product.sizes.find((s) => s.id === sizeId);
 }
 
-/** "MRP ₹499", or "Price on request" when a pack has no MRP yet. */
-export function formatMrp(size: Pick<ProductSize, "mrp">): string {
+/** "MRP ₹499", "Sold out" for an unavailable pack, or "Price on request" when there is no MRP yet. */
+export function formatMrp(size: Pick<ProductSize, "mrp" | "soldOut">): string {
+  if (size.soldOut) return "Sold out";
   return size.mrp == null ? "Price on request" : `MRP ₹${size.mrp.toLocaleString("en-IN")}`;
 }
 

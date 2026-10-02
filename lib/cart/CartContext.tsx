@@ -76,10 +76,12 @@ function load(): CartItem[] {
         (i): i is CartItem =>
           !!i && typeof i.id === "string" && typeof i.sizeId === "string" && typeof i.qty === "number",
       )
-      // Drop anything that no longer exists in the catalogue — product or pack.
+      // Drop anything that no longer exists in the catalogue — product or pack —
+      // and anything that has since gone out of stock, so a stale cart can't check out.
       .filter((i) => {
         const p = getProductById(i.id);
-        return p && getSize(p, i.sizeId);
+        const size = p && getSize(p, i.sizeId);
+        return !!size && !size.soldOut;
       })
       .map((i) => ({ id: i.id, sizeId: i.sizeId, qty: Math.min(MAX_QTY, Math.max(1, Math.round(i.qty))) }));
   } catch {

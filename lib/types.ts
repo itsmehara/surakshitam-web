@@ -24,6 +24,12 @@ export interface ProductSize {
   /** Maximum retail price in whole rupees, inclusive of taxes. */
   mrp?: number;
   default?: boolean;
+  /**
+   * This pack is temporarily unavailable: it still shows on the card and the
+   * product page (so people know the size exists) but cannot be added to the
+   * cart. Set per size — a product is never sold out as a whole.
+   */
+  soldOut?: boolean;
 }
 
 export interface Category {
