@@ -1061,7 +1061,11 @@ export const products: Product[] = [
       { id: "100g", label: "100 g", default: true },
     ],
     sku: "SN-HR-BRJ-100",
-    image: "/products/placeholder.webp",
+    image: "/surakshitam-product-images/bhringraj-powder/bhringraj-powder-01-listing-front-clean.webp",
+    images: [
+      "/surakshitam-product-images/bhringraj-powder/bhringraj-powder-01-listing-front-clean.webp",
+      "/surakshitam-product-images/bhringraj-powder/bhringraj-powder-02-ingredients-lifestyle.webp",
+    ],
     isNew: true,
   },
   {
@@ -1104,7 +1108,11 @@ export const products: Product[] = [
       { id: "250g", label: "250 g", mrp: 100, default: true },
     ],
     sku: "SN-HR-SKP-250",
-    image: "/products/placeholder.webp",
+    image: "/surakshitam-product-images/shikakai-powder/shikakai-powder-01-listing-front-clean.webp",
+    images: [
+      "/surakshitam-product-images/shikakai-powder/shikakai-powder-01-listing-front-clean.webp",
+      "/surakshitam-product-images/shikakai-powder/shikakai-powder-02-ingredients-lifestyle.webp",
+    ],
     isNew: true,
   },
   {
@@ -1122,7 +1130,11 @@ export const products: Product[] = [
       { id: "100g", label: "100 g", mrp: 80, default: true },
     ],
     sku: "SN-HR-AML-100",
-    image: "/products/placeholder.webp",
+    image: "/surakshitam-product-images/amla-powder/amla-powder-01-listing-front-clean.webp",
+    images: [
+      "/surakshitam-product-images/amla-powder/amla-powder-01-listing-front-clean.webp",
+      "/surakshitam-product-images/amla-powder/amla-powder-02-ingredients-lifestyle.webp",
+    ],
     isNew: true,
   },
   {
