@@ -504,27 +504,6 @@ export const products: Product[] = [
     ],
   },
   {
-    id: "p-foot-cream",
-    slug: "foot-cream",
-    name: "Foot Cream",
-    category: "skin-care",
-    shortDescription: "Softening care for tired feet",
-    description:
-      "A softening foot cream that helps care for dry heels and tired feet with a light, refreshing feel.",
-    benefits: ["Softens dry heels", "Refreshing feel", "Everyday care"],
-    keyIngredients: ["Shea butter", "Peppermint oil"],
-    usage: "Massage into clean, dry feet, ideally before bed.",
-    sizes: [
-      { id: "20g", label: "20 g", mrp: 140, default: true },
-    ],
-    sku: "SN-SC-FTC-020",
-    image: "/surakshitam-product-images/foot-cream/foot-cream-01-listing-front-clean.webp",
-    images: [
-      "/surakshitam-product-images/foot-cream/foot-cream-01-listing-front-clean.webp",
-      "/surakshitam-product-images/foot-cream/foot-cream-02-peppermint-care-lifestyle.webp",
-    ],
-  },
-  {
     id: "p-foot-crack-heel-cream",
     slug: "foot-crack-heel-cream",
     name: "Foot Crack Heel Cream",
@@ -542,7 +521,7 @@ export const products: Product[] = [
     usage:
       "Wash and dry your feet. Apply a generous amount to heels and rough areas and massage gently until absorbed. For best results, apply before bedtime.",
     sizes: [
-      { id: "25g", label: "25 g", mrp: 125, default: true },
+      { id: "25g", label: "25 g", mrp: 140, default: true },
     ],
     sku: "SN-SC-FCH-025",
     image: "/products/placeholder.webp",
@@ -1198,7 +1177,6 @@ const CONCERN_TAGS: Record<string, string[]> = {
   "p-lavender-body-wash": ["dry-skin", "daily-freshness"],
   "p-body-lotion": ["dry-skin"],
   "p-herbal-bath-powder": ["sensitive-skin"],
-  "p-foot-cream": ["dry-skin"],
   "p-foot-crack-heel-cream": ["dry-skin"],
   "p-aloe-vera-gel": ["sensitive-skin", "dry-skin"],
   "p-strawberry-lip-balm": ["dry-skin"],
