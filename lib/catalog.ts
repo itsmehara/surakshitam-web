@@ -1022,12 +1022,18 @@ export const products: Product[] = [
     slug: "indigo-powder",
     name: "Natural Hair Dye — Indigo",
     category: "hair-care",
-    shortDescription: "Pure indigo for deeper natural colour",
+    shortDescription: "Pure indigo for a natural black tone",
     description:
-      "Finely sifted indigo leaf powder, used after henna for a deeper, natural colour — mixed fresh at home.",
-    benefits: ["Finely sifted", "Use after henna", "No added colourants"],
-    keyIngredients: ["Indigo (Indigofera tinctoria)"],
-    usage: "Mix with warm water into a paste and apply over henna-treated hair; leave as preferred, then rinse thoroughly.",
+      "Pure indigo leaf powder for a natural black hair tone — used after henna for black, or mixed with henna for brown. For grey coverage and hair conditioning, with no chemicals, no PPD and no artificial colour.",
+    benefits: [
+      "100% pure indigo leaf powder",
+      "For a natural black hair tone",
+      "For grey coverage and hair conditioning",
+      "No chemicals, no PPD, no artificial colour",
+    ],
+    keyIngredients: ["100% pure indigo (Indigofera tinctoria) leaf powder"],
+    usage:
+      "For a natural black shade (two steps): apply henna to the hair first, then wash and dry completely. Take the required indigo powder in a non-metal bowl, add warm water, mix into a smooth paste and apply immediately. Leave for 1–2 hours, then wash with plain water — no shampoo the same day. For a brown shade (single step): mix henna powder and indigo powder together with warm water, apply for 1–2 hours, then wash with plain water. Store in a cool, dry place.",
     sizes: [
       { id: "100g", label: "100 g", mrp: 125 },
       { id: "200g", label: "200 g", mrp: 225, default: true },
