@@ -524,7 +524,11 @@ export const products: Product[] = [
       { id: "25g", label: "25 g", mrp: 140, default: true },
     ],
     sku: "SN-SC-FCH-025",
-    image: "/products/placeholder.webp",
+    image: "/surakshitam-product-images/foot-crack-heel-cream/foot-crack-heel-cream-01-listing-front-clean.webp",
+    images: [
+      "/surakshitam-product-images/foot-crack-heel-cream/foot-crack-heel-cream-01-listing-front-clean.webp",
+      "/surakshitam-product-images/foot-crack-heel-cream/foot-crack-heel-cream-02-ingredients-lifestyle.webp",
+    ],
     isNew: true,
   },
   {
