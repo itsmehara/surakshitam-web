@@ -581,7 +581,7 @@ export const products: Product[] = [
     image: "/surakshitam-product-images/strawberry-lip-balm/strawberry-lip-balm-01-listing-front-clean.webp",
     images: [
       "/surakshitam-product-images/strawberry-lip-balm/strawberry-lip-balm-01-listing-front-clean.webp",
-      "/surakshitam-product-images/strawberry-lip-balm/strawberry-lip-balm-02-strawberry-care-lifestyle.webp",
+      "/surakshitam-product-images/strawberry-lip-balm/strawberry-lip-balm-02-ingredients-lifestyle.webp",
     ],
   },
   {
@@ -599,7 +599,11 @@ export const products: Product[] = [
       { id: "stick", label: "Stick", mrp: 100, default: true },
     ],
     sku: "SN-SC-SLB-STK",
-    image: "/surakshitam-product-images/strawberry-lip-balm/strawberry-lip-balm-01-listing-front-clean.webp",
+    image: "/surakshitam-product-images/strawberry-lip-balm-stick/strawberry-lip-balm-stick-01-listing-front-clean.webp",
+    images: [
+      "/surakshitam-product-images/strawberry-lip-balm-stick/strawberry-lip-balm-stick-01-listing-front-clean.webp",
+      "/surakshitam-product-images/strawberry-lip-balm-stick/strawberry-lip-balm-stick-02-ingredients-lifestyle.webp",
+    ],
     isNew: true,
   },
   {
@@ -617,7 +621,11 @@ export const products: Product[] = [
       { id: "box", label: "Round box", mrp: 125, default: true },
     ],
     sku: "SN-SC-BLB-BOX",
-    image: "/products/placeholder.webp",
+    image: "/surakshitam-product-images/beetroot-lip-balm/beetroot-lip-balm-01-listing-front-clean.webp",
+    images: [
+      "/surakshitam-product-images/beetroot-lip-balm/beetroot-lip-balm-01-listing-front-clean.webp",
+      "/surakshitam-product-images/beetroot-lip-balm/beetroot-lip-balm-02-ingredients-lifestyle.webp",
+    ],
     isNew: true,
   },
   {
@@ -635,7 +643,11 @@ export const products: Product[] = [
       { id: "stick", label: "Stick", mrp: 100, default: true },
     ],
     sku: "SN-SC-BLB-STK",
-    image: "/products/placeholder.webp",
+    image: "/surakshitam-product-images/beetroot-lip-balm-stick/beetroot-lip-balm-stick-01-listing-front-clean.webp",
+    images: [
+      "/surakshitam-product-images/beetroot-lip-balm-stick/beetroot-lip-balm-stick-01-listing-front-clean.webp",
+      "/surakshitam-product-images/beetroot-lip-balm-stick/beetroot-lip-balm-stick-02-ingredients-lifestyle.webp",
+    ],
     isNew: true,
   },
   {
@@ -653,7 +665,11 @@ export const products: Product[] = [
       { id: "box", label: "Round box", mrp: 125, default: true },
     ],
     sku: "SN-SC-VLB-BOX",
-    image: "/products/placeholder.webp",
+    image: "/surakshitam-product-images/vanilla-lip-balm/vanilla-lip-balm-01-listing-front-clean.webp",
+    images: [
+      "/surakshitam-product-images/vanilla-lip-balm/vanilla-lip-balm-01-listing-front-clean.webp",
+      "/surakshitam-product-images/vanilla-lip-balm/vanilla-lip-balm-02-ingredients-lifestyle.webp",
+    ],
     isNew: true,
   },
   {
@@ -671,7 +687,11 @@ export const products: Product[] = [
       { id: "stick", label: "Stick", mrp: 100, default: true },
     ],
     sku: "SN-SC-VLB-STK",
-    image: "/products/placeholder.webp",
+    image: "/surakshitam-product-images/vanilla-lip-balm-stick/vanilla-lip-balm-stick-01-listing-front-clean.webp",
+    images: [
+      "/surakshitam-product-images/vanilla-lip-balm-stick/vanilla-lip-balm-stick-01-listing-front-clean.webp",
+      "/surakshitam-product-images/vanilla-lip-balm-stick/vanilla-lip-balm-stick-02-ingredients-lifestyle.webp",
+    ],
     isNew: true,
   },
   {
