@@ -1,10 +1,10 @@
-# v3-static: build the Next.js static export and publish `out/` to GitHub Pages.
+# v4-whatsapp-orders (live since 2 Oct 2026; v3-static is the rollback): build the Next.js static export and publish `out/` to GitHub Pages.
 # Pages settings → Build and deployment → Source must be "GitHub Actions".
 name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [v3-static]
+    branches: [v4-whatsapp-orders]
   workflow_dispatch:
 
 permissions:
