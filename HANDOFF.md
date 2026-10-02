@@ -8,8 +8,12 @@ need to re-read the whole codebase. Complements `../surakshitam-docs/docs/`
 
 ## 0a. v4-whatsapp-orders — current work (read this first on `v4-whatsapp-orders`)
 
-**Branch:** `v4-whatsapp-orders`, cut 19 Sep 2026 from tag `v3.0-live`. **Built, verified locally, NOT
-deployed** — `pages.yml` still publishes `v3-static`; go-live only when Hara says so.
+**Branch:** `v4-whatsapp-orders`, cut 19 Sep 2026 from tag `v3.0-live`.
+
+### 🟢 LIVE — 2 Oct 2026 (tag `v4.0-live`; deploy run green at `8e43109`)
+`pages.yml` publishes `v4-whatsapp-orders`; the `github-pages` environment allows that branch (added by
+Hara 2 Oct). `Code.gs` re-deployed from Hara's account, same /exec URL. **Rollback:** point
+`pages.yml` back at `v3-static` (also still allowed) and push. Every push to this branch now deploys.
 
 **What v4 adds (still a static export, no backend):** every product carries `sizes[]` with an MRP per
 pack (`lib/types.ts` → `ProductSize`; bigger pack is `default`); the "enquiry list" became a **cart**
