@@ -525,6 +525,30 @@ export const products: Product[] = [
     ],
   },
   {
+    id: "p-foot-crack-heel-cream",
+    slug: "foot-crack-heel-cream",
+    name: "Foot Crack Heel Cream",
+    category: "skin-care",
+    shortDescription: "Rich cream for dry, cracked heels",
+    description:
+      "A rich, moisturising cream for dry, rough heels. Massaged in before bed, it helps soften hardened skin and leaves feet feeling smooth, nourished and comfortable.",
+    benefits: [
+      "Helps soften dry and rough heels",
+      "Moisturises cracked, dry skin",
+      "Helps improve the appearance of rough feet",
+      "Ideal for daily foot care",
+    ],
+    keyIngredients: ["Coconut", "Almond", "Shea butter", "Calendula"],
+    usage:
+      "Wash and dry your feet. Apply a generous amount to heels and rough areas and massage gently until absorbed. For best results, apply before bedtime.",
+    sizes: [
+      { id: "25g", label: "25 g", mrp: 125, default: true },
+    ],
+    sku: "SN-SC-FCH-025",
+    image: "/products/placeholder.webp",
+    isNew: true,
+  },
+  {
     id: "p-aloe-vera-gel",
     slug: "aloe-vera-gel",
     name: "Aloe Vera Gel",
@@ -1175,6 +1199,7 @@ const CONCERN_TAGS: Record<string, string[]> = {
   "p-body-lotion": ["dry-skin"],
   "p-herbal-bath-powder": ["sensitive-skin"],
   "p-foot-cream": ["dry-skin"],
+  "p-foot-crack-heel-cream": ["dry-skin"],
   "p-aloe-vera-gel": ["sensitive-skin", "dry-skin"],
   "p-strawberry-lip-balm": ["dry-skin"],
   "p-herbal-shampoo": ["dandruff", "hair-fall"],
