@@ -65,7 +65,33 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
       ),
     },
     { title: "Ingredients", body: <p>{product.keyIngredients.join(", ")}.</p> },
-    { title: "How to use", body: <p>{product.usage}</p> },
+    {
+      title: "How to use",
+      body: Array.isArray(product.usage) ? (
+        <ol className="list-decimal space-y-1.5 pl-5">
+          {product.usage.map((step) => (
+            <li key={step}>{step}</li>
+          ))}
+        </ol>
+      ) : (
+        <p>{product.usage}</p>
+      ),
+    },
+    ...(product.suitableFor ? [{ title: "Suitable for", body: <p>{product.suitableFor}</p> }] : []),
+    ...(product.precautions?.length
+      ? [
+          {
+            title: "Precautions",
+            body: (
+              <ul className="list-disc space-y-1.5 pl-5">
+                {product.precautions.map((p) => (
+                  <li key={p}>{p}</li>
+                ))}
+              </ul>
+            ),
+          },
+        ]
+      : []),
     {
       title: "Storage & care",
       body: <p>Store in a cool, dry place away from direct sunlight. Keep out of reach of children.</p>,
@@ -122,6 +148,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               {product.name}
             </h1>
             <p className="mt-2 text-base text-forest/70">{product.shortDescription}</p>
+            <p className="mt-3 text-sm leading-relaxed text-forest/75">{product.description}</p>
 
             {partnerBrand && (
               <p className="mt-3 rounded-lg border border-forest/10 bg-white/70 px-3 py-2 text-xs leading-relaxed text-forest/65">

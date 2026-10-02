@@ -61,8 +61,12 @@ export interface Product {
    * Supriya's lists (19 Sep 2026); the rest still await hers.
    */
   keyIngredients: string[];
-  /** How to use — demo content, founder verification recommended. */
-  usage: string;
+  /** How to use — one paragraph, or numbered steps when the founders give them as steps. */
+  usage: string | string[];
+  /** Optional "Suitable for" line, shown as its own section on the product page. */
+  suitableFor?: string;
+  /** Optional precautions, shown as a list on the product page. */
+  precautions?: string[];
   /** Pack sizes with MRP; see ProductSize. */
   sizes: ProductSize[];
   sku: string;
