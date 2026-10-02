@@ -168,17 +168,27 @@ export const products: Product[] = [
     slug: "dishwash-powder",
     name: "Dish Wash Powder",
     category: "home-care",
-    shortDescription: "Scouring powder for everyday utensils",
+    shortDescription: "Herbal scouring powder for everyday utensils",
     description:
-      "A dry dishwashing powder for scrubbing everyday utensils — ash, soapnut and lemon do the work, with no synthetic foam.",
-    benefits: ["Scrubs without synthetic foam", "Low-waste dry format", "Everyday utensils"],
-    keyIngredients: ["Rice husk ash", "Soapnut powder", "Neem", "Lemon powder", "Pulses powder"],
-    usage: "Sprinkle a little onto a damp scrubber, clean the utensil, then rinse.",
+      "A herbal dishwashing powder suitable for regular kitchen cleaning — an alternative to conventional dishwashing powders. Rice husk ash and soapnut do the scrubbing, with lemon and selected herbs to cut through the day's cooking.",
+    benefits: [
+      "Suitable for regular kitchen cleaning",
+      "An alternative to conventional dishwashing powders",
+      "Rice husk ash and soapnut do the work",
+      "Low-waste dry format",
+    ],
+    keyIngredients: ["Rice husk ash", "Soapnut powder", "Lemon powder", "Pulses", "Selected herbs"],
+    usage:
+      "Wet the sponge or scrubber, take a small quantity of the powder and apply it to the wet scrubber. Gently scrub plates, vessels and kitchen utensils, rinse thoroughly with clean water and let them dry. For heavily greasy vessels, use a little extra powder and scrub gently.",
     sizes: [
       { id: "200g", label: "200 g", mrp: 114, default: true },
     ],
     sku: "SN-HC-DWP-200",
-    image: "/products/placeholder.webp",
+    image: "/surakshitam-product-images/dish-wash-powder/dish-wash-powder-01-listing-front-clean.webp",
+    images: [
+      "/surakshitam-product-images/dish-wash-powder/dish-wash-powder-01-listing-front-clean.webp",
+      "/surakshitam-product-images/dish-wash-powder/dish-wash-powder-02-ingredients-lifestyle.webp",
+    ],
     isNew: true,
   },
   {
