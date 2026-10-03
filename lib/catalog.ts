@@ -214,10 +214,10 @@ export const products: Product[] = [
       { id: "140g", label: "140 g", mrp: 140, default: true },
     ],
     sku: "SN-HC-TBP-140",
-    image: "/surakshitam-product-images/toilet-bathroom-cleaning-powder/toilet-bathroom-cleaning-powder-01-listing-front-clean.webp",
+    image: "/surakshitam-product-images/toilet-bathroom-cleaning-powder/toilet-bathroom-cleaning-powder-01-listing-front-140g.webp",
     images: [
-      "/surakshitam-product-images/toilet-bathroom-cleaning-powder/toilet-bathroom-cleaning-powder-01-listing-front-clean.webp",
-      "/surakshitam-product-images/toilet-bathroom-cleaning-powder/toilet-bathroom-cleaning-powder-02-minimal-lemon-lifestyle.webp",
+      "/surakshitam-product-images/toilet-bathroom-cleaning-powder/toilet-bathroom-cleaning-powder-01-listing-front-140g.webp",
+      "/surakshitam-product-images/toilet-bathroom-cleaning-powder/toilet-bathroom-cleaning-powder-02-lemon-lifestyle-140g.webp",
     ],
     isNew: true,
   },
