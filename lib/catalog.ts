@@ -201,7 +201,15 @@ export const products: Product[] = [
       "A concentrated cleaning powder for toilets and bathrooms — mix one pack in water to make a litre of ready-to-use cleaner with a lavender note.",
     benefits: ["Makes 1 litre", "Lavender note", "Toilets, tiles and basins"],
     keyIngredients: ["Baking soda", "Citric acid", "Salt", "Plant-based (coconut) surfactant", "Lavender essential oil"],
-    usage: "Mix the pack in 1 litre of water. Apply, leave for a few minutes, scrub and rinse.",
+    usage: [
+      "To prepare 1 litre of cleaning liquid: take 1 litre of hot water in a suitable container.",
+      "Add the complete contents of the pack.",
+      "Stir thoroughly until the powder is uniformly dispersed.",
+      "Allow the mixture to cool completely.",
+      "Transfer into a suitable, clearly labelled cleaning bottle.",
+      "For toilets: pour the prepared liquid around the inner surface of the bowl, leave for about 10–15 minutes, scrub thoroughly with a toilet brush and flush with water.",
+      "For bathroom tiles and wash basins: apply the prepared liquid to the surface, scrub gently with a suitable brush or sponge and rinse thoroughly with clean water.",
+    ],
     sizes: [
       { id: "140g", label: "140 g", mrp: 140, default: true },
     ],
@@ -415,9 +423,16 @@ export const products: Product[] = [
     category: "skin-care",
     shortDescription: "Gentle daily facial cleanser",
     description:
-      "A gentle rose facial cleanser for a fresh, everyday clean without stripping the skin.",
-    benefits: ["Gentle daily cleanse", "Soft rose scent", "Non-stripping"],
-    keyIngredients: ["Rose extract", "Aloe vera", "Glycerin"],
+      "Refresh your skincare routine with Surakshitam Naturals Rose Face Wash, a gentle cleansing formula enriched with rose extract, rose essential oil, and coconut oil-based surfactants. Designed for everyday cleansing, it helps remove dirt and impurities while leaving your skin feeling fresh, soft, and clean. Experience the soothing fragrance of roses and a refreshing cleansing ritual with every wash.",
+    benefits: [
+      "Gently cleanses skin",
+      "Helps remove dirt and everyday impurities",
+      "Leaves skin feeling fresh and soft",
+      "Provides a refreshing rose fragrance",
+      "Suitable for daily cleansing",
+      "Sulphate-free formula",
+    ],
+    keyIngredients: ["Rose extract", "Rose essential oil", "Coconut oil-based surfactants"],
     usage: "Massage a small amount onto damp skin, then rinse with water.",
     sizes: [
       { id: "50ml", label: "50 ml", mrp: 125, default: true },
@@ -541,18 +556,19 @@ export const products: Product[] = [
     category: "skin-care",
     shortDescription: "Rich cream for dry, cracked heels",
     description:
-      "A rich, moisturising cream for dry, rough heels. Massaged in before bed, it helps soften hardened skin and leaves feet feeling smooth, nourished and comfortable.",
+      "Give your feet the care they deserve with Surakshitam Naturals Foot Crack Heel Cream. Its rich, moisturizing texture helps soften dry, rough heels and keeps your feet feeling smooth, nourished, and comfortable.",
     benefits: [
       "Helps soften dry and rough heels",
       "Moisturises cracked, dry skin",
       "Helps improve the appearance of rough feet",
+      "Supports smoother and softer-looking heels",
       "Ideal for daily foot care",
     ],
     keyIngredients: ["Coconut", "Almond", "Shea butter", "Calendula"],
     usage:
-      "Wash and dry your feet. Apply a generous amount to heels and rough areas and massage gently until absorbed. For best results, apply before bedtime.",
+      "Wash and dry your feet. Apply a generous amount of cream to heels and rough areas. Gently massage until absorbed. For best results, apply before bedtime.",
     sizes: [
-      { id: "25g", label: "25 g", mrp: 140, default: true },
+      { id: "25g", label: "25 g", mrp: 125, default: true },
     ],
     sku: "SN-SC-FCH-025",
     image: "/surakshitam-product-images/foot-crack-heel-cream/foot-crack-heel-cream-01-listing-front-clean.webp",
@@ -591,10 +607,13 @@ export const products: Product[] = [
     category: "skin-care",
     shortDescription: "Softening balm for dry lips",
     description:
-      "A softening lip balm with a light strawberry note to help everyday dry lips feel comfortable.",
+      "A softening lip balm in a round box with a delightful strawberry fragrance.",
     benefits: ["Softens dry lips", "Light strawberry note", "Pocket-sized"],
-    keyIngredients: ["Shea butter", "Beeswax", "Strawberry extract"],
-    usage: "Apply a thin layer to the lips as often as needed.",
+    keyIngredients: ["Cocoa Butter", "Almond Oil", "Beeswax", "Vitamin E", "Strawberry Essential Oil"],
+    usage: [
+      "Apply a small amount of lip balm evenly over clean lips.",
+      "Apply before going outdoors and reapply as needed.",
+    ],
     sizes: [
       { id: "box", label: "Round box", mrp: 125, default: true },
     ],
@@ -612,10 +631,13 @@ export const products: Product[] = [
     category: "skin-care",
     shortDescription: "Chapstick with a light strawberry note",
     description:
-      "The strawberry lip balm in a twist-up stick — the same softening balm, easier to carry and apply on the go.",
+      "The strawberry lip balm in a twist-up stick — the same balm with a delightful strawberry fragrance, easier to carry and apply on the go.",
     benefits: ["Softens dry lips", "Light natural note", "Pocket-sized"],
-    keyIngredients: ["Shea butter", "Beeswax", "Strawberry extract"],
-    usage: "Apply a thin layer to the lips as often as needed.",
+    keyIngredients: ["Cocoa Butter", "Almond Oil", "Beeswax", "Vitamin E", "Strawberry Essential Oil"],
+    usage: [
+      "Apply a small amount of lip balm evenly over clean lips.",
+      "Apply before going outdoors and reapply as needed.",
+    ],
     sizes: [
       { id: "stick", label: "Stick", mrp: 100, default: true },
     ],
@@ -1179,6 +1201,29 @@ export const products: Product[] = [
     images: [
       "/surakshitam-product-images/amla-powder/amla-powder-01-listing-front-clean.webp",
       "/surakshitam-product-images/amla-powder/amla-powder-02-ingredients-lifestyle.webp",
+    ],
+    isNew: true,
+  },
+  {
+    id: "p-rosemary-leaves",
+    slug: "rosemary-leaves",
+    name: "Rosemary Leaves",
+    category: "hair-care",
+    shortDescription: "Dried aromatic rosemary leaves",
+    description:
+      "Surakshitam Naturals Rosemary Leaves are carefully dried aromatic herbs, valued for their natural fragrance and versatility. Rosemary is traditionally used in hair care, skin care, herbal preparations, and culinary applications. Add the goodness of rosemary to your natural self-care routine with this versatile herbal ingredient.",
+    benefits: ["Carefully dried aromatic herb", "Natural fragrance", "Versatile herbal ingredient"],
+    keyIngredients: ["Dried rosemary leaves (Rosmarinus officinalis)"],
+    usage:
+      "For hair oil: infuse completely dried rosemary leaves in a suitable carrier oil using a properly controlled preparation method. Strain before use.",
+    sizes: [
+      { id: "50g", label: "50 g", mrp: 100, default: true },
+    ],
+    sku: "SN-HR-RML-050",
+    image: "/surakshitam-product-images/rosemary-leaves/rosemary-leaves-01-listing-front-clean.webp",
+    images: [
+      "/surakshitam-product-images/rosemary-leaves/rosemary-leaves-01-listing-front-clean.webp",
+      "/surakshitam-product-images/rosemary-leaves/rosemary-leaves-02-minimal-rosemary-lifestyle.webp",
     ],
     isNew: true,
   },
