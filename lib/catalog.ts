@@ -727,7 +727,11 @@ export const products: Product[] = [
       { id: "50g", label: "50 g", mrp: 79, default: true },
     ],
     sku: "SN-SC-NMG-050",
-    image: "/products/placeholder.webp",
+    image: "/surakshitam-product-images/neem-gel/neem-gel-01-listing-front-clean.webp",
+    images: [
+      "/surakshitam-product-images/neem-gel/neem-gel-01-listing-front-clean.webp",
+      "/surakshitam-product-images/neem-gel/neem-gel-02-ingredients-lifestyle.webp",
+    ],
     isNew: true,
   },
 
