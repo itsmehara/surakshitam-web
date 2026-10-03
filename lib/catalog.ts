@@ -484,10 +484,10 @@ export const products: Product[] = [
       { id: "200ml", label: "200 ml", mrp: 299, default: true },
     ],
     sku: "SN-SC-LOT-200",
-    image: "/surakshitam-product-images/body-lotion/rose-body-lotion-01-listing-front-clean.webp",
+    image: "/surakshitam-product-images/body-lotion/body-lotion-01-listing-front-clean.webp",
     images: [
-      "/surakshitam-product-images/body-lotion/rose-body-lotion-01-listing-front-clean.webp",
-      "/surakshitam-product-images/body-lotion/rose-body-lotion-02-minimal-rose-lifestyle.webp",
+      "/surakshitam-product-images/body-lotion/body-lotion-01-listing-front-clean.webp",
+      "/surakshitam-product-images/body-lotion/body-lotion-02-minimal-rose-lifestyle.webp",
     ],
     isNew: true,
   },
@@ -507,7 +507,7 @@ export const products: Product[] = [
       { id: "200ml", label: "200 ml", mrp: 299, default: true },
     ],
     sku: "SN-SC-LLT-200",
-    image: "/surakshitam-product-images/body-lotion/body-lotion-01-listing-front-clean.webp",
+    image: "/surakshitam-product-images/lavender-body-lotion/lavender-body-lotion-01-listing-front-clean.webp",
     isNew: true,
   },
   {
