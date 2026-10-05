@@ -111,19 +111,19 @@ export function Footer() {
         </div>
 
         {/* pr-16 keeps the right end (credit badge) clear of the fixed WhatsApp/Instagram stack */}
-        <div className="mt-12 flex flex-col gap-4 border-t border-cream/15 pt-6 pr-16 text-xs text-cream/60 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} {site.name}, Hyderabad. All rights reserved.</p>
-          <div className="flex w-full flex-wrap items-center gap-x-5 gap-y-2 sm:w-auto">
+        <div className="mt-12 flex items-center justify-between gap-4 border-t border-cream/15 pt-6 pr-16 text-xs text-cream/60">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <p className="w-full sm:w-auto">© {new Date().getFullYear()} {site.name}, Hyderabad. All rights reserved.</p>
+            <span aria-hidden className="hidden text-cream/30 sm:inline">|</span>
             <Link href="/our-story" className="transition-colors hover:text-cream">
               Our Story
             </Link>
+            <span aria-hidden className="text-cream/30">|</span>
             <Link href="/contact" className="inline-flex items-center gap-1 transition-colors hover:text-cream">
               Contact <ArrowRight width={13} />
             </Link>
-            <span className="ml-auto sm:ml-1">
-              <CreditBadge />
-            </span>
           </div>
+          <CreditBadge />
         </div>
       </div>
     </footer>

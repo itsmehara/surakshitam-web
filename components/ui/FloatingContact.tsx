@@ -12,7 +12,7 @@ import { CartFab } from "@/components/cart/CartFab";
  */
 export function FloatingContact() {
   return (
-    <div className="fixed bottom-16 right-5 z-40 flex flex-col items-end gap-3 sm:bottom-20 sm:right-6">
+    <div className="fixed bottom-24 right-5 z-40 flex flex-col items-end gap-3 sm:bottom-28 sm:right-6">
       <CartFab />
 
       {/* Instagram */}

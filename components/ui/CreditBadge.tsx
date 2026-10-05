@@ -19,7 +19,7 @@ export function CreditBadge() {
   useEffect(() => window.nscCreditBadge?.mount(ref.current), []);
   return (
     <>
-      <div ref={ref} data-nsc-credit className="flex h-8 w-8 items-center justify-center" />
+      <div ref={ref} data-nsc-credit className="flex h-8 w-8 shrink-0 items-center justify-center" />
       <Script src="/nsc-credit-badge.js" strategy="afterInteractive" />
     </>
   );
