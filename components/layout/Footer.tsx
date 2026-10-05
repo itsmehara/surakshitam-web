@@ -3,7 +3,7 @@ import { site, footerNav } from "@/lib/site";
 import { Logo } from "@/components/ui/Logo";
 import { WhatsAppLink } from "@/components/ui/WhatsAppLink";
 import { CreditBadge } from "@/components/ui/CreditBadge";
-import { WhatsAppIcon, InstagramIcon, FacebookIcon, YouTubeIcon, ArrowRight } from "@/components/icons";
+import { WhatsAppIcon, InstagramIcon, FacebookIcon, YouTubeIcon, ArrowRight, ClipboardIcon } from "@/components/icons";
 
 export function Footer() {
   const cols = footerNav;
@@ -120,7 +120,7 @@ export function Footer() {
             </Link>
             <span aria-hidden className="text-cream/30">|</span>
             <Link href="/contact" className="inline-flex items-center gap-1 transition-colors hover:text-cream">
-              Contact <ArrowRight width={13} />
+              Contact <ArrowRight width={13} /> <ClipboardIcon width={14} height={14} />
             </Link>
           </div>
           <CreditBadge />
