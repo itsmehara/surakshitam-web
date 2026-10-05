@@ -28,7 +28,7 @@
   .nsc-credit-pop[hidden] { display: block; visibility: hidden; pointer-events: none; }
   .nsc-credit-pop.show { opacity: 1; transform: none; }
   .nsc-credit-pop p { margin: 0 0 6px; color: #AFBDB2; }
-  .nsc-credit-pop b { color: #F5F1E9; font-weight: 600; }
+  .nsc-credit-pop b { color: #F5F1E9; font-weight: 600; white-space: nowrap; }
   .nsc-credit-pop a { color: #F3961F; font-weight: 600; text-decoration: none; }
   .nsc-credit-pop a:hover, .nsc-credit-pop a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
   .nsc-credit-pop a:focus-visible { outline: 2px solid #F3961F; outline-offset: 2px; border-radius: 3px; }
@@ -96,7 +96,7 @@
     </svg>
   </button>
   <div class="nsc-credit-pop" id="nsc-credit-pop-${n}" role="dialog" aria-label="Website credit" hidden>
-    <p>Developed and maintained by <b>Nischaya Creative Soft</b></p>
+    <p>Developed and maintained by<br><b>— Nischaya Creative Soft</b></p>
     <a href="https://nischayacreativesoft.com/" target="_blank" rel="noopener nofollow">www.nischayacreativesoft.com <span aria-hidden="true">↗</span></a>
   </div>
 </div>`;
