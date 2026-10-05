@@ -2,6 +2,7 @@ import Link from "next/link";
 import { site, footerNav } from "@/lib/site";
 import { Logo } from "@/components/ui/Logo";
 import { WhatsAppLink } from "@/components/ui/WhatsAppLink";
+import { CreditBadge } from "@/components/ui/CreditBadge";
 import { WhatsAppIcon, InstagramIcon, FacebookIcon, YouTubeIcon, ArrowRight } from "@/components/icons";
 
 export function Footer() {
@@ -109,15 +110,19 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-4 border-t border-cream/15 pt-6 text-xs text-cream/60 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} {site.name}, Hyderabad. Online ordering coming soon.</p>
-          <div className="flex flex-wrap gap-x-5 gap-y-2">
+        {/* pr-16 keeps the right end (credit badge) clear of the fixed WhatsApp/Instagram stack */}
+        <div className="mt-12 flex flex-col gap-4 border-t border-cream/15 pt-6 pr-16 text-xs text-cream/60 sm:flex-row sm:items-center sm:justify-between">
+          <p>© {new Date().getFullYear()} {site.name}, Hyderabad. All rights reserved.</p>
+          <div className="flex w-full flex-wrap items-center gap-x-5 gap-y-2 sm:w-auto">
             <Link href="/our-story" className="transition-colors hover:text-cream">
               Our Story
             </Link>
             <Link href="/contact" className="inline-flex items-center gap-1 transition-colors hover:text-cream">
               Contact <ArrowRight width={13} />
             </Link>
+            <span className="ml-auto sm:ml-1">
+              <CreditBadge />
+            </span>
           </div>
         </div>
       </div>
