@@ -6,6 +6,8 @@
  * in .env.local for dev and in the GitHub Pages build env for production.
  */
 
+import { gaEvent } from "@/lib/analytics";
+
 /** The three things the contact form is used for (ANSWERS-2026-09-14 + 15 Sep brief). */
 export type EnquiryType = "product" | "partner" | "consultation";
 
@@ -117,6 +119,7 @@ export function whatsAppFormFallbackHref(f: EnquiryFields): string {
  * Call it in onClick and let the <a> navigate normally.
  */
 export function trackWhatsAppClick(opts: { product?: string; cta: string }): void {
+  gaEvent("whatsapp_click", { cta: opts.cta, product: opts.product ?? "" });
   if (!ENQUIRY_URL || typeof window === "undefined") return;
   const body = JSON.stringify({
     event: "whatsapp_click",

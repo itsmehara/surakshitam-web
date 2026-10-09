@@ -10,6 +10,7 @@
 
 import type { CartLine } from "@/lib/cart/CartContext";
 import { ENQUIRY_URL } from "@/lib/enquiry";
+import { gaEvent } from "@/lib/analytics";
 import { isIndianPincode, isIndianState } from "@/lib/india";
 
 const WA_NUMBER = "917416394594";
@@ -205,6 +206,14 @@ export async function submitOrder(input: {
 }): Promise<OrderResult> {
   if (!ENQUIRY_URL) return { ok: false, error: "Order service is not configured (NEXT_PUBLIC_ENQUIRY_URL)." };
   const { subtotal, hasPriceOnRequest } = orderSubtotal(input.lines);
+  // GA4: order count and value only — no customer details.
+  gaEvent("whatsapp_order", {
+    order_id: input.orderId,
+    value: subtotal,
+    currency: "INR",
+    items: input.lines.length,
+    price_on_request: hasPriceOnRequest,
+  });
   const c = input.customer;
   const payload = {
     kind: "order",

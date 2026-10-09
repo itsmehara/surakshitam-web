@@ -5,6 +5,7 @@ import "@fontsource-variable/inter";
 import { site } from "@/lib/site";
 import { AppShell } from "@/components/layout/AppShell";
 import { CartProvider } from "@/lib/cart/CartContext";
+import { Analytics } from "@/components/Analytics";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -89,6 +90,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
         />
+        <Analytics />
       </body>
     </html>
   );
