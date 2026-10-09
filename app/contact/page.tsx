@@ -8,6 +8,7 @@ import { site } from "@/lib/site";
 import { WhatsAppIcon, InstagramIcon, FacebookIcon, YouTubeIcon, ArrowRight } from "@/components/icons";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/contact/" },
   title: "Contact",
   description:
     "Order on WhatsApp or send an enquiry — phone, email, address and hours for Surakshitam Naturals, Hyderabad.",

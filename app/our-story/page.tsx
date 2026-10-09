@@ -12,6 +12,7 @@ import {
 } from "@/components/icons";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/our-story/" },
   title: "Our Story",
   description:
     "How Surakshitam Naturals began — a home experiment in Hyderabad, years of Supriya's research, and Srikanth's push to share homemade, plant-based care with more homes.",

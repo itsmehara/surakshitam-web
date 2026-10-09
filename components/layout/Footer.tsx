@@ -122,6 +122,10 @@ export function Footer() {
             <Link href="/contact" className="inline-flex items-center gap-1 transition-colors hover:text-cream">
               Contact <ArrowRight width={13} /> <ClipboardIcon width={14} height={14} />
             </Link>
+            <span aria-hidden className="text-cream/30">|</span>
+            <Link href="/privacy" className="transition-colors hover:text-cream">
+              Privacy
+            </Link>
           </div>
           <CreditBadge />
         </div>

@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { ShopView } from "@/components/shop/ShopView";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/shop/" },
   title: "Shop",
   description:
     "Browse Surakshitam Naturals home care, skin care and hair care — natural, small-batch essentials for everyday homes. Order on WhatsApp.",

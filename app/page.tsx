@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { HeroSlideshow } from "@/components/home/HeroSlideshow";
 import { CategoryStrip } from "@/components/home/CategoryStrip";
 import { FeaturedProducts } from "@/components/home/FeaturedProducts";
@@ -7,6 +8,10 @@ import { BestSellers } from "@/components/home/BestSellers";
 import { Sustainability } from "@/components/home/Sustainability";
 import { InstagramFeedSection } from "@/components/home/InstagramFeedSection";
 import { WhatsAppCta } from "@/components/home/WhatsAppCta";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 export default function HomePage() {
   return (

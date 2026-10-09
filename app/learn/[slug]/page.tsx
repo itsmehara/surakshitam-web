@@ -12,7 +12,11 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
   const article = getArticleBySlug(params.slug);
   if (!article) return { title: "Article not found" };
-  return { title: article.title, description: article.excerpt };
+  return {
+    title: article.title,
+    description: article.excerpt,
+    alternates: { canonical: `/learn/${article.slug}/` },
+  };
 }
 
 export default function ArticlePage({ params }: { params: { slug: string } }) {

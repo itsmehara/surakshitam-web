@@ -26,7 +26,6 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: site.locale,
-    url: site.url,
     siteName: site.name,
     title: `${site.name} — ${site.tagline}`,
     description: site.description,
@@ -37,7 +36,6 @@ export const metadata: Metadata = {
     description: site.description,
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: "/" },
   icons: {
     icon: "/brand/favicon-64.png",
     apple: "/brand/apple-touch-180.png",

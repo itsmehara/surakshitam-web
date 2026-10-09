@@ -5,6 +5,7 @@ import { BannerIntro } from "@/components/ui/BannerIntro";
 import { ArrowRight } from "@/components/icons";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/learn/" },
   title: "Learn",
   description:
     "Care guides and ingredient stories from Surakshitam Naturals — practical notes on ingredients, product care and how our formulations come together.",

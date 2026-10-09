@@ -9,6 +9,7 @@ import {
 import { ArrowRight, CheckIcon } from "@/components/icons";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/ingredients/" },
   title: "Ingredients",
   description:
     "The plant-forward ingredients behind Surakshitam Naturals — botanicals, plant butters, natural cleansers and essential oils, and why we choose each one.",

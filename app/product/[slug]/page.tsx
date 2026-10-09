@@ -19,7 +19,9 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   return {
     title: product.name,
     description: product.shortDescription,
+    alternates: { canonical: `/product/${product.slug}/` },
     openGraph: {
+      url: `/product/${product.slug}/`,
       title: `${product.name} · ${site.name}`,
       description: product.shortDescription,
       images: [{ url: productImage(product) }],
