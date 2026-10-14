@@ -3,6 +3,7 @@ import { site, footerNav } from "@/lib/site";
 import { Logo } from "@/components/ui/Logo";
 import { WhatsAppLink } from "@/components/ui/WhatsAppLink";
 import { CreditBadge } from "@/components/ui/CreditBadge";
+import { VisitCounter } from "@/components/ui/VisitCounter";
 import { WhatsAppIcon, InstagramIcon, FacebookIcon, YouTubeIcon, ArrowRight, ClipboardIcon } from "@/components/icons";
 
 export function Footer() {
@@ -113,8 +114,8 @@ export function Footer() {
         {/* pr-16 keeps the right end (credit badge) clear of the fixed WhatsApp/Instagram stack */}
         <div className="mt-12 flex items-center justify-between gap-4 border-t border-cream/15 pt-6 pr-16 text-xs text-cream/60">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <p className="w-full sm:w-auto">© {new Date().getFullYear()} {site.name}, Hyderabad. All rights reserved.</p>
-            <span aria-hidden className="hidden text-cream/30 sm:inline">|</span>
+            <p className="w-full lg:w-auto">© {new Date().getFullYear()} {site.name}, Hyderabad. All rights reserved.</p>
+            <span aria-hidden className="hidden text-cream/30 lg:inline">|</span>
             <Link href="/our-story" className="transition-colors hover:text-cream">
               Our Story
             </Link>
@@ -122,10 +123,13 @@ export function Footer() {
             <Link href="/contact" className="inline-flex items-center gap-1 transition-colors hover:text-cream">
               Contact <ArrowRight width={13} /> <ClipboardIcon width={14} height={14} />
             </Link>
-            <span aria-hidden className="text-cream/30">|</span>
+            {/* Phones: Privacy + visit count start their own line, so no line ends or starts with "|" */}
+            <span aria-hidden className="basis-full sm:hidden" />
+            <span aria-hidden className="hidden text-cream/30 sm:inline">|</span>
             <Link href="/privacy" className="transition-colors hover:text-cream">
               Privacy
             </Link>
+            <VisitCounter />
           </div>
           <CreditBadge />
         </div>

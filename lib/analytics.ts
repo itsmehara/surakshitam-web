@@ -1,6 +1,7 @@
 /**
  * Google Analytics 4 (property "Surakshitam Naturals", stream "Surakshitam Naturals – Website").
- * The tag loads only on the live domain (see <Analytics>), so local dev and previews
+ * Consent first: the tag loads only after the visitor clicks Allow (see <Analytics>), and only on
+ * the live domain, so local dev and previews
  * don't count as visits. Page views on client-side navigation come from GA4's enhanced
  * measurement ("page changes based on browser history events"), so no router hook is needed.
  * Never send personal data (names, phones, addresses) in event params.

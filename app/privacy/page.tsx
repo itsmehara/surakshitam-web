@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { site } from "@/lib/site";
+import { AnalyticsChoice } from "@/components/Analytics";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/privacy/" },
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
     "What Surakshitam Naturals collects when you browse, enquire or order — and how to see, correct or delete it.",
 };
 
-const updated = "9 October 2026";
+const updated = "14 October 2026";
 
 const sections: { heading: string; body: React.ReactNode[] }[] = [
   {
@@ -32,17 +33,24 @@ const sections: { heading: string; body: React.ReactNode[] }[] = [
         reach us. No name or number is recorded at that point.
       </>,
       <>
-        <strong className="font-semibold text-forest">When you browse.</strong> We use Google Analytics to count
-        visits: pages viewed, roughly where visitors are (city level), device and browser, and events such as a
-        WhatsApp tap or an order being sent (order number, total and item count only — never your name, phone or
-        address). Google Analytics uses cookies to do this.
+        <strong className="font-semibold text-forest">When you browse — Google Analytics, only if you allow it.</strong>{" "}
+        The first time you visit, we ask. If you click Allow, Google Analytics counts pages viewed, roughly where
+        visitors are (city level), device and browser, and events such as a WhatsApp tap or an order being sent
+        (order number, total and item count only — never your name, phone or address), using cookies on your device.
+        Nothing is used for advertising. If you click No thanks, nothing from Google Analytics loads.{" "}
+        <AnalyticsChoice />
+      </>,
+      <>
+        <strong className="font-semibold text-forest">The visit count in the footer.</strong> Each visit adds one to a
+        simple daily total in our sheet. It stores no cookies, no IP address and nothing about you — just a number
+        per day.
       </>,
     ],
   },
   {
     heading: "Kept on your own device",
     body: [
-      "Your cart, cart note and delivery details (so you don't retype them next time) are stored in your browser, not on our side. Clearing your browser's site data removes them.",
+      "Your cart, cart note and delivery details (so you don't retype them next time), your analytics choice and the last visit count you saw are stored in your browser, not on our side. Clearing your browser's site data removes them.",
     ],
   },
   {
@@ -74,8 +82,8 @@ const sections: { heading: string; body: React.ReactNode[] }[] = [
         . We'll reply within a reasonable time, as required by India's Digital Personal Data Protection Act, 2023.
       </>,
       <>
-        To stop Google Analytics counting your visits, you can block cookies for this site in your browser or use
-        Google's{" "}
+        You can change your Google Analytics choice at any time with the Change link above. You can also block
+        cookies for this site in your browser or use Google's{" "}
         <a
           href="https://tools.google.com/dlpage/gaoptout"
           target="_blank"
