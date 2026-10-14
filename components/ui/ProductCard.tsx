@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Product } from "@/lib/types";
 import { productImage } from "@/lib/catalog";
 import { BuyBox } from "./BuyBox";
+import { ShareMenu } from "./ShareBar";
 
 const categoryLabel: Record<Product["category"], string> = {
   "home-care": "Home Care",
@@ -47,6 +48,8 @@ export function ProductCard({ product, priority }: { product: Product; priority?
           }
         />
       </Link>
+      {/* Share: above the card-wide overlay link (z-20), top-right of the photo */}
+      <ShareMenu product={product} className="absolute right-2.5 top-2.5 z-20" />
 
       <div className="flex flex-1 flex-col p-3">
         <p

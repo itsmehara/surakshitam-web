@@ -178,13 +178,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
             </div>
             <OrderingNote className="mt-3" />
             <div className="mt-5">
-              <ShareBar
-                url={`${site.url}/product/${product.slug}/`}
-                slug={product.slug}
-                name={product.name}
-                tagline={product.shortDescription}
-                benefits={product.benefits}
-              />
+              <ShareBar product={product} />
             </div>
 
             {/* Assurances */}
