@@ -12,19 +12,18 @@ type Props = {
   tagline: string;
   /** Up to three benefits, shown as ✓ lines in the WhatsApp message. */
   benefits: string[];
-  /** e.g. "100 g · MRP ₹104"; omitted when the pack is sold out or has no price. */
-  price?: string;
   /** Product slug, for the GA share event. */
   slug: string;
 };
 
 /**
- * Share a product on WhatsApp (pre-filled message with benefits + price), Facebook, X, Threads,
+ * Share a product on WhatsApp (pre-filled message with benefits; no price on purpose — the reader
+ * taps through to the site or asks, Hara 14 Oct), Facebook, X, Threads,
  * the phone's own share sheet (Instagram, Telegram…) or by copying the link. Plain links — no
  * third-party scripts. The link preview (photo, title, description) comes from the page's
  * Open Graph tags and public/share/<slug>.jpg.
  */
-export function ShareBar({ url, name, tagline, benefits, price, slug }: Props) {
+export function ShareBar({ url, name, tagline, benefits, slug }: Props) {
   const [canShare, setCanShare] = useState(false);
   const [copied, setCopied] = useState(false);
   useEffect(() => setCanShare(typeof navigator !== "undefined" && !!navigator.share), []);
@@ -34,9 +33,8 @@ export function ShareBar({ url, name, tagline, benefits, price, slug }: Props) {
     tagline,
     "",
     ...benefits.slice(0, 3).map((b) => `✓ ${b}`),
-    ...(price ? ["", `💰 ${price}`] : []),
     "",
-    `See it and order: ${url}`,
+    `Price & order 👉 ${url}`,
   ].join("\n");
   const shortText = `${name} — Surakshitam Naturals. ${tagline}`;
 

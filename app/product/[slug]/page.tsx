@@ -184,7 +184,6 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                 name={product.name}
                 tagline={product.shortDescription}
                 benefits={product.benefits}
-                price={!pack.soldOut && pack.mrp != null ? `${pack.label} · MRP ₹${pack.mrp.toLocaleString("en-IN")}` : undefined}
               />
             </div>
 
