@@ -191,3 +191,37 @@ export const ClipboardIcon = (p: IconProps) => (
     <path d="M9 11h6M9 15h6" />
   </svg>
 );
+
+/** X (Twitter) mark, drawn in the same stroke style. */
+export const XIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="M4.5 4h4.2l10.8 16h-4.2z" />
+    <path d="M19.5 4l-6.3 7.2M10.8 12.8L4.5 20" />
+  </svg>
+);
+
+/** Threads mark (simplified @-style loop). */
+export const ThreadsIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="M16.5 11.2c-.5-2.4-2.2-3.7-4.6-3.7-2.6 0-4.2 1.7-4.2 4.3 0 2.7 1.7 4.6 4.4 4.6 2.2 0 3.6-1.2 3.6-3 0-2-2-2.9-4.1-2.6-1.6.2-2.5 1-2.4 2 .1 1.1 1.2 1.7 2.6 1.6 2.7-.2 4-2.4 3.4-5.6" />
+    <path d="M18.8 7.5A8.4 8.4 0 0 0 12 3.5c-5 0-8 3.5-8 8.5s3 8.5 8 8.5c3.3 0 5.8-1.5 7-4" />
+  </svg>
+);
+
+/** Generic share (three linked dots). */
+export const ShareIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <circle cx="18" cy="5.5" r="2.5" />
+    <circle cx="6" cy="12" r="2.5" />
+    <circle cx="18" cy="18.5" r="2.5" />
+    <path d="M8.2 10.8l7.6-4.1M8.2 13.2l7.6 4.1" />
+  </svg>
+);
+
+/** Chain link (copy link). */
+export const LinkIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" />
+    <path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />
+  </svg>
+);

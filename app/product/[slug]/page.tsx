@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { existsSync } from "node:fs";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { products, getProductBySlug, getProductsByCategory, productImage, defaultSize } from "@/lib/catalog";
@@ -6,11 +7,18 @@ import { ProductGallery } from "@/components/ui/ProductGallery";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { BuyBox } from "@/components/ui/BuyBox";
 import { OrderingNote } from "@/components/ui/OrderingNote";
+import { ShareBar } from "@/components/ui/ShareBar";
 import { CheckIcon, LeafIcon, ChevronDown } from "@/components/icons";
 import { site } from "@/lib/site";
 
 export function generateStaticParams() {
   return products.map((p) => ({ slug: p.slug }));
+}
+
+// Link-preview image: the 1200×630 JPG from scripts/make-share-images.mjs when it exists
+// (WhatsApp doesn't reliably show .webp), else the product's cover photo.
+function shareImage(product: NonNullable<ReturnType<typeof getProductBySlug>>): string {
+  return existsSync(`public/share/${product.slug}.jpg`) ? `/share/${product.slug}.jpg` : productImage(product);
 }
 
 export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
@@ -24,7 +32,13 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
       url: `/product/${product.slug}/`,
       title: `${product.name} · ${site.name}`,
       description: product.shortDescription,
-      images: [{ url: productImage(product) }],
+      images: [{ url: shareImage(product), width: 1200, height: 630, alt: product.name }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.name} · ${site.name}`,
+      description: product.shortDescription,
+      images: [shareImage(product)],
     },
   };
 }
@@ -163,6 +177,16 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               <BuyBox product={product} variant="page" />
             </div>
             <OrderingNote className="mt-3" />
+            <div className="mt-5">
+              <ShareBar
+                url={`${site.url}/product/${product.slug}/`}
+                slug={product.slug}
+                name={product.name}
+                tagline={product.shortDescription}
+                benefits={product.benefits}
+                price={!pack.soldOut && pack.mrp != null ? `${pack.label} · MRP ₹${pack.mrp.toLocaleString("en-IN")}` : undefined}
+              />
+            </div>
 
             {/* Assurances */}
             <div className="mt-6 rounded-lg border border-forest/8 bg-parchment/60 p-4">
