@@ -10,6 +10,14 @@ need to re-read the whole codebase. Complements `../surakshitam-docs/docs/`
 
 **Branch:** `v4-whatsapp-orders`, cut 19 Sep 2026 from tag `v3.0-live`.
 
+### Status snapshot — 6 Nov 2026
+Live site = `v4-whatsapp-orders` @ `14eb63e` (14 Oct); 53 listings (28 skin, 14 hair, 10 home, 1 partner). Added since go-live:
+founders' 3 Oct copy/photo updates, GA4 + `/privacy/` + per-page canonicals (9 Oct), analytics consent banner + footer
+visit counter (Apps Script `?action=visit`), product share row/card icon + 1200x630 share images (14 Oct). No code changes
+since 14 Oct; open work is founder inputs (ingredient lists, photos, UPI ID) and the v5 plan — see `PENDING.md`.
+Status page: `../status.html`, built by the `project-status-page` skill from `../surakshitam-docs/status/{status-data,TASKS}.json`
+(edit the JSON, re-run `python3 ~/.claude/skills/project-status-page/scripts/build_status.py --data surakshitam-docs/status/status-data.json --tasks surakshitam-docs/status/TASKS.json --out status.html` from the workspace root).
+
 ### 🟢 LIVE — 2 Oct 2026 (tag `v4.0-live`; deploy run green at `8e43109`)
 `pages.yml` publishes `v4-whatsapp-orders`; the `github-pages` environment allows that branch (added by
 Hara 2 Oct). `Code.gs` re-deployed from Hara's account, same /exec URL. **Rollback:** point
