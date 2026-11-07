@@ -11,8 +11,9 @@ import { WhatsAppIcon, FacebookIcon, XIcon, ThreadsIcon, ShareIcon, LinkIcon, Ch
  * taps through to the site or asks, Hara 14 Oct), Facebook, X, Threads, the phone's own share sheet
  * (Instagram, Telegram…) or by copying the link. Plain links — no third-party scripts.
  *
- * Every target that takes text gets the same message: name, tagline, first 3 benefits (X, Threads
- * and the phone sheet add the link). Facebook's sharer takes only a URL, so tapping it copies the
+ * Every target gets the WhatsApp layout: name, tagline, first 3 benefits, then the "Price & order"
+ * line. The link sits on that line for WhatsApp, Threads and Facebook's copied text; X and the
+ * phone sheet take it as the separate url. Facebook's sharer takes only a URL, so tapping it copies the
  * message to the clipboard for the reader to paste into the post; the link preview (name, tagline,
  * photo) comes from the page's Open Graph tags and public/share/<slug>.jpg.
  *
@@ -28,22 +29,19 @@ function shareData(p: ShareProduct) {
   // Partner-brand stock is someone else's: name its maker, never Surakshitam (catalog.ts, PARTNER BRANDS).
   const by = p.thirdParty && p.brand ? p.brand : site.name;
   const benefits = p.benefits.slice(0, 3).map((b) => `✓ ${b}`);
-  const message = [`🌿 ${p.name} — ${by}`, p.shortDescription, ...benefits].join("\n");
-  const waText = [
-    `🌿 *${p.name}* — ${by}`,
-    p.shortDescription,
-    "",
-    ...benefits,
-    "",
-    `Price & order 👉 ${url}`,
-  ].join("\n");
+  const cta = "Price & order 👉"; // no price on purpose
+  // The WhatsApp layout for every target: name, tagline, 3 benefits, then the order line.
+  const body = (name: string) => [`🌿 ${name} — ${by}`, p.shortDescription, "", ...benefits, ""];
+  const waText = [...body(`*${p.name}*`), `${cta} ${url}`].join("\n");
+  const linkText = [...body(p.name), `${cta} ${url}`].join("\n"); // Threads, and Facebook's copied text
+  const shareText = [...body(p.name), cta].join("\n"); // X and the phone sheet get the link separately
   const targets: Target[] = [
     { method: "whatsapp", label: "WhatsApp", icon: WhatsAppIcon, href: `https://wa.me/?text=${encodeURIComponent(waText)}` },
     { method: "facebook", label: "Facebook", icon: FacebookIcon, href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}` },
-    { method: "x", label: "X", icon: XIcon, href: `https://x.com/intent/post?text=${encodeURIComponent(message)}&url=${encodeURIComponent(url)}` },
-    { method: "threads", label: "Threads", icon: ThreadsIcon, href: `https://www.threads.net/intent/post?text=${encodeURIComponent(`${message}\n\n${url}`)}` },
+    { method: "x", label: "X", icon: XIcon, href: `https://x.com/intent/post?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}` },
+    { method: "threads", label: "Threads", icon: ThreadsIcon, href: `https://www.threads.net/intent/post?text=${encodeURIComponent(linkText)}` },
   ];
-  return { url, message, targets };
+  return { url, shareText, linkText, targets };
 }
 
 const track = (method: string, slug: string) => gaEvent("share", { method, content_type: "product", item_id: slug });
@@ -57,7 +55,7 @@ function ShareButtons({ product, onDone }: { product: ShareProduct; onDone?: () 
   const [copied, setCopied] = useState(false);
   const [fbNote, setFbNote] = useState<string | null>(null);
   useEffect(() => setCanShare(typeof navigator !== "undefined" && !!navigator.share), []);
-  const { url, message, targets } = shareData(product);
+  const { url, shareText, linkText, targets } = shareData(product);
 
   return (
     <>
@@ -80,7 +78,7 @@ function ShareButtons({ product, onDone }: { product: ShareProduct; onDone?: () 
                     ? "Text copied. Facebook takes only the link, so paste the text into your post."
                     : "Facebook takes only the link here.",
                 );
-              const copy = navigator.clipboard?.writeText(message);
+              const copy = navigator.clipboard?.writeText(linkText);
               if (copy) copy.then(() => note(true), () => note(false));
               else note(false);
               window.setTimeout(() => setFbNote(null), 12000);
@@ -101,7 +99,7 @@ function ShareButtons({ product, onDone }: { product: ShareProduct; onDone?: () 
           className={btn}
           onClick={() => {
             track("native", product.slug);
-            navigator.share({ title: product.name, text: message, url }).catch(() => {});
+            navigator.share({ title: product.name, text: shareText, url }).catch(() => {});
             onDone?.();
           }}
         >
