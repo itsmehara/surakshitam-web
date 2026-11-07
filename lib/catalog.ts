@@ -237,8 +237,12 @@ export const products: Product[] = [
       { id: "1l", label: "1 L", mrp: 175, default: true },
     ],
     sku: "SN-HC-BFC-1000",
-    image: "/surakshitam-product-images/bio-enzyme-floor-cleaner/bio-enzyme-floor-cleaner-01-listing-front-clean.webp",
-    images: ["/surakshitam-product-images/bio-enzyme-floor-cleaner/bio-enzyme-floor-cleaner-01-listing-front-clean.webp"],
+    image: "/surakshitam-product-images/bio-enzyme-floor-cleaner/bio-enzyme-floor-cleaner-1000ml-01-listing-front.webp",
+    images: [
+      "/surakshitam-product-images/bio-enzyme-floor-cleaner/bio-enzyme-floor-cleaner-1000ml-01-listing-front.webp",
+      "/surakshitam-product-images/bio-enzyme-floor-cleaner/bio-enzyme-floor-cleaner-1000ml-02-ingredient-lifestyle.webp",
+      "/surakshitam-product-images/bio-enzyme-floor-cleaner/bio-enzyme-floor-cleaner-1000ml-03-use-context.webp",
+    ],
     isNew: true,
   },
   {
@@ -275,8 +279,12 @@ export const products: Product[] = [
       { id: "1l", label: "1 L", mrp: 185, default: true },
     ],
     sku: "SN-HC-BTC-1000",
-    image: "/surakshitam-product-images/bio-enzyme-toilet-cleaner/bio-enzyme-toilet-cleaner-01-listing-front-clean.webp",
-    images: ["/surakshitam-product-images/bio-enzyme-toilet-cleaner/bio-enzyme-toilet-cleaner-01-listing-front-clean.webp"],
+    image: "/surakshitam-product-images/bio-enzyme-toilet-cleaner/bio-enzyme-toilet-cleaner-1000ml-01-listing-front.webp",
+    images: [
+      "/surakshitam-product-images/bio-enzyme-toilet-cleaner/bio-enzyme-toilet-cleaner-1000ml-01-listing-front.webp",
+      "/surakshitam-product-images/bio-enzyme-toilet-cleaner/bio-enzyme-toilet-cleaner-1000ml-02-ingredient-lifestyle.webp",
+      "/surakshitam-product-images/bio-enzyme-toilet-cleaner/bio-enzyme-toilet-cleaner-1000ml-03-use-context.webp",
+    ],
     isNew: true,
   },
 
