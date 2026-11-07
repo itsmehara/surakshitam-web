@@ -9,35 +9,40 @@ import { WhatsAppIcon, FacebookIcon, XIcon, ThreadsIcon, ShareIcon, LinkIcon, Ch
 /**
  * Share a product on WhatsApp (pre-filled message with benefits; no price on purpose — the reader
  * taps through to the site or asks, Hara 14 Oct), Facebook, X, Threads, the phone's own share sheet
- * (Instagram, Telegram…) or by copying the link. Plain links — no third-party scripts. The link
- * preview (photo, title, description) comes from the page's Open Graph tags and
- * public/share/<slug>.jpg.
+ * (Instagram, Telegram…) or by copying the link. Plain links — no third-party scripts.
+ *
+ * Every target that takes text gets the same message: name, tagline, first 3 benefits (X, Threads
+ * and the phone sheet add the link). Facebook's sharer takes only a URL, so its post is the link
+ * preview alone (name, tagline, photo from the page's Open Graph tags and public/share/<slug>.jpg).
  *
  * <ShareBar>  — the full row of buttons, on the product page.
  * <ShareMenu> — one share icon that pops the same buttons, on listing cards.
  */
 
-type ShareProduct = Pick<Product, "slug" | "name" | "shortDescription" | "benefits">;
+type ShareProduct = Pick<Product, "slug" | "name" | "shortDescription" | "benefits" | "brand" | "thirdParty">;
 type Target = { method: string; label: string; icon: ComponentType<SVGProps<SVGSVGElement>>; href: string };
 
 function shareData(p: ShareProduct) {
   const url = `${site.url}/product/${p.slug}/`;
+  // Partner-brand stock is someone else's: name its maker, never Surakshitam (catalog.ts, PARTNER BRANDS).
+  const by = p.thirdParty && p.brand ? p.brand : site.name;
+  const benefits = p.benefits.slice(0, 3).map((b) => `✓ ${b}`);
+  const message = [`🌿 ${p.name} — ${by}`, p.shortDescription, ...benefits].join("\n");
   const waText = [
-    `🌿 *${p.name}* — Surakshitam Naturals`,
+    `🌿 *${p.name}* — ${by}`,
     p.shortDescription,
     "",
-    ...p.benefits.slice(0, 3).map((b) => `✓ ${b}`),
+    ...benefits,
     "",
     `Price & order 👉 ${url}`,
   ].join("\n");
-  const shortText = `${p.name} — Surakshitam Naturals. ${p.shortDescription}`;
   const targets: Target[] = [
     { method: "whatsapp", label: "WhatsApp", icon: WhatsAppIcon, href: `https://wa.me/?text=${encodeURIComponent(waText)}` },
     { method: "facebook", label: "Facebook", icon: FacebookIcon, href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}` },
-    { method: "x", label: "X", icon: XIcon, href: `https://x.com/intent/post?text=${encodeURIComponent(shortText)}&url=${encodeURIComponent(url)}` },
-    { method: "threads", label: "Threads", icon: ThreadsIcon, href: `https://www.threads.net/intent/post?text=${encodeURIComponent(`${shortText} ${url}`)}` },
+    { method: "x", label: "X", icon: XIcon, href: `https://x.com/intent/post?text=${encodeURIComponent(message)}&url=${encodeURIComponent(url)}` },
+    { method: "threads", label: "Threads", icon: ThreadsIcon, href: `https://www.threads.net/intent/post?text=${encodeURIComponent(`${message}\n\n${url}`)}` },
   ];
-  return { url, shortText, targets };
+  return { url, message, targets };
 }
 
 const track = (method: string, slug: string) => gaEvent("share", { method, content_type: "product", item_id: slug });
@@ -50,7 +55,7 @@ function ShareButtons({ product, onDone }: { product: ShareProduct; onDone?: () 
   const [canShare, setCanShare] = useState(false);
   const [copied, setCopied] = useState(false);
   useEffect(() => setCanShare(typeof navigator !== "undefined" && !!navigator.share), []);
-  const { url, shortText, targets } = shareData(product);
+  const { url, message, targets } = shareData(product);
 
   return (
     <>
@@ -79,7 +84,7 @@ function ShareButtons({ product, onDone }: { product: ShareProduct; onDone?: () 
           className={btn}
           onClick={() => {
             track("native", product.slug);
-            navigator.share({ title: product.name, text: shortText, url }).catch(() => {});
+            navigator.share({ title: product.name, text: message, url }).catch(() => {});
             onDone?.();
           }}
         >

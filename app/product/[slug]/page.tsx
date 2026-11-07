@@ -24,19 +24,21 @@ function shareImage(product: NonNullable<ReturnType<typeof getProductBySlug>>): 
 export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
   const product = getProductBySlug(params.slug);
   if (!product) return { title: "Product not found" };
+  // Link previews (WhatsApp, Facebook, X) show this title: partner-brand stock is named for its maker.
+  const by = product.thirdParty && product.brand ? product.brand : site.name;
   return {
     title: product.name,
     description: product.shortDescription,
     alternates: { canonical: `/product/${product.slug}/` },
     openGraph: {
       url: `/product/${product.slug}/`,
-      title: `${product.name} · ${site.name}`,
+      title: `${product.name} · ${by}`,
       description: product.shortDescription,
       images: [{ url: shareImage(product), width: 1200, height: 630, alt: product.name }],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${product.name} · ${site.name}`,
+      title: `${product.name} · ${by}`,
       description: product.shortDescription,
       images: [shareImage(product)],
     },
