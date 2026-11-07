@@ -12,8 +12,9 @@ import { WhatsAppIcon, FacebookIcon, XIcon, ThreadsIcon, ShareIcon, LinkIcon, Ch
  * (Instagram, Telegram…) or by copying the link. Plain links — no third-party scripts.
  *
  * Every target that takes text gets the same message: name, tagline, first 3 benefits (X, Threads
- * and the phone sheet add the link). Facebook's sharer takes only a URL, so its post is the link
- * preview alone (name, tagline, photo from the page's Open Graph tags and public/share/<slug>.jpg).
+ * and the phone sheet add the link). Facebook's sharer takes only a URL, so tapping it copies the
+ * message to the clipboard for the reader to paste into the post; the link preview (name, tagline,
+ * photo) comes from the page's Open Graph tags and public/share/<slug>.jpg.
  *
  * <ShareBar>  — the full row of buttons, on the product page.
  * <ShareMenu> — one share icon that pops the same buttons, on listing cards.
@@ -54,6 +55,7 @@ const btn =
 function ShareButtons({ product, onDone }: { product: ShareProduct; onDone?: () => void }) {
   const [canShare, setCanShare] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [fbNote, setFbNote] = useState<string | null>(null);
   useEffect(() => setCanShare(typeof navigator !== "undefined" && !!navigator.share), []);
   const { url, message, targets } = shareData(product);
 
@@ -69,6 +71,21 @@ function ShareButtons({ product, onDone }: { product: ShareProduct; onDone?: () 
           title={`Share on ${label}`}
           onClick={() => {
             track(method, product.slug);
+            if (method === "facebook") {
+              // The sharer can't take text, so the message goes on the clipboard for pasting.
+              // The pop-up stays open so the note can be read.
+              const note = (ok: boolean) =>
+                setFbNote(
+                  ok
+                    ? "Text copied. Facebook takes only the link, so paste the text into your post."
+                    : "Facebook takes only the link here.",
+                );
+              const copy = navigator.clipboard?.writeText(message);
+              if (copy) copy.then(() => note(true), () => note(false));
+              else note(false);
+              window.setTimeout(() => setFbNote(null), 12000);
+              return;
+            }
             onDone?.();
           }}
           className={btn}
@@ -112,6 +129,11 @@ function ShareButtons({ product, onDone }: { product: ShareProduct; onDone?: () 
       <span aria-live="polite" className="sr-only">
         {copied ? "Link copied" : ""}
       </span>
+      {fbNote && (
+        <p role="status" className="basis-full text-xs leading-relaxed text-forest/70">
+          {fbNote}
+        </p>
+      )}
     </>
   );
 }
