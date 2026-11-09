@@ -12,6 +12,7 @@ import type { CartLine } from "@/lib/cart/CartContext";
 import { ENQUIRY_URL } from "@/lib/enquiry";
 import { gaEvent } from "@/lib/analytics";
 import { isIndianPincode, isIndianState } from "@/lib/india";
+import { checkoutDelivery, formatWeight, PACKAGING_G, type Delivery } from "@/lib/delivery";
 
 const WA_NUMBER = "917416394594";
 const waLink = (text: string) => `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`;
@@ -40,6 +41,35 @@ export function orderSubtotal(lines: CartLine[]): { subtotal: number; hasPriceOn
 export function formatSubtotal(lines: CartLine[]): string {
   const { subtotal, hasPriceOnRequest } = orderSubtotal(lines);
   return `Subtotal: ${rupees(subtotal)} (MRP, incl. taxes)${hasPriceOnRequest ? " + items priced on request" : ""}`;
+}
+
+export type OrderCharges = {
+  subtotal: number;
+  hasPriceOnRequest: boolean;
+  /** Courier charge from the rule in lib/delivery.ts, the same one the UPI QR uses. */
+  delivery: Delivery;
+  /** Subtotal + delivery. null until the State is chosen and every pack has a weight. */
+  total: number | null;
+};
+
+/** Subtotal, delivery and total for a cart and a State. The checkout, the WhatsApp message and the payload all use this. */
+export function orderCharges(lines: CartLine[], state: string): OrderCharges {
+  const { subtotal, hasPriceOnRequest } = orderSubtotal(lines);
+  const delivery = checkoutDelivery(lines, state, subtotal);
+  return { subtotal, hasPriceOnRequest, delivery, total: delivery.status === "ok" ? subtotal + delivery.charge : null };
+}
+
+/** `Delivery: ₹120 (1.4 kg incl. 400 g packaging)`, or "to confirm on WhatsApp" while the charge is not known. */
+export function formatDelivery(d: Delivery): string {
+  if (d.status !== "ok") return "Delivery: to confirm on WhatsApp";
+  const weight = `${formatWeight(d.weightG)} incl. ${PACKAGING_G} g packaging`;
+  return d.charge === 0 ? `Delivery: free (${weight})` : `Delivery: ${rupees(d.charge)} (${weight})`;
+}
+
+/** `Total: ₹1,220`, or `Total: ₹1,100 + delivery` while the delivery charge is still to confirm. */
+export function formatTotal(c: OrderCharges): string {
+  const amount = c.total == null ? `${rupees(c.subtotal)} + delivery` : rupees(c.total);
+  return `Total: ${amount}${c.hasPriceOnRequest ? " + items priced on request" : ""}`;
 }
 
 // ---------- customer details ----------
@@ -177,10 +207,13 @@ export function orderMessage(
   payment: Payment = NO_PAYMENT,
 ): string {
   const trimmed = note?.trim();
+  const charges = orderCharges(lines, customer.state);
   return (
     `Order ${orderId} — Surakshitam Naturals\n\n` +
     formatOrderLines(lines) +
     `\n${formatSubtotal(lines)}` +
+    `\n${formatDelivery(charges.delivery)}` +
+    `\n${formatTotal(charges)}` +
     `\n${formatPayment(payment)}` +
     (trimmed ? `\n\nNote: ${trimmed}` : "") +
     `\n\nDeliver to:\n${formatDeliverTo(customer)}`
@@ -205,14 +238,15 @@ export async function submitOrder(input: {
   website?: string;
 }): Promise<OrderResult> {
   if (!ENQUIRY_URL) return { ok: false, error: "Order service is not configured (NEXT_PUBLIC_ENQUIRY_URL)." };
-  const { subtotal, hasPriceOnRequest } = orderSubtotal(input.lines);
-  // GA4: order count and value only — no customer details.
+  const charges = orderCharges(input.lines, input.customer.state);
+  // GA4: order count and value only — no customer details. Value is the total; the subtotal while delivery is still to confirm.
   gaEvent("whatsapp_order", {
     order_id: input.orderId,
-    value: subtotal,
+    value: charges.total ?? charges.subtotal,
     currency: "INR",
     items: input.lines.length,
-    price_on_request: hasPriceOnRequest,
+    price_on_request: charges.hasPriceOnRequest,
+    delivery_pending: charges.total == null,
   });
   const c = input.customer;
   const payload = {
@@ -226,8 +260,10 @@ export async function submitOrder(input: {
     state: c.state.trim(),
     pincode: c.pincode.trim(),
     items: formatOrderLines(input.lines),
-    subtotal,
-    priceOnRequest: hasPriceOnRequest,
+    subtotal: charges.subtotal,
+    delivery: charges.delivery.status === "ok" ? charges.delivery.charge : null,
+    total: charges.total,
+    priceOnRequest: charges.hasPriceOnRequest,
     note: input.note.trim(),
     paid: !!input.payment?.paid,
     paymentRef: input.payment?.paid ? input.payment.ref.trim() : "",

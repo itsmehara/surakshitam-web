@@ -13,7 +13,7 @@ import {
   validatePayment,
   type Payment,
   orderMessage,
-  orderSubtotal,
+  orderCharges,
   rememberSentOrder,
   saveCustomer,
   submitOrder,
@@ -137,25 +137,26 @@ export function CheckoutView() {
     );
   }
 
-  const { subtotal, hasPriceOnRequest } = orderSubtotal(lines);
+  // Subtotal + courier charge by weight and State (lib/delivery.ts); the QR and the summary read the same numbers.
+  const charges = orderCharges(lines, customer.state);
 
   return (
     <>
       <PageIntro
         eyebrow="Checkout"
         title="Where should we deliver?"
-        intro="We deliver across India — Hyderabad by local delivery, elsewhere by courier. Your order goes to us on WhatsApp with these details; we confirm availability and delivery charges, you pay on WhatsApp, we pack and send."
+        intro="We deliver across India — Hyderabad by local delivery, elsewhere by courier. Your order goes to us on WhatsApp with these details. Delivery is added by weight and state. We confirm availability on WhatsApp, and you pay by UPI here or on WhatsApp, then we pack and send."
       />
       <div className="container grid gap-8 py-8 sm:py-12 lg:grid-cols-[1fr_1.2fr] lg:gap-12">
         <div className="lg:order-2">
           <h2 className="font-serif text-xl font-semibold text-forest">Your order</h2>
           <div className="mt-3">
-            <OrderSummary lines={lines} />
+            <OrderSummary lines={lines} charges={charges} />
           </div>
           <Link href="/shop" className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-moss hover:text-forest">
             Add more products <ArrowRight width={14} />
           </Link>
-          <UpiPayment amount={subtotal} orderId={checkoutOrderId} priceOnRequest={hasPriceOnRequest} />
+          <UpiPayment charges={charges} orderId={checkoutOrderId} />
         </div>
 
         <form onSubmit={onSubmit} noValidate className="space-y-4 lg:order-1" aria-busy={sending}>

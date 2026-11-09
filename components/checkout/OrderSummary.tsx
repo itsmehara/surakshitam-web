@@ -4,11 +4,12 @@ import Image from "next/image";
 import type { CartLine } from "@/lib/cart/CartContext";
 import { lineKey } from "@/lib/cart/CartContext";
 import { productImage } from "@/lib/catalog";
-import { orderSubtotal, rupees } from "@/lib/order";
+import { PACKAGING_G, formatWeight } from "@/lib/delivery";
+import { rupees, type OrderCharges } from "@/lib/order";
 
-/** Read-only order lines + subtotal, at the top of the checkout page. */
-export function OrderSummary({ lines }: { lines: CartLine[] }) {
-  const { subtotal, hasPriceOnRequest } = orderSubtotal(lines);
+/** Read-only order lines, then subtotal, delivery and total, at the top of the checkout page. */
+export function OrderSummary({ lines, charges }: { lines: CartLine[]; charges: OrderCharges }) {
+  const { subtotal, hasPriceOnRequest, delivery, total } = charges;
   return (
     <section aria-label="Order summary" className="rounded-lg border border-forest/10 bg-white/70">
       <ul className="divide-y divide-forest/8 px-4">
@@ -37,15 +38,46 @@ export function OrderSummary({ lines }: { lines: CartLine[] }) {
           </li>
         ))}
       </ul>
-      <div className="flex items-baseline justify-between border-t border-forest/10 px-4 py-3">
+      <div className="flex items-baseline justify-between gap-3 border-t border-forest/10 px-4 py-2.5">
         <span className="text-sm text-forest/70">Subtotal</span>
-        <span className="font-serif text-xl font-semibold tabular-nums text-forest">
+        <span className="text-sm font-medium tabular-nums text-forest">
           {rupees(subtotal)}
           {hasPriceOnRequest && <span className="ml-1 text-xs font-normal text-forest/50">+ on request</span>}
         </span>
       </div>
+      <div className="flex items-start justify-between gap-3 border-t border-forest/10 px-4 py-2.5">
+        <span className="text-sm text-forest/70">Delivery</span>
+        <span className="text-right text-sm tabular-nums text-forest">
+          {delivery.status === "ok" ? (
+            <>
+              <span className="block font-medium">{delivery.charge === 0 ? "Free" : rupees(delivery.charge)}</span>
+              <span className="block text-xs text-forest/50">
+                {formatWeight(delivery.weightG)} incl. {PACKAGING_G} g packaging
+              </span>
+            </>
+          ) : delivery.status === "pick-state" ? (
+            <span className="text-xs text-forest/50">Pick your state for the charge</span>
+          ) : (
+            <span className="text-xs text-forest/50">Confirmed on WhatsApp</span>
+          )}
+        </span>
+      </div>
+      <div className="flex items-baseline justify-between border-t border-forest/10 px-4 py-3">
+        <span className="text-sm text-forest/70">Total</span>
+        <span className="font-serif text-xl font-semibold tabular-nums text-forest">
+          {total == null ? (
+            <>
+              {rupees(subtotal)}
+              <span className="ml-1 text-xs font-normal text-forest/50">+ delivery</span>
+            </>
+          ) : (
+            rupees(total)
+          )}
+          {hasPriceOnRequest && <span className="ml-1 text-xs font-normal text-forest/50">+ on request</span>}
+        </span>
+      </div>
       <p className="border-t border-forest/8 px-4 py-2 text-[0.7rem] leading-snug text-forest/50">
-        MRP, inclusive of all taxes. Delivery across India — Hyderabad by local delivery, elsewhere by courier; charges confirmed on WhatsApp before you pay.
+        MRP, inclusive of all taxes. Delivery is by weight and state, across India. We confirm your order on WhatsApp before you pay.
       </p>
     </section>
   );

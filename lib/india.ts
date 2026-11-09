@@ -76,12 +76,12 @@ export function deliveryZone(pin: string): DeliveryZone {
 export function deliveryHint(pin: string): string {
   switch (deliveryZone(pin)) {
     case "hyderabad":
-      return "Hyderabad — local delivery. Charges, if any, confirmed on WhatsApp.";
+      return "Hyderabad — local delivery.";
     case "telangana-andhra":
-      return "Telangana / Andhra — sent by courier; charges confirmed on WhatsApp.";
+      return "Telangana / Andhra — sent by courier.";
     case "india":
-      return "Sent by courier anywhere in India; charges confirmed on WhatsApp.";
+      return "Sent by courier anywhere in India.";
     default:
-      return "We deliver across India — Hyderabad by local delivery, elsewhere by courier. Charges confirmed on WhatsApp.";
+      return "We deliver across India — Hyderabad by local delivery, elsewhere by courier.";
   }
 }

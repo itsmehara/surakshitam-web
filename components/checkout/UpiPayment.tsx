@@ -3,29 +3,24 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { toDataURL } from "qrcode";
-import { rupees } from "@/lib/order";
+import { PACKAGING_G, formatWeight } from "@/lib/delivery";
+import { rupees, type OrderCharges } from "@/lib/order";
 import { UPI_ID, UPI_PAYEE_NAME, upiPayLink } from "@/lib/upi";
 
 /**
- * "Pay by UPI" on /checkout/: the cart total as a QR code, drawn in the browser
+ * "Pay by UPI" on /checkout/: the order total as a QR code, drawn in the browser
  * (no QR service is called), plus a button that opens the UPI app on a phone.
- * The amount is the cart subtotal only. Delivery charges are confirmed on
- * WhatsApp and are not added here yet.
+ * The total is the cart subtotal plus the courier charge (lib/delivery.ts). The QR
+ * waits until a State is chosen and every pack has a weight, so the amount is never short.
  *
  * The payment note carries the order ID, the same one the WhatsApp message uses,
  * so the founders can match the bank credit to the order.
  */
-export function UpiPayment({
-  amount,
-  orderId,
-  priceOnRequest,
-}: {
-  amount: number;
-  orderId: string;
-  priceOnRequest: boolean;
-}) {
-  // Items priced on request are not in the subtotal, so a QR for it would ask for too little.
-  const payable = !priceOnRequest && amount > 0;
+export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderId: string }) {
+  const { subtotal, hasPriceOnRequest, delivery, total } = charges;
+  // Items priced on request are not in the subtotal, and delivery is unknown until a State is chosen.
+  const payable = !hasPriceOnRequest && total != null && total > 0;
+  const amount = total ?? 0;
   const link = useMemo(() => upiPayLink(amount, `Order ${orderId}`), [amount, orderId]);
   const [qr, setQr] = useState("");
   const [copied, setCopied] = useState(false);
@@ -63,6 +58,18 @@ export function UpiPayment({
   // The order ID is made after the first render, so wait for it.
   if (!orderId) return null;
 
+  const waiting = hasPriceOnRequest
+    ? "Some items are priced on request, so we confirm the total on WhatsApp first. You can pay by UPI once we send it."
+    : delivery.status === "pick-state"
+      ? "Choose your state under Delivery details to see the total with delivery. The UPI QR appears then."
+      : "Delivery for part of your order is confirmed on WhatsApp, so we send the total there first. You can pay by UPI once we send it.";
+
+  // Shown only when payable, so delivery is always the computed charge here.
+  const breakdown =
+    delivery.status === "ok"
+      ? `${rupees(subtotal)} for the cart + ${delivery.charge === 0 ? "free delivery" : `${rupees(delivery.charge)} delivery`} (${formatWeight(delivery.weightG)} incl. ${PACKAGING_G} g packaging)`
+      : null;
+
   return (
     <section aria-labelledby="upi-pay-heading" className="mt-6 rounded-lg border border-forest/10 bg-white/70 p-4">
       <h2 id="upi-pay-heading" className="font-serif text-xl font-semibold text-forest">
@@ -70,9 +77,7 @@ export function UpiPayment({
       </h2>
 
       {!payable ? (
-        <p className="mt-2 text-sm leading-relaxed text-forest/65">
-          Some items are priced on request, so we confirm the total on WhatsApp first. You can pay by UPI once we send it.
-        </p>
+        <p className="mt-2 text-sm leading-relaxed text-forest/65">{waiting}</p>
       ) : (
         <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start">
           <div className="flex shrink-0 justify-center sm:justify-start">
@@ -94,6 +99,7 @@ export function UpiPayment({
             <p>
               Pay <span className="font-serif text-lg font-semibold tabular-nums text-forest">{rupees(amount)}</span> to
             </p>
+            {breakdown && <p className="text-xs leading-relaxed text-forest/60">{breakdown}</p>}
             <div className="flex flex-wrap items-center gap-2">
               <span className="break-all font-medium text-forest">{UPI_ID}</span>
               <button
@@ -114,7 +120,7 @@ export function UpiPayment({
               Pay with a UPI app
             </a>
             <p className="text-xs leading-relaxed text-forest/55">
-              This is the cart total. If delivery charges apply, we confirm them on WhatsApp. Order note: {orderId}.
+              The total includes delivery. Order note: {orderId}.
             </p>
             <p className="text-xs leading-relaxed text-forest/55">
               Paid? Tick &ldquo;I&apos;ve already paid by UPI&rdquo; below and enter the transaction ID.

@@ -67,7 +67,7 @@ export function BuyBox({ product, variant = "card" }: { product: Product; varian
           )}
           {!size.soldOut && size.mrp != null && (
             <p className="mt-1 text-xs text-forest/50">
-              MRP inclusive of all taxes. Delivery charges, if any, confirmed on WhatsApp.
+              MRP inclusive of all taxes. Delivery is added at checkout, by weight and state.
             </p>
           )}
         </div>
