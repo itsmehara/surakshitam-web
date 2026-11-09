@@ -3,15 +3,16 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { toDataURL } from "qrcode";
-import { formatWeight } from "@/lib/delivery";
+import { FREE_DELIVERY_OVER, formatWeight } from "@/lib/delivery";
 import { rupees, type OrderCharges } from "@/lib/order";
 import { UPI_ID, UPI_PAYEE_NAME, upiPayLink } from "@/lib/upi";
 
 /**
  * "Pay by UPI" on /checkout/: the order total as a QR code, drawn in the browser
  * (no QR service is called), plus a button that opens the UPI app on a phone.
- * The total is the cart subtotal plus the courier charge (lib/delivery.ts). The QR
- * waits until a State is chosen and every pack has a weight, so the amount is never short.
+ * The total is the cart subtotal plus the courier charge (lib/delivery.ts). Free
+ * delivery and Rapido add nothing, since the rider is paid the Rapido fare directly.
+ * The QR waits until a courier State is chosen and every pack has a weight, so the amount is never short.
  *
  * The payment note carries the order ID, the same one the WhatsApp message uses,
  * so the founders can match the bank credit to the order.
@@ -64,11 +65,15 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
       ? "Choose your state under Delivery details to see the total with delivery. The UPI QR appears then."
       : "Delivery for part of your order is confirmed on WhatsApp, so we send the total there first. You can pay by UPI once we send it.";
 
-  // Shown only when payable, so delivery is always the computed charge here.
+  // Shown only when payable, so the delivery status is settled here.
   const breakdown =
-    delivery.status === "ok"
-      ? `${rupees(subtotal)} for the cart + ${delivery.charge === 0 ? "free delivery" : `${rupees(delivery.charge)} delivery`} (${formatWeight(delivery.weightG)})`
-      : null;
+    delivery.status === "courier"
+      ? `${rupees(subtotal)} for the cart + ${rupees(delivery.charge)} courier (${formatWeight(delivery.weightG)})`
+      : delivery.status === "free"
+        ? `${rupees(subtotal)} for the cart, with free delivery over ${rupees(FREE_DELIVERY_OVER)}`
+        : delivery.status === "rapido"
+          ? `${rupees(subtotal)} for the cart. The Rapido fare is paid to the rider.`
+          : null;
 
   return (
     <section aria-labelledby="upi-pay-heading" className="mt-6 rounded-lg border border-forest/10 bg-white/70 p-4">
@@ -120,7 +125,7 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
               Pay with a UPI app
             </a>
             <p className="text-xs leading-relaxed text-forest/55">
-              The total includes delivery. Order note: {orderId}.
+              {delivery.status === "rapido" ? "The Rapido fare is not in this amount." : "The total includes delivery."} Order note: {orderId}.
             </p>
             <p className="text-xs leading-relaxed text-forest/55">
               Paid? Tick &ldquo;I&apos;ve already paid by UPI&rdquo; below and enter the transaction ID.

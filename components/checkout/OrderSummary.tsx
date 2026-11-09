@@ -4,12 +4,54 @@ import Image from "next/image";
 import type { CartLine } from "@/lib/cart/CartContext";
 import { lineKey } from "@/lib/cart/CartContext";
 import { productImage } from "@/lib/catalog";
-import { formatWeight } from "@/lib/delivery";
+import { FREE_DELIVERY_OVER, formatWeight, type CourierBreakdown, type Delivery } from "@/lib/delivery";
 import { rupees, type OrderCharges } from "@/lib/order";
+
+/** The courier sum in words: "₹120 for the first 2 kg, plus ₹100 for 2 more kg at ₹50 a kg". */
+function courierSum(b: CourierBreakdown): string {
+  if (b.extraKg === 0) return `${rupees(b.base)} for up to 2 kg`;
+  return `${rupees(b.base)} for the first 2 kg, plus ${rupees(b.extra)} for ${b.extraKg} more kg at ${rupees(b.perKg)} a kg`;
+}
+
+/** The Delivery figure, with the calculation under it so the customer can see how it is reached. */
+function DeliveryFigure({ delivery }: { delivery: Delivery }) {
+  switch (delivery.status) {
+    case "free":
+      return (
+        <>
+          <span className="block font-medium">Free</span>
+          <span className="block text-xs text-forest/50">
+            {delivery.method === "rapido" ? "Rapido" : "Courier"}, orders over {rupees(FREE_DELIVERY_OVER)}
+          </span>
+        </>
+      );
+    case "rapido":
+      return (
+        <>
+          <span className="block font-medium">Rapido</span>
+          <span className="block text-xs text-forest/50">Fare paid to the rider, not in the total</span>
+        </>
+      );
+    case "courier":
+      return (
+        <>
+          <span className="block font-medium">{rupees(delivery.charge)}</span>
+          <span className="block text-xs text-forest/50">Courier, {formatWeight(delivery.weightG)}</span>
+          <span className="block text-xs text-forest/50">{courierSum(delivery.breakdown)}</span>
+        </>
+      );
+    case "pick-state":
+      return <span className="text-xs text-forest/50">Pick your state for the charge</span>;
+    default:
+      return <span className="text-xs text-forest/50">Confirmed on WhatsApp</span>;
+  }
+}
 
 /** Read-only order lines, then subtotal, delivery and total, at the top of the checkout page. */
 export function OrderSummary({ lines, charges }: { lines: CartLine[]; charges: OrderCharges }) {
   const { subtotal, hasPriceOnRequest, delivery, total } = charges;
+  // Free delivery is for a subtotal above FREE_DELIVERY_OVER, so this is what the cart still needs.
+  const moreForFree = FREE_DELIVERY_OVER + 1 - subtotal;
   return (
     <section aria-label="Order summary" className="rounded-lg border border-forest/10 bg-white/70">
       <ul className="divide-y divide-forest/8 px-4">
@@ -47,21 +89,13 @@ export function OrderSummary({ lines, charges }: { lines: CartLine[]; charges: O
       </div>
       <div className="flex items-start justify-between gap-3 border-t border-forest/10 px-4 py-2.5">
         <span className="text-sm text-forest/70">Delivery</span>
-        <span className="text-right text-sm tabular-nums text-forest">
-          {delivery.status === "ok" ? (
-            <>
-              <span className="block font-medium">{delivery.charge === 0 ? "Free" : rupees(delivery.charge)}</span>
-              <span className="block text-xs text-forest/50">
-                {formatWeight(delivery.weightG)}
-              </span>
-            </>
-          ) : delivery.status === "pick-state" ? (
-            <span className="text-xs text-forest/50">Pick your state for the charge</span>
-          ) : (
-            <span className="text-xs text-forest/50">Confirmed on WhatsApp</span>
-          )}
+        <span className="space-y-0.5 text-right text-sm tabular-nums text-forest">
+          <DeliveryFigure delivery={delivery} />
         </span>
       </div>
+      {delivery.status !== "free" && moreForFree > 0 && (
+        <p className="border-t border-forest/8 px-4 py-2 text-xs text-moss">Add {rupees(moreForFree)} more for free delivery.</p>
+      )}
       <div className="flex items-baseline justify-between border-t border-forest/10 px-4 py-3">
         <span className="text-sm text-forest/70">Total</span>
         <span className="font-serif text-xl font-semibold tabular-nums text-forest">
@@ -73,11 +107,13 @@ export function OrderSummary({ lines, charges }: { lines: CartLine[]; charges: O
           ) : (
             rupees(total)
           )}
+          {delivery.status === "rapido" && <span className="ml-1 text-xs font-normal text-forest/50">+ Rapido fare</span>}
           {hasPriceOnRequest && <span className="ml-1 text-xs font-normal text-forest/50">+ on request</span>}
         </span>
       </div>
       <p className="border-t border-forest/8 px-4 py-2 text-[0.7rem] leading-snug text-forest/50">
-        MRP, inclusive of all taxes. Delivery is by weight and state, across India. We confirm your order on WhatsApp before you pay.
+        MRP, inclusive of all taxes. Free delivery on orders over {rupees(FREE_DELIVERY_OVER)}. Courier is charged by weight
+        and state, and part of a kg counts as a full kg. We confirm your order on WhatsApp before you pay.
       </p>
     </section>
   );

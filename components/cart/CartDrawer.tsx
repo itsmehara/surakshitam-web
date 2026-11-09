@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { useCart, MAX_NOTE, lineKey } from "@/lib/cart/CartContext";
 import { productImage } from "@/lib/catalog";
+import { FREE_DELIVERY_OVER } from "@/lib/delivery";
 import { rupees } from "@/lib/order";
 import { CartIcon, CloseIcon, ArrowRight } from "@/components/icons";
 import { cn } from "@/lib/cn";
@@ -182,6 +183,9 @@ export function CartDrawer() {
                   {hasPriceOnRequest && <span className="ml-1 text-xs font-normal text-forest/50">+ on request</span>}
                 </span>
               </div>
+              <p className="text-[0.7rem] leading-snug text-forest/50">
+                Delivery is added at checkout. Free on orders over {rupees(FREE_DELIVERY_OVER)}.
+              </p>
               <textarea
                 ref={noteRef}
                 id="enq-list-note"

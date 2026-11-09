@@ -14,6 +14,7 @@ import {
   type Payment,
   orderMessage,
   orderCharges,
+  rupees,
   rememberSentOrder,
   saveCustomer,
   submitOrder,
@@ -23,6 +24,7 @@ import {
   type CustomerErrors,
 } from "@/lib/order";
 import { trackWhatsAppClick } from "@/lib/enquiry";
+import { FREE_DELIVERY_OVER, rapidoAvailable, type DeliveryMethod } from "@/lib/delivery";
 import { OrderSummary } from "./OrderSummary";
 import { UpiPayment } from "./UpiPayment";
 import { PageIntro } from "@/components/ui/PageIntro";
@@ -117,6 +119,8 @@ export function CheckoutView() {
     if (errors[k]) setErrors((er) => ({ ...er, [k]: undefined }));
   };
 
+  const setMethod = (m: DeliveryMethod) => setCustomer((c) => ({ ...c, deliveryMethod: m }));
+
   function forget() {
     clearCustomer();
     setCustomer(EMPTY_CUSTOMER);
@@ -176,15 +180,19 @@ export function CheckoutView() {
     );
   }
 
-  // Subtotal + courier charge by weight and State (lib/delivery.ts); the QR and the summary read the same numbers.
-  const charges = orderCharges(lines, customer.state);
+  // Delivery by courier or Rapido (lib/delivery.ts); the QR and the summary read the same numbers.
+  // Rapido is offered only for a Hyderabad pincode. Anywhere else the choice is courier.
+  const rapidoOk = rapidoAvailable(pinNow);
+  const method: DeliveryMethod = rapidoOk ? customer.deliveryMethod : "courier";
+  const freeOver = rupees(FREE_DELIVERY_OVER);
+  const charges = orderCharges(lines, customer);
 
   return (
     <>
       <PageIntro
         eyebrow="Checkout"
         title="Where should we deliver?"
-        intro="We deliver across India — Hyderabad by local delivery, elsewhere by courier. Your order goes to us on WhatsApp with these details. Delivery is added by weight and state. We confirm availability on WhatsApp, and you pay by UPI here or on WhatsApp, then we pack and send."
+        intro={`We deliver across India by courier, and in Hyderabad and Secunderabad you can choose Rapido. Courier is charged by weight and state. Orders over ${freeOver} ship free. Your order goes to us on WhatsApp with these details. We confirm availability on WhatsApp, and you pay by UPI here or on WhatsApp, then we pack and send.`}
       />
       <div className="container grid gap-8 py-8 sm:py-12 lg:grid-cols-[1fr_1.2fr] lg:gap-12">
         <div className="lg:order-2">
@@ -317,6 +325,49 @@ export function CheckoutView() {
               </div>
             )}
           </div>
+
+          {/* Courier, or Rapido for Hyderabad and Secunderabad pincodes (500xxx) only. */}
+          <fieldset className="rounded-lg border border-forest/10 bg-white/70 p-3">
+            <legend className="px-1 text-sm font-medium text-forest">How should we deliver?</legend>
+            <label className="flex cursor-pointer items-start gap-2.5 py-1.5 text-sm text-forest">
+              <input
+                type="radio"
+                name="deliveryMethod"
+                value="courier"
+                checked={method === "courier"}
+                onChange={() => setMethod("courier")}
+                className="mt-1 h-4 w-4 accent-moss"
+              />
+              <span>
+                <span className="font-medium">Courier</span>
+                <span className="block text-xs text-forest/55">
+                  Charged by weight and state, added to your total. Free on orders over {freeOver}.
+                </span>
+              </span>
+            </label>
+            {rapidoOk ? (
+              <label className="flex cursor-pointer items-start gap-2.5 py-1.5 text-sm text-forest">
+                <input
+                  type="radio"
+                  name="deliveryMethod"
+                  value="rapido"
+                  checked={method === "rapido"}
+                  onChange={() => setMethod("rapido")}
+                  className="mt-1 h-4 w-4 accent-moss"
+                />
+                <span>
+                  <span className="font-medium">Rapido, Hyderabad and Secunderabad</span>
+                  <span className="block text-xs text-forest/55">
+                    You pay the Rapido fare to the rider, so it is not in your total. Free on orders over {freeOver}.
+                  </span>
+                </span>
+              </label>
+            ) : (
+              pinNow.length === 6 && (
+                <p className="px-1 py-1.5 text-xs text-forest/55">Rapido is for Hyderabad and Secunderabad pincodes only.</p>
+              )
+            )}
+          </fieldset>
 
           <Field idPrefix="co" label="Email (optional)" name="email" type="email" autoComplete="email" value={customer.email} onChange={set("email")} error={errors.email} />
 

@@ -2,7 +2,9 @@
  * India-specific delivery helpers for checkout (Supriya/Srikanth, 19 Sep 2026):
  * Hyderabad orders go by local delivery (by hand when nearby, else Porter /
  * Uber-type services), the rest of India by courier — the founders pick the
- * service per order, by pincode. The site never names a service. So the customer picks a State, types
+ * service per order, by pincode. The site named no service until 9 Nov 2026, when checkout began
+ * offering Rapido for Hyderabad and Secunderabad pincodes only (see `lib/delivery.ts`, PENDING F1).
+ * So the customer picks a State, types
  * the City, and the pincode must be a real Indian one.
  */
 

@@ -12,7 +12,7 @@ import type { CartLine } from "@/lib/cart/CartContext";
 import { ENQUIRY_URL } from "@/lib/enquiry";
 import { gaEvent } from "@/lib/analytics";
 import { isIndianPincode, isIndianState } from "@/lib/india";
-import { checkoutDelivery, formatWeight, type Delivery } from "@/lib/delivery";
+import { FREE_DELIVERY_OVER, checkoutDelivery, deliveryAdded, deliveryMethodOf, formatWeight, type Delivery, type DeliveryMethod } from "@/lib/delivery";
 
 const WA_NUMBER = "917416394594";
 const waLink = (text: string) => `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`;
@@ -46,30 +46,46 @@ export function formatSubtotal(lines: CartLine[]): string {
 export type OrderCharges = {
   subtotal: number;
   hasPriceOnRequest: boolean;
-  /** Courier charge from the rule in lib/delivery.ts, the same one the UPI QR uses. */
+  /** How delivery is charged (lib/delivery.ts). The QR, the WhatsApp message and the payload all read this. */
   delivery: Delivery;
-  /** Subtotal + delivery. null until the State is chosen and every pack has a weight. */
+  /** Subtotal + what delivery adds. Rapido and free delivery add nothing. null while the courier charge is still to confirm. */
   total: number | null;
 };
 
-/** Subtotal, delivery and total for a cart and a State. The checkout, the WhatsApp message and the payload all use this. */
-export function orderCharges(lines: CartLine[], state: string): OrderCharges {
+/** Subtotal, delivery and total for a cart and a customer's pincode, State and delivery method. The checkout, the WhatsApp message and the payload all use this. */
+export function orderCharges(lines: CartLine[], c: Pick<Customer, "state" | "pincode" | "deliveryMethod">): OrderCharges {
   const { subtotal, hasPriceOnRequest } = orderSubtotal(lines);
-  const delivery = checkoutDelivery(lines, state, subtotal);
-  return { subtotal, hasPriceOnRequest, delivery, total: delivery.status === "ok" ? subtotal + delivery.charge : null };
+  const delivery = checkoutDelivery(lines, { method: c.deliveryMethod, pincode: c.pincode, state: c.state }, subtotal);
+  const added = deliveryAdded(delivery);
+  return { subtotal, hasPriceOnRequest, delivery, total: added == null ? null : subtotal + added };
 }
 
-/** `Delivery: ₹120 (1.4 kg)`, or "to confirm on WhatsApp" while the charge is not known. */
+/** `Delivery: ₹170 by courier (3.4 kg)`, `Delivery: Rapido, fare paid to the rider`, or "to confirm on WhatsApp" while the courier charge is not known. */
 export function formatDelivery(d: Delivery): string {
-  if (d.status !== "ok") return "Delivery: to confirm on WhatsApp";
-  const weight = formatWeight(d.weightG);
-  return d.charge === 0 ? `Delivery: free (${weight})` : `Delivery: ${rupees(d.charge)} (${weight})`;
+  switch (d.status) {
+    case "free":
+      return `Delivery: free (order over ${rupees(FREE_DELIVERY_OVER)}, by ${d.method === "rapido" ? "Rapido" : "courier"})`;
+    case "rapido":
+      return "Delivery: Rapido, fare paid to the rider";
+    case "courier":
+      return `Delivery: ${rupees(d.charge)} by courier (${formatWeight(d.weightG)})`;
+    default:
+      return "Delivery: to confirm on WhatsApp";
+  }
 }
 
-/** `Total: ₹1,220`, or `Total: ₹1,100 + delivery` while the delivery charge is still to confirm. */
+/** Short reason for the Orders tab when the delivery amount is 0 or unknown. */
+function deliveryNoteOf(d: Delivery): string {
+  if (d.status === "rapido") return "Rapido: customer pays the rider";
+  if (d.status === "free") return `Free: order over ${rupees(FREE_DELIVERY_OVER)}`;
+  return "";
+}
+
+/** `Total: ₹1,220`, `Total: ₹1,100 + Rapido fare`, or `Total: ₹1,100 + delivery` while the courier charge is still to confirm. */
 export function formatTotal(c: OrderCharges): string {
   const amount = c.total == null ? `${rupees(c.subtotal)} + delivery` : rupees(c.total);
-  return `Total: ${amount}${c.hasPriceOnRequest ? " + items priced on request" : ""}`;
+  const rider = c.delivery.status === "rapido" ? " + Rapido fare (paid to the rider)" : "";
+  return `Total: ${amount}${rider}${c.hasPriceOnRequest ? " + items priced on request" : ""}`;
 }
 
 // ---------- customer details ----------
@@ -85,9 +101,11 @@ export type Customer = {
   email: string;
   /** Post office picked from the pincode lookup (lib/pincode.ts). Optional; sent with the order. */
   postOffice: string;
+  /** Courier, or Rapido for Hyderabad pincodes (lib/delivery.ts). Falls back to courier outside 500xxx. */
+  deliveryMethod: DeliveryMethod;
 };
 
-export const EMPTY_CUSTOMER: Customer = { name: "", phone: "", address: "", city: "", state: "", pincode: "", email: "", postOffice: "" };
+export const EMPTY_CUSTOMER: Customer = { name: "", phone: "", address: "", city: "", state: "", pincode: "", email: "", postOffice: "", deliveryMethod: "courier" };
 
 const CUSTOMER_KEY = "sn-customer-v1";
 
@@ -98,7 +116,17 @@ export function loadCustomer(): Customer | null {
     if (!raw) return null;
     const c = JSON.parse(raw) as Partial<Customer>;
     const pick = (k: keyof Customer) => (typeof c[k] === "string" ? (c[k] as string) : "");
-    return { name: pick("name"), phone: pick("phone"), address: pick("address"), city: pick("city"), state: pick("state"), pincode: pick("pincode"), email: pick("email"), postOffice: pick("postOffice") };
+    return {
+      name: pick("name"),
+      phone: pick("phone"),
+      address: pick("address"),
+      city: pick("city"),
+      state: pick("state"),
+      pincode: pick("pincode"),
+      email: pick("email"),
+      postOffice: pick("postOffice"),
+      deliveryMethod: c.deliveryMethod === "rapido" ? "rapido" : "courier",
+    };
   } catch {
     return null;
   }
@@ -210,7 +238,7 @@ export function orderMessage(
   payment: Payment = NO_PAYMENT,
 ): string {
   const trimmed = note?.trim();
-  const charges = orderCharges(lines, customer.state);
+  const charges = orderCharges(lines, customer);
   return (
     `Order ${orderId} — Surakshitam Naturals\n\n` +
     formatOrderLines(lines) +
@@ -241,7 +269,7 @@ export async function submitOrder(input: {
   website?: string;
 }): Promise<OrderResult> {
   if (!ENQUIRY_URL) return { ok: false, error: "Order service is not configured (NEXT_PUBLIC_ENQUIRY_URL)." };
-  const charges = orderCharges(input.lines, input.customer.state);
+  const charges = orderCharges(input.lines, input.customer);
   // GA4: order count and value only — no customer details. Value is the total; the subtotal while delivery is still to confirm.
   gaEvent("whatsapp_order", {
     order_id: input.orderId,
@@ -265,7 +293,9 @@ export async function submitOrder(input: {
     postOffice: c.postOffice.trim(),
     items: formatOrderLines(input.lines),
     subtotal: charges.subtotal,
-    delivery: charges.delivery.status === "ok" ? charges.delivery.charge : null,
+    delivery: deliveryAdded(charges.delivery),
+    deliveryMethod: deliveryMethodOf(charges.delivery),
+    deliveryNote: deliveryNoteOf(charges.delivery),
     total: charges.total,
     priceOnRequest: charges.hasPriceOnRequest,
     note: input.note.trim(),
