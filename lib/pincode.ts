@@ -70,8 +70,9 @@ export function pickableOffices(offices: PostOffice[]): PostOffice[] {
 }
 
 /**
- * Fill City, State and the post office from one office. City and State are only
- * replaced while the customer has not typed their own (`edited`).
+ * Fill City, State and the post office from one office. City is the office's own
+ * locality (its name), not the district head office, so each pincode gets its own City.
+ * City and State are only replaced while the customer has not typed their own (`edited`).
  */
 export function fillFromOffice<T extends { city: string; state: string; postOffice: string }>(
   c: T,
@@ -81,7 +82,7 @@ export function fillFromOffice<T extends { city: string; state: string; postOffi
   return {
     ...c,
     postOffice: office.name,
-    city: !edited.city && office.district ? office.district : c.city,
+    city: !edited.city && office.name ? office.name : c.city,
     state: !edited.state && office.state ? office.state : c.state,
   };
 }
