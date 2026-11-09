@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useCart, MAX_NOTE } from "@/lib/cart/CartContext";
 import {
   EMPTY_CUSTOMER,
@@ -27,7 +27,8 @@ import { OrderSummary } from "./OrderSummary";
 import { UpiPayment } from "./UpiPayment";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { Field, inputClass } from "@/components/ui/FormField";
-import { INDIAN_STATES, deliveryHint, stateFromPincode } from "@/lib/india";
+import { INDIAN_STATES, deliveryHint, isIndianPincode, stateFromPincode } from "@/lib/india";
+import { fillFromOffice, lookupPincode, pickableOffices, type PostOffice } from "@/lib/pincode";
 import { WhatsAppIcon, CartIcon, ArrowRight } from "@/components/icons";
 import { cn } from "@/lib/cn";
 
@@ -54,6 +55,11 @@ export function CheckoutView() {
   const [sending, setSending] = useState(false);
   // One order ID per checkout visit: the UPI payment note and the WhatsApp message share it.
   const [checkoutOrderId, setCheckoutOrderId] = useState("");
+  // Post offices for the pincode, and where the lookup stands (lib/pincode.ts).
+  const [offices, setOffices] = useState<PostOffice[]>([]);
+  const [lookup, setLookup] = useState<"idle" | "loading" | "ok" | "not-found" | "unavailable">("idle");
+  // City and State the customer typed or picked for the current pincode. A lookup never overwrites them.
+  const touched = useRef({ city: false, state: false });
 
   useEffect(() => {
     setCheckoutOrderId(newOrderId());
@@ -61,17 +67,50 @@ export function CheckoutView() {
     if (saved && (saved.name || saved.phone)) {
       setCustomer(saved);
       setRemembered(true);
+      // Remembered City and State count as the customer's, so this visit's lookup keeps them.
+      touched.current = { city: !!saved.city, state: !!saved.state };
     }
   }, []);
 
+  // Pincode → City, State and post office (lib/pincode.ts). A failed or slow lookup changes nothing.
+  const pinNow = customer.pincode.trim();
+  useEffect(() => {
+    if (!isIndianPincode(pinNow)) {
+      setOffices([]);
+      setLookup("idle");
+      return;
+    }
+    let live = true;
+    setLookup("loading");
+    lookupPincode(pinNow).then((out) => {
+      if (!live) return;
+      if (out.status !== "ok") {
+        setOffices([]);
+        setLookup(out.status);
+        return;
+      }
+      const list = pickableOffices(out.offices);
+      setOffices(list);
+      setLookup("ok");
+      // Keep the post office the customer picked if this pincode still has it; otherwise the first delivering one.
+      setCustomer((c) => fillFromOffice(c, list.find((o) => o.name === c.postOffice) ?? list[0], touched.current));
+    });
+    return () => {
+      live = false;
+    };
+  }, [pinNow]);
+
   const set = (k: keyof Customer) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const value = e.target.value;
+    if (k === "city" || k === "state") touched.current[k] = true;
+    // A new pincode starts the City and State afresh; the lookup refills them. The pincode alone pre-selects the State until then.
+    if (k === "pincode" && value !== customer.pincode) touched.current = { city: false, state: false };
     setCustomer((c) => {
       const next = { ...c, [k]: value };
-      // Pincode encodes the state — pre-select it when the customer hasn't chosen one (still editable).
-      if (k === "pincode" && !c.state) {
-        const guess = stateFromPincode(value);
-        if (guess) next.state = guess;
+      if (k === "pincode" && value !== c.pincode) {
+        next.city = "";
+        next.state = stateFromPincode(value) ?? "";
+        next.postOffice = "";
       }
       return next;
     });
@@ -242,6 +281,41 @@ export function CheckoutView() {
               {errors.state && <p className="mt-1 text-xs text-clay">{errors.state}</p>}
             </div>
             <p className="text-xs text-forest/55 sm:col-span-3">{deliveryHint(customer.pincode)}</p>
+            {lookup === "loading" && <p role="status" className="text-xs text-forest/55 sm:col-span-3">Looking up your pincode…</p>}
+            {lookup === "not-found" && (
+              <p role="status" className="text-xs text-clay sm:col-span-3">
+                We couldn&apos;t find this pincode. Check it, or enter city and state by hand.
+              </p>
+            )}
+            {lookup === "unavailable" && (
+              <p role="status" className="text-xs text-forest/55 sm:col-span-3">
+                Pincode lookup is unavailable right now. Enter city and state by hand.
+              </p>
+            )}
+            {lookup === "ok" && offices.length > 0 && (
+              <div className="sm:col-span-3">
+                <label htmlFor="co-postoffice" className="mb-1 block text-sm font-medium text-forest">
+                  Post office
+                </label>
+                <select
+                  id="co-postoffice"
+                  name="postOffice"
+                  value={customer.postOffice}
+                  onChange={(e) => {
+                    const office = offices.find((o) => o.name === e.target.value);
+                    if (office) setCustomer((c) => fillFromOffice(c, office, touched.current));
+                  }}
+                  className={cn(inputClass, "h-10")}
+                >
+                  {offices.map((o) => (
+                    <option key={o.name} value={o.name}>
+                      {o.district ? `${o.name} (${o.district})` : o.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-forest/55">Filled from your pincode. Pick another post office if it is nearer.</p>
+              </div>
+            )}
           </div>
 
           <Field idPrefix="co" label="Email (optional)" name="email" type="email" autoComplete="email" value={customer.email} onChange={set("email")} error={errors.email} />

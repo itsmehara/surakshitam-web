@@ -83,9 +83,11 @@ export type Customer = {
   state: string;
   pincode: string;
   email: string;
+  /** Post office picked from the pincode lookup (lib/pincode.ts). Optional; sent with the order. */
+  postOffice: string;
 };
 
-export const EMPTY_CUSTOMER: Customer = { name: "", phone: "", address: "", city: "", state: "", pincode: "", email: "" };
+export const EMPTY_CUSTOMER: Customer = { name: "", phone: "", address: "", city: "", state: "", pincode: "", email: "", postOffice: "" };
 
 const CUSTOMER_KEY = "sn-customer-v1";
 
@@ -96,7 +98,7 @@ export function loadCustomer(): Customer | null {
     if (!raw) return null;
     const c = JSON.parse(raw) as Partial<Customer>;
     const pick = (k: keyof Customer) => (typeof c[k] === "string" ? (c[k] as string) : "");
-    return { name: pick("name"), phone: pick("phone"), address: pick("address"), city: pick("city"), state: pick("state"), pincode: pick("pincode"), email: pick("email") };
+    return { name: pick("name"), phone: pick("phone"), address: pick("address"), city: pick("city"), state: pick("state"), pincode: pick("pincode"), email: pick("email"), postOffice: pick("postOffice") };
   } catch {
     return null;
   }
@@ -192,6 +194,7 @@ export function formatDeliverTo(c: Customer): string {
     `${c.name.trim()} · ${pretty}`,
     c.address.trim(),
     `${c.city.trim()}, ${c.state.trim()} — ${c.pincode.trim()}`,
+    c.postOffice.trim() ? `Post office: ${c.postOffice.trim()}` : "",
     c.email.trim(),
   ]
     .filter(Boolean)
@@ -259,6 +262,7 @@ export async function submitOrder(input: {
     city: c.city.trim(),
     state: c.state.trim(),
     pincode: c.pincode.trim(),
+    postOffice: c.postOffice.trim(),
     items: formatOrderLines(input.lines),
     subtotal: charges.subtotal,
     delivery: charges.delivery.status === "ok" ? charges.delivery.charge : null,
