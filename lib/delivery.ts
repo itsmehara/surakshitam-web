@@ -93,8 +93,12 @@ export function courierBreakdown(weightG: number, state: string): CourierBreakdo
 export type DeliveryChoice = { method: DeliveryMethod; pincode: string; state: string };
 
 export type Delivery =
-  /** Subtotal above FREE_DELIVERY_OVER: nothing is added to the total. */
-  | { status: "free"; method: DeliveryMethod }
+  /**
+   * Subtotal above FREE_DELIVERY_OVER: nothing is added to the total. `waived` is the
+   * courier charge the rule takes off, when it can be worked out (courier, a State
+   * chosen and every pack weighed). The summary shows it struck out and discounted.
+   */
+  | { status: "free"; method: DeliveryMethod; waived: { weightG: number; breakdown: CourierBreakdown } | null }
   /** Rapido: the rider is paid the fare directly, so nothing is added to the total. */
   | { status: "rapido" }
   /** Courier, but no State chosen yet, so the charge cannot be worked out. */
@@ -106,7 +110,12 @@ export type Delivery =
 
 export function checkoutDelivery(lines: WeighedLine[], choice: DeliveryChoice, subtotal: number): Delivery {
   const rapido = choice.method === "rapido" && rapidoAvailable(choice.pincode);
-  if (subtotal > FREE_DELIVERY_OVER) return { status: "free", method: rapido ? "rapido" : "courier" };
+  if (subtotal > FREE_DELIVERY_OVER) {
+    // The courier charge the rule waives, so the summary can show it struck out.
+    const weightG = rapido || !choice.state ? null : orderWeightG(lines);
+    const waived = weightG == null ? null : { weightG, breakdown: courierBreakdown(weightG, choice.state) };
+    return { status: "free", method: rapido ? "rapido" : "courier", waived };
+  }
   if (rapido) return { status: "rapido" };
   if (!choice.state) return { status: "pick-state" };
   const weightG = orderWeightG(lines);
