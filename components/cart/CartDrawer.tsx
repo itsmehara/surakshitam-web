@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { useCart, MAX_NOTE, lineKey } from "@/lib/cart/CartContext";
 import { productImage } from "@/lib/catalog";
-import { FREE_DELIVERY_OVER } from "@/lib/delivery";
 import { rupees } from "@/lib/order";
 import { CartIcon, CloseIcon, ArrowRight } from "@/components/icons";
 import { cn } from "@/lib/cn";
@@ -184,7 +183,7 @@ export function CartDrawer() {
                 </span>
               </div>
               <p className="text-[0.7rem] leading-snug text-forest/50">
-                Delivery is added at checkout. Special delivery discount on courier orders over {rupees(FREE_DELIVERY_OVER)}.
+                Delivery: ₹120 for up to 2 kg + ₹50 for each additional kg.
               </p>
               <textarea
                 ref={noteRef}
