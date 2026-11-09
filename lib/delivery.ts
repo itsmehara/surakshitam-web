@@ -7,7 +7,7 @@
  * label ("500 ml", "1 L", "100 g"), so a new size needs no change here.
  *
  * Rules:
- * - Cart weight = every pack's weight × qty, plus 400 g packaging per order.
+ * - Cart weight = every pack's weight × qty. No packaging allowance (removed 9 Nov 2026 at a founder's request).
  * - Telangana: ₹120 up to 2 kg, then +₹50 for each started kg above 2 kg.
  *   Hyderabad is a Telangana address, so it takes this rate too.
  * - Elsewhere in India: ₹150 up to 2 kg, then +₹60 for each started kg above 2 kg.
@@ -17,9 +17,6 @@
  * - Free delivery: set FREE_DELIVERY_FROM to a subtotal in rupees (null = off).
  * - Hyderabad local rule: change the Telangana branch in deliveryCharge().
  */
-
-/** Packaging added to every order, in grams. */
-export const PACKAGING_G = 400;
 
 /** Subtotal (₹) at or above which delivery is free. null = no free-delivery rule (open question). */
 export const FREE_DELIVERY_FROM: number | null = null;
@@ -43,9 +40,9 @@ export function packWeightG(label: string): number | null {
 
 export type WeighedLine = { size: { label: string }; qty: number };
 
-/** Whole-order grams including packaging, or null when any pack has no readable weight. */
+/** Whole-order grams, or null when any pack has no readable weight. */
 export function orderWeightG(lines: WeighedLine[]): number | null {
-  let grams = PACKAGING_G;
+  let grams = 0;
   for (const l of lines) {
     const w = packWeightG(l.size.label);
     if (w == null) return null;

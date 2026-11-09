@@ -12,7 +12,7 @@ import type { CartLine } from "@/lib/cart/CartContext";
 import { ENQUIRY_URL } from "@/lib/enquiry";
 import { gaEvent } from "@/lib/analytics";
 import { isIndianPincode, isIndianState } from "@/lib/india";
-import { checkoutDelivery, formatWeight, PACKAGING_G, type Delivery } from "@/lib/delivery";
+import { checkoutDelivery, formatWeight, type Delivery } from "@/lib/delivery";
 
 const WA_NUMBER = "917416394594";
 const waLink = (text: string) => `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`;
@@ -59,10 +59,10 @@ export function orderCharges(lines: CartLine[], state: string): OrderCharges {
   return { subtotal, hasPriceOnRequest, delivery, total: delivery.status === "ok" ? subtotal + delivery.charge : null };
 }
 
-/** `Delivery: ₹120 (1.4 kg incl. 400 g packaging)`, or "to confirm on WhatsApp" while the charge is not known. */
+/** `Delivery: ₹120 (1.4 kg)`, or "to confirm on WhatsApp" while the charge is not known. */
 export function formatDelivery(d: Delivery): string {
   if (d.status !== "ok") return "Delivery: to confirm on WhatsApp";
-  const weight = `${formatWeight(d.weightG)} incl. ${PACKAGING_G} g packaging`;
+  const weight = formatWeight(d.weightG);
   return d.charge === 0 ? `Delivery: free (${weight})` : `Delivery: ${rupees(d.charge)} (${weight})`;
 }
 

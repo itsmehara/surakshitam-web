@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { toDataURL } from "qrcode";
-import { PACKAGING_G, formatWeight } from "@/lib/delivery";
+import { formatWeight } from "@/lib/delivery";
 import { rupees, type OrderCharges } from "@/lib/order";
 import { UPI_ID, UPI_PAYEE_NAME, upiPayLink } from "@/lib/upi";
 
@@ -67,7 +67,7 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
   // Shown only when payable, so delivery is always the computed charge here.
   const breakdown =
     delivery.status === "ok"
-      ? `${rupees(subtotal)} for the cart + ${delivery.charge === 0 ? "free delivery" : `${rupees(delivery.charge)} delivery`} (${formatWeight(delivery.weightG)} incl. ${PACKAGING_G} g packaging)`
+      ? `${rupees(subtotal)} for the cart + ${delivery.charge === 0 ? "free delivery" : `${rupees(delivery.charge)} delivery`} (${formatWeight(delivery.weightG)})`
       : null;
 
   return (

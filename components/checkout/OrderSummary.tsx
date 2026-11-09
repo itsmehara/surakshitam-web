@@ -4,7 +4,7 @@ import Image from "next/image";
 import type { CartLine } from "@/lib/cart/CartContext";
 import { lineKey } from "@/lib/cart/CartContext";
 import { productImage } from "@/lib/catalog";
-import { PACKAGING_G, formatWeight } from "@/lib/delivery";
+import { formatWeight } from "@/lib/delivery";
 import { rupees, type OrderCharges } from "@/lib/order";
 
 /** Read-only order lines, then subtotal, delivery and total, at the top of the checkout page. */
@@ -52,7 +52,7 @@ export function OrderSummary({ lines, charges }: { lines: CartLine[]; charges: O
             <>
               <span className="block font-medium">{delivery.charge === 0 ? "Free" : rupees(delivery.charge)}</span>
               <span className="block text-xs text-forest/50">
-                {formatWeight(delivery.weightG)} incl. {PACKAGING_G} g packaging
+                {formatWeight(delivery.weightG)}
               </span>
             </>
           ) : delivery.status === "pick-state" ? (
