@@ -98,7 +98,7 @@ export type Delivery =
    * courier charge the rule takes off, when it can be worked out (courier, a State
    * chosen and every pack weighed). The summary shows it struck out and discounted.
    */
-  | { status: "free"; method: DeliveryMethod; waived: { weightG: number; breakdown: CourierBreakdown } | null }
+  | { status: "free"; method: DeliveryMethod; waived: { weightG: number; breakdown: CourierBreakdown } | null; stateToSee: boolean }
   /** Rapido: the rider is paid the fare directly, so nothing is added to the total. */
   | { status: "rapido" }
   /** Courier, but no State chosen yet, so the charge cannot be worked out. */
@@ -112,9 +112,12 @@ export function checkoutDelivery(lines: WeighedLine[], choice: DeliveryChoice, s
   const rapido = choice.method === "rapido" && rapidoAvailable(choice.pincode);
   if (subtotal > FREE_DELIVERY_OVER) {
     // The courier charge the rule waives, so the summary can show it struck out.
-    const weightG = rapido || !choice.state ? null : orderWeightG(lines);
+    const weighed = orderWeightG(lines);
+    const weightG = rapido || !choice.state ? null : weighed;
     const waived = weightG == null ? null : { weightG, breakdown: courierBreakdown(weightG, choice.state) };
-    return { status: "free", method: rapido ? "rapido" : "courier", waived };
+    // No State yet, so the waived charge is not known: the summary says how to see it.
+    const stateToSee = !rapido && !choice.state && weighed != null;
+    return { status: "free", method: rapido ? "rapido" : "courier", waived, stateToSee };
   }
   if (rapido) return { status: "rapido" };
   if (!choice.state) return { status: "pick-state" };

@@ -23,6 +23,9 @@ function DeliveryFigure({ delivery }: { delivery: Delivery }) {
           <span className="block text-xs text-forest/50">
             {delivery.method === "rapido" ? "Rapido" : "Courier"}, orders over {rupees(FREE_DELIVERY_OVER)}
           </span>
+          {delivery.stateToSee && (
+            <span className="block text-xs text-moss">Enter your pincode or State to see the courier charge this waives.</span>
+          )}
         </>
       );
     case "rapido":
