@@ -10,7 +10,8 @@ need to re-read the whole codebase. Complements `../surakshitam-docs/docs/`
 
 **Branch:** `v4-whatsapp-orders`, cut 19 Sep 2026 from tag `v3.0-live`.
 
-### Status snapshot — 6 Nov 2026
+### Status snapshot — 9 Nov 2026
+**9 Nov, uncommitted:** UPI QR for the cart total on `/checkout/`. Code: `components/checkout/UpiPayment.tsx` and `lib/upi.ts` (`upi://pay?pa=mohanasupriya@okicici`, drawn in the browser with `qrcode`, no QR service). The order ID is made once per checkout visit and shared by the UPI note and the WhatsApp message. The amount is the subtotal only; courier charges are the next step (PENDING A4c). Pushing `v4-whatsapp-orders` deploys live, so push only when Hara approves.
 Live site = `v4-whatsapp-orders` @ `14eb63e` (14 Oct); 53 listings (28 skin, 14 hair, 10 home, 1 partner). Added since go-live:
 founders' 3 Oct copy/photo updates, GA4 + `/privacy/` + per-page canonicals (9 Oct), analytics consent banner + footer
 visit counter (Apps Script `?action=visit`), product share row/card icon + 1200x630 share images (14 Oct). No code changes

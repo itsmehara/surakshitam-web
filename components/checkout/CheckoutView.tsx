@@ -13,6 +13,7 @@ import {
   validatePayment,
   type Payment,
   orderMessage,
+  orderSubtotal,
   rememberSentOrder,
   saveCustomer,
   submitOrder,
@@ -23,6 +24,7 @@ import {
 } from "@/lib/order";
 import { trackWhatsAppClick } from "@/lib/enquiry";
 import { OrderSummary } from "./OrderSummary";
+import { UpiPayment } from "./UpiPayment";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { Field, inputClass } from "@/components/ui/FormField";
 import { INDIAN_STATES, deliveryHint, stateFromPincode } from "@/lib/india";
@@ -50,8 +52,11 @@ export function CheckoutView() {
   const [payment, setPayment] = useState<Payment>(NO_PAYMENT);
   const [paymentError, setPaymentError] = useState<string | undefined>();
   const [sending, setSending] = useState(false);
+  // One order ID per checkout visit: the UPI payment note and the WhatsApp message share it.
+  const [checkoutOrderId, setCheckoutOrderId] = useState("");
 
   useEffect(() => {
+    setCheckoutOrderId(newOrderId());
     const saved = loadCustomer();
     if (saved && (saved.name || saved.phone)) {
       setCustomer(saved);
@@ -94,7 +99,7 @@ export function CheckoutView() {
     }
     setSending(true);
 
-    const orderId = newOrderId();
+    const orderId = checkoutOrderId || newOrderId();
     const message = orderMessage(orderId, lines, customer, note, payment);
     const href = whatsAppOrderHref(message);
 
@@ -132,6 +137,8 @@ export function CheckoutView() {
     );
   }
 
+  const { subtotal, hasPriceOnRequest } = orderSubtotal(lines);
+
   return (
     <>
       <PageIntro
@@ -148,6 +155,7 @@ export function CheckoutView() {
           <Link href="/shop" className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-moss hover:text-forest">
             Add more products <ArrowRight width={14} />
           </Link>
+          <UpiPayment amount={subtotal} orderId={checkoutOrderId} priceOnRequest={hasPriceOnRequest} />
         </div>
 
         <form onSubmit={onSubmit} noValidate className="space-y-4 lg:order-1" aria-busy={sending}>
@@ -269,8 +277,8 @@ export function CheckoutView() {
               <span>
                 <span className="font-medium">I&apos;ve already paid by UPI</span>
                 <span className="block text-xs text-forest/55">
-                  Usually you pay on WhatsApp after we confirm availability and delivery. Paid already? Paste the
-                  transaction ID so we can match it.
+                  Paid with the UPI QR above, or another UPI payment? Paste the transaction ID so we can match it.
+                  Otherwise, pay on WhatsApp once we confirm.
                 </span>
               </span>
             </label>
