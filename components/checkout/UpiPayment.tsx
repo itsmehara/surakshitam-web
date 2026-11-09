@@ -70,7 +70,7 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
     delivery.status === "courier"
       ? `${rupees(subtotal)} for the cart + ${rupees(delivery.charge)} courier (${formatWeight(delivery.weightG)})`
       : delivery.status === "free"
-        ? `${rupees(subtotal)} for the cart, with free delivery over ${rupees(FREE_DELIVERY_OVER)}`
+        ? `${rupees(subtotal)} for the cart, with the special delivery discount over ${rupees(FREE_DELIVERY_OVER)}`
         : delivery.status === "rapido"
           ? `${rupees(subtotal)} for the cart. The Rapido fare is paid to the rider.`
           : null;

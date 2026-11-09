@@ -184,7 +184,7 @@ export function CartDrawer() {
                 </span>
               </div>
               <p className="text-[0.7rem] leading-snug text-forest/50">
-                Delivery is added at checkout. Free on orders over {rupees(FREE_DELIVERY_OVER)}.
+                Delivery is added at checkout. Special delivery discount on courier orders over {rupees(FREE_DELIVERY_OVER)}.
               </p>
               <textarea
                 ref={noteRef}

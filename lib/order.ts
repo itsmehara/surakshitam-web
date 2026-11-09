@@ -64,7 +64,7 @@ export function orderCharges(lines: CartLine[], c: Pick<Customer, "state" | "pin
 export function formatDelivery(d: Delivery): string {
   switch (d.status) {
     case "free":
-      return `Delivery: free (order over ${rupees(FREE_DELIVERY_OVER)}, by ${d.method === "rapido" ? "Rapido" : "courier"})`;
+      return `Delivery: special delivery discount (order over ${rupees(FREE_DELIVERY_OVER)}, courier)`;
     case "rapido":
       return "Delivery: Rapido, fare paid to the rider";
     case "courier":
@@ -77,7 +77,7 @@ export function formatDelivery(d: Delivery): string {
 /** Short reason for the Orders tab when the delivery amount is 0 or unknown. */
 function deliveryNoteOf(d: Delivery): string {
   if (d.status === "rapido") return "Rapido: customer pays the rider";
-  if (d.status === "free") return `Free: order over ${rupees(FREE_DELIVERY_OVER)}`;
+  if (d.status === "free") return `Special discount: order over ${rupees(FREE_DELIVERY_OVER)}`;
   return "";
 }
 

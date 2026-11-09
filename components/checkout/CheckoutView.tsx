@@ -192,7 +192,7 @@ export function CheckoutView() {
       <PageIntro
         eyebrow="Checkout"
         title="Where should we deliver?"
-        intro={`We deliver across India by courier, and in Hyderabad and Secunderabad you can choose Rapido. Courier is charged by weight and state. Orders over ${freeOver} ship free. Your order goes to us on WhatsApp with these details. We confirm availability on WhatsApp, and you pay by UPI here or on WhatsApp, then we pack and send.`}
+        intro={`We deliver across India by courier, and in Hyderabad and Secunderabad you can choose Rapido. Courier is charged by weight and state. Courier orders over ${freeOver} get a special delivery discount. Your order goes to us on WhatsApp with these details. We confirm availability on WhatsApp, and you pay by UPI here or on WhatsApp, then we pack and send.`}
       />
       <div className="container grid gap-8 py-8 sm:py-12 lg:grid-cols-[1fr_1.2fr] lg:gap-12">
         <div className="lg:order-2">
@@ -341,7 +341,7 @@ export function CheckoutView() {
               <span>
                 <span className="font-medium">Courier</span>
                 <span className="block text-xs text-forest/55">
-                  Charged by weight and state, added to your total. Free on orders over {freeOver}.
+                  Charged by weight and state, added to your total. Special delivery discount on orders over {freeOver}.
                 </span>
               </span>
             </label>
@@ -358,7 +358,7 @@ export function CheckoutView() {
                 <span>
                   <span className="font-medium">Rapido, Hyderabad and Secunderabad</span>
                   <span className="block text-xs text-forest/55">
-                    You pay the Rapido fare to the rider, so it is not in your total. Free on orders over {freeOver}.
+                    You pay the Rapido fare to the rider, so it is not in your total.
                   </span>
                 </span>
               </label>

@@ -9,8 +9,9 @@
  * needs no change here.
  *
  * Rules:
- * - Free delivery: a subtotal above FREE_DELIVERY_OVER (more than, not equal to)
- *   is free by either method. Free beats everything else below.
+ * - Special delivery discount (courier only): a subtotal above FREE_DELIVERY_OVER
+ *   (more than, not equal to) takes the courier charge off, so the total is the
+ *   items alone. Rapido is never discounted.
  * - Courier (anywhere in India): cart weight = every pack's weight × qty, no
  *   packaging allowance. Telangana: ₹120 up to 2 kg, then +₹50 for each started
  *   kg above 2 kg. Elsewhere: ₹150 up to 2 kg, then +₹60 for each started kg.
@@ -27,7 +28,7 @@
 
 import { deliveryZone } from "@/lib/india";
 
-/** Subtotal (₹) above which delivery is free, by courier or Rapido. */
+/** Subtotal (₹) above which the courier charge is discounted to ₹0 (special delivery discount). Rapido is not discounted. */
 export const FREE_DELIVERY_OVER = 2000;
 
 export type DeliveryMethod = "courier" | "rapido";
@@ -110,7 +111,8 @@ export type Delivery =
 
 export function checkoutDelivery(lines: WeighedLine[], choice: DeliveryChoice, subtotal: number): Delivery {
   const rapido = choice.method === "rapido" && rapidoAvailable(choice.pincode);
-  if (subtotal > FREE_DELIVERY_OVER) {
+  // Courier only: Rapido is never discounted, so the customer pays the Rapido fare at any cart value.
+  if (subtotal > FREE_DELIVERY_OVER && !rapido) {
     // The courier charge the rule waives, so the summary can show it struck out.
     const weighed = orderWeightG(lines);
     const weightG = rapido || !choice.state ? null : weighed;

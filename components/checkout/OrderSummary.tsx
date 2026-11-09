@@ -21,7 +21,7 @@ function DeliveryFigure({ delivery }: { delivery: Delivery }) {
         <>
           <span className="block font-medium">Free</span>
           <span className="block text-xs text-forest/50">
-            {delivery.method === "rapido" ? "Rapido" : "Courier"}, orders over {rupees(FREE_DELIVERY_OVER)}
+            Special delivery discount, orders over {rupees(FREE_DELIVERY_OVER)}
           </span>
           {delivery.stateToSee && (
             <span className="block text-xs text-moss">Enter your pincode or State to see the courier charge this waives.</span>
@@ -102,7 +102,7 @@ export function OrderSummary({ lines, charges }: { lines: CartLine[]; charges: O
           </div>
           <div className="flex items-baseline justify-between gap-3 border-t border-forest/10 px-4 py-2.5">
             <span className="text-sm text-moss">
-              Free delivery <span className="text-xs text-forest/50">(orders over {rupees(FREE_DELIVERY_OVER)})</span>
+              Special delivery discount <span className="text-xs text-forest/50">(orders over {rupees(FREE_DELIVERY_OVER)})</span>
             </span>
             <span className="text-sm font-medium tabular-nums text-moss">−{rupees(delivery.waived.breakdown.total)}</span>
           </div>
@@ -115,8 +115,8 @@ export function OrderSummary({ lines, charges }: { lines: CartLine[]; charges: O
           </span>
         </div>
       )}
-      {delivery.status !== "free" && moreForFree > 0 && (
-        <p className="border-t border-forest/8 px-4 py-2 text-xs text-moss">Add {rupees(moreForFree)} more for free delivery.</p>
+      {delivery.status !== "free" && delivery.status !== "rapido" && moreForFree > 0 && (
+        <p className="border-t border-forest/8 px-4 py-2 text-xs text-moss">Add {rupees(moreForFree)} more for the special delivery discount.</p>
       )}
       <div className="flex items-baseline justify-between border-t border-forest/10 px-4 py-3">
         <span className="text-sm text-forest/70">Total</span>
@@ -134,7 +134,7 @@ export function OrderSummary({ lines, charges }: { lines: CartLine[]; charges: O
         </span>
       </div>
       <p className="border-t border-forest/8 px-4 py-2 text-[0.7rem] leading-snug text-forest/50">
-        MRP, inclusive of all taxes. Free delivery on orders over {rupees(FREE_DELIVERY_OVER)}. Courier is charged by weight
+        MRP, inclusive of all taxes. Special delivery discount on courier orders over {rupees(FREE_DELIVERY_OVER)}. Courier is charged by weight
         and state, and part of a kg counts as a full kg. We confirm your order on WhatsApp before you pay.
       </p>
     </section>
