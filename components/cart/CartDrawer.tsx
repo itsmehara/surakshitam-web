@@ -183,7 +183,7 @@ export function CartDrawer() {
                 </span>
               </div>
               <p className="text-[0.7rem] leading-snug text-forest/50">
-                Delivery: ₹120 for up to 2 kg + ₹50 for each additional kg.
+                Delivery: ₹120 for up to 2 kg + ₹50 for each additional kg in Telangana, ₹150 + ₹60 elsewhere in India.
               </p>
               <textarea
                 ref={noteRef}
