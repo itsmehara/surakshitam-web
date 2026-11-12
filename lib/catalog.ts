@@ -212,7 +212,7 @@ const allProducts: Product[] = [
       "For bathroom tiles and wash basins: apply the prepared liquid to the surface, scrub gently with a suitable brush or sponge and rinse thoroughly with clean water.",
     ],
     sizes: [
-      { id: "140g", label: "140 g", mrp: 140, default: true },
+      { id: "140g", label: "140 g", mrp: 150, offer: 110, default: true },
     ],
     sku: "SN-HC-TBP-140",
     image: "/surakshitam-product-images/toilet-bathroom-cleaning-powder/toilet-bathroom-cleaning-powder-01-listing-front-140g.webp",
@@ -235,7 +235,7 @@ const allProducts: Product[] = [
     usage: "Dilute one capful in a bucket of water and mop as usual.",
     sizes: [
       { id: "500ml", label: "500 ml", mrp: 110, offer: 100 },
-      { id: "1l", label: "1 L", mrp: 175, default: true },
+      { id: "1l", label: "1 L", mrp: 220, offer: 190, default: true },
     ],
     sku: "SN-HC-BFC-1000",
     image: "/surakshitam-product-images/bio-enzyme-floor-cleaner/bio-enzyme-floor-cleaner-1000ml-01-listing-front.webp",
@@ -473,7 +473,7 @@ const allProducts: Product[] = [
     keyIngredients: ["Rose extract", "Rose essential oil", "Coconut oil-based surfactants"],
     usage: "Massage a small amount onto damp skin, then rinse with water.",
     sizes: [
-      { id: "50ml", label: "50 ml", mrp: 125, default: true },
+      { id: "50ml", label: "50 ml", mrp: 149, offer: 125, default: true },
     ],
     sku: "SN-SC-RFW-050",
     image: "/surakshitam-product-images/rose-face-wash/rose-face-wash-01-listing-front-clean.webp",
@@ -536,7 +536,7 @@ const allProducts: Product[] = [
       "Use daily after bathing or whenever your skin needs moisture.",
     ],
     sizes: [
-      { id: "100ml", label: "100 ml", mrp: 149 },
+      { id: "100ml", label: "100 ml", mrp: 185, offer: 165 },
       { id: "200ml", label: "200 ml", mrp: 299, offer: 279, default: true },
     ],
     sku: "SN-SC-LOT-200",
@@ -578,7 +578,7 @@ const allProducts: Product[] = [
     keyIngredients: ["Herbal blend", "Gram flour"],
     usage: "Mix with a little water into a paste and use as a cleanser, then rinse.",
     sizes: [
-      { id: "200g", label: "200 g", mrp: 125, default: true },
+      { id: "200g", label: "200 g", mrp: 145, offer: 125, default: true },
     ],
     sku: "SN-SC-BTP-200",
     image: "/surakshitam-product-images/herbal-bath-powder/herbal-bath-powder-01-listing-front-clean.webp",
@@ -787,7 +787,7 @@ const allProducts: Product[] = [
     keyIngredients: ["Neem extract", "Aloe vera"],
     usage: "Apply a thin layer to clean skin as needed.",
     sizes: [
-      { id: "50g", label: "50 g", mrp: 79, default: true },
+      { id: "50g", label: "50 g", mrp: 99, offer: 79, default: true },
     ],
     sku: "SN-SC-NMG-050",
     image: "/surakshitam-product-images/neem-gel/neem-gel-01-listing-front-clean.webp",
@@ -1163,7 +1163,7 @@ const allProducts: Product[] = [
     keyIngredients: ["Bhringraj (Eclipta alba)"],
     usage: "Mix with water, curd or your hair oil into a paste, apply to the scalp and hair, leave for 20–30 minutes, then rinse.",
     sizes: [
-      { id: "100g", label: "100 g", default: true },
+      { id: "100g", label: "100 g", mrp: 80, offer: 70, default: true },
     ],
     sku: "SN-HR-BRJ-100",
     image: "/surakshitam-product-images/bhringraj-powder/bhringraj-powder-01-listing-front-clean.webp",
@@ -1188,7 +1188,7 @@ const allProducts: Product[] = [
       // 100 g is out of stock (founders, 2 Oct) and has never had a price of its
       // own — shown so people know the size exists, but not purchasable.
       { id: "100g", label: "100 g", soldOut: true },
-      { id: "250g", label: "250 g", mrp: 100, default: true },
+      { id: "250g", label: "250 g", mrp: 125, offer: 110, default: true },
     ],
     sku: "SN-HR-SNP-250",
     image: "/surakshitam-product-images/soap-nut-powder/soap-nut-powder-01-listing-front-clean.webp",
@@ -1210,7 +1210,7 @@ const allProducts: Product[] = [
     keyIngredients: ["Shikakai (Acacia concinna)"],
     usage: "Mix with water, curd or your hair oil into a paste, apply to the scalp and hair, leave for 20–30 minutes, then rinse.",
     sizes: [
-      { id: "250g", label: "250 g", mrp: 100, default: true },
+      { id: "250g", label: "250 g", mrp: 135, offer: 121, default: true },
     ],
     sku: "SN-HR-SKP-250",
     image: "/surakshitam-product-images/shikakai-powder/shikakai-powder-01-listing-front-clean.webp",
@@ -1299,7 +1299,7 @@ const allProducts: Product[] = [
     keyIngredients: ["Hibiscus flower"],
     usage: "Mix with water, curd or your hair oil into a paste, apply to the scalp and hair, leave for 20–30 minutes, then rinse.",
     sizes: [
-      { id: "100g", label: "100 g", mrp: 110, default: true },
+      { id: "100g", label: "100 g", mrp: 130, offer: 110, default: true },
     ],
     sku: "SN-HR-HFP-100",
     image: "/surakshitam-product-images/hibiscus-flower-powder/hibiscus-flower-powder-01-listing-front-clean.webp",
