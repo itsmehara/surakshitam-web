@@ -287,7 +287,7 @@ const allProducts: Product[] = [
     usage: "Pour around the bowl, leave for a few minutes, brush and flush.",
     sizes: [
       { id: "500ml", label: "500 ml", mrp: 110, offer: 100, images: bioGallery("bio-enzyme-toilet-cleaner", "500ml") },
-      { id: "1l", label: "1 L", mrp: 185, default: true, images: bioGallery("bio-enzyme-toilet-cleaner", "1000ml") },
+      { id: "1l", label: "1 L", mrp: 210, offer: 185, default: true, images: bioGallery("bio-enzyme-toilet-cleaner", "1000ml") },
     ],
     sku: "SN-HC-BTC-1000",
     image: "/surakshitam-product-images/bio-enzyme-toilet-cleaner/bio-enzyme-toilet-cleaner-1000ml-01-listing-front.webp",
@@ -312,7 +312,7 @@ const allProducts: Product[] = [
     usage: "",
     sizes: [
       { id: "500ml", label: "500 ml", mrp: 110, offer: 100, default: true, images: bioGallery("bio-enzyme-multi-purpose-cleaner", "500ml") },
-      { id: "1l", label: "1 L", mrp: 185, images: bioGallery("bio-enzyme-multi-purpose-cleaner", "1000ml") },
+      { id: "1l", label: "1 L", mrp: 210, offer: 185, images: bioGallery("bio-enzyme-multi-purpose-cleaner", "1000ml") },
     ],
     sku: "SN-HC-BMC-500",
     image: "/surakshitam-product-images/bio-enzyme-multi-purpose-cleaner/bio-enzyme-multi-purpose-cleaner-500ml-01-listing-front.webp",
