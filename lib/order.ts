@@ -9,6 +9,7 @@
  */
 
 import type { CartLine } from "@/lib/cart/CartContext";
+import { payPrice } from "@/lib/catalog";
 import { ENQUIRY_URL } from "@/lib/enquiry";
 import { gaEvent } from "@/lib/analytics";
 import { isIndianPincode, isIndianState } from "@/lib/india";
@@ -25,7 +26,8 @@ export const rupees = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 export function formatOrderLines(lines: CartLine[]): string {
   return lines
     .map((l, i) => {
-      const amount = l.size.mrp == null ? "price on request" : rupees(l.size.mrp * l.qty);
+      const price = payPrice(l.size);
+      const amount = price == null ? "price on request" : rupees(price * l.qty);
       return `${i + 1}. ${l.product.name} — ${l.size.label} × ${l.qty} — ${amount}`;
     })
     .join("\n");
@@ -33,8 +35,8 @@ export function formatOrderLines(lines: CartLine[]): string {
 
 export function orderSubtotal(lines: CartLine[]): { subtotal: number; hasPriceOnRequest: boolean } {
   return {
-    subtotal: lines.reduce((sum, l) => sum + (l.size.mrp ?? 0) * l.qty, 0),
-    hasPriceOnRequest: lines.some((l) => l.size.mrp == null),
+    subtotal: lines.reduce((sum, l) => sum + (payPrice(l.size) ?? 0) * l.qty, 0),
+    hasPriceOnRequest: lines.some((l) => payPrice(l.size) == null),
   };
 }
 

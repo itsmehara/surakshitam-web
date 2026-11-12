@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { existsSync } from "node:fs";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { products, getProductBySlug, getProductsByCategory, productImage, defaultSize } from "@/lib/catalog";
+import { products, getProductBySlug, getProductsByCategory, productImage, defaultSize, payPrice } from "@/lib/catalog";
 import { ProductGallery } from "@/components/ui/ProductGallery";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { BuyBox } from "@/components/ui/BuyBox";
@@ -124,9 +124,9 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
     sku: product.sku,
     image: cover,
     brand: { "@type": "Brand", name: partnerBrand ?? site.name },
-    // MRP of the default pack. Orders still go through WhatsApp, so no URL/availability.
-    ...(pack.mrp != null && {
-      offers: { "@type": "Offer", price: pack.mrp, priceCurrency: "INR", itemCondition: "https://schema.org/NewCondition" },
+    // Price paid for the default pack (offer rate when there is one, else MRP). Orders still go through WhatsApp, so no URL/availability.
+    ...(payPrice(pack) != null && {
+      offers: { "@type": "Offer", price: payPrice(pack), priceCurrency: "INR", itemCondition: "https://schema.org/NewCondition" },
     }),
   };
 

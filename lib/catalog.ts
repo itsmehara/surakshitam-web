@@ -61,7 +61,7 @@ export const products: Product[] = [
     keyIngredients: ["Lemon extract", "Plant-based (coconut) surfactant", "Salt", "Lime essential oil"],
     usage: "Add a few drops to a wet sponge, work into a lather, then rinse thoroughly.",
     sizes: [
-      { id: "500ml", label: "500 ml", mrp: 185, default: true },
+      { id: "500ml", label: "500 ml", mrp: 185, offer: 150, default: true },
     ],
     sku: "SN-HC-DWL-500",
     image: "/surakshitam-product-images/natural-dishwash-liquid/natural-dishwash-liquid-01-listing-front-clean.webp",
@@ -85,7 +85,7 @@ export const products: Product[] = [
     keyIngredients: ["Cow-dung ash", "Tamarind seed powder", "Soapnut powder"],
     usage: "Rub a damp sponge on the bar to build lather, clean, then rinse.",
     sizes: [
-      { id: "400g", label: "400 g", mrp: 114, default: true },
+      { id: "400g", label: "400 g", mrp: 114, offer: 100, default: true },
     ],
     sku: "SN-HC-DWS-400",
     image: "/surakshitam-product-images/natural-dishwash-bar/natural-dishwash-bar-01-listing-front-clean.webp",
@@ -108,7 +108,7 @@ export const products: Product[] = [
     keyIngredients: ["Vinegar", "Lemongrass essential oil", "Citronella essential oil"],
     usage: "Dilute one capful in a bucket of water and mop as usual.",
     sizes: [
-      { id: "500ml", label: "500 ml", mrp: 185, default: true },
+      { id: "500ml", label: "500 ml", mrp: 185, offer: 150, default: true },
     ],
     sku: "SN-HC-FLC-500",
     image: "/surakshitam-product-images/natural-floor-cleaner/natural-floor-cleaner-01-listing-front-clean.webp",
@@ -132,7 +132,7 @@ export const products: Product[] = [
     keyIngredients: ["Plant-based (coconut) surfactant", "Bio-enzymes", "IFRA-certified fragrance"],
     usage: "Add one cap per load; use less for lightly soiled laundry.",
     sizes: [
-      { id: "1l", label: "1 L", mrp: 300, default: true },
+      { id: "1l", label: "1 L", mrp: 300, offer: 280, default: true },
     ],
     sku: "SN-HC-LDT-1000",
     image: "/surakshitam-product-images/washing-machine-liquid/washing-machine-liquid-01-listing-front-clean.webp",
@@ -154,7 +154,7 @@ export const products: Product[] = [
     keyIngredients: ["Rice husk ash", "Soapnut powder", "Whole lemon powder", "Neem powder"],
     usage: "Sprinkle onto a damp cloth, rub the utensil, then rinse clean.",
     sizes: [
-      { id: "100g", label: "100 g", mrp: 104, default: true },
+      { id: "100g", label: "100 g", mrp: 104, offer: 80, default: true },
     ],
     sku: "SN-HC-PIT-100",
     image: "/surakshitam-product-images/natural-utensil-shine/natural-utensil-shine-01-listing-front-clean.webp",
@@ -181,7 +181,7 @@ export const products: Product[] = [
     usage:
       "Wet the sponge or scrubber, take a small quantity of the powder and apply it to the wet scrubber. Gently scrub plates, vessels and kitchen utensils, rinse thoroughly with clean water and let them dry. For heavily greasy vessels, use a little extra powder and scrub gently.",
     sizes: [
-      { id: "200g", label: "200 g", mrp: 114, default: true },
+      { id: "200g", label: "200 g", mrp: 114, offer: 100, default: true },
     ],
     sku: "SN-HC-DWP-200",
     image: "/surakshitam-product-images/dish-wash-powder/dish-wash-powder-01-listing-front-clean.webp",
@@ -233,7 +233,7 @@ export const products: Product[] = [
     keyIngredients: ["Citrus bio-enzyme", "Lemongrass essential oil"],
     usage: "Dilute one capful in a bucket of water and mop as usual.",
     sizes: [
-      { id: "500ml", label: "500 ml", mrp: 110 },
+      { id: "500ml", label: "500 ml", mrp: 110, offer: 100 },
       { id: "1l", label: "1 L", mrp: 175, default: true },
     ],
     sku: "SN-HC-BFC-1000",
@@ -301,7 +301,7 @@ export const products: Product[] = [
     keyIngredients: ["Shea butter", "Coconut oil", "Glycerin"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     sizes: [
-      { id: "bar", label: "approx. 100 g", mrp: 95, default: true },
+      { id: "bar", label: "approx. 100 g", mrp: 95, offer: 85, default: true },
     ],
     sku: "SN-SC-SHS-100",
     image: "/surakshitam-product-images/shea-butter-soap/shea-butter-soap-01-listing-front-clean.webp",
@@ -325,7 +325,7 @@ export const products: Product[] = [
     keyIngredients: ["Neem", "Tulsi (holy basil)", "Coconut oil"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     sizes: [
-      { id: "bar", label: "approx. 100 g", mrp: 95, default: true },
+      { id: "bar", label: "approx. 100 g", mrp: 95, offer: 85, default: true },
     ],
     sku: "SN-SC-NTS-100",
     image: "/surakshitam-product-images/neem-tulsi-soap/neem-tulsi-soap-01-listing-front-clean.webp",
@@ -349,7 +349,7 @@ export const products: Product[] = [
     keyIngredients: ["Papaya extract", "Glycerin", "Coconut oil"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     sizes: [
-      { id: "bar", label: "approx. 100 g", mrp: 95, default: true },
+      { id: "bar", label: "approx. 100 g", mrp: 95, offer: 85, default: true },
     ],
     sku: "SN-SC-PYS-100",
     image: "/surakshitam-product-images/papaya-soap/papaya-soap-01-listing-front-clean.webp",
@@ -372,7 +372,7 @@ export const products: Product[] = [
     keyIngredients: ["Beetroot extract", "Glycerin", "Coconut oil"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     sizes: [
-      { id: "bar", label: "approx. 100 g", mrp: 95, default: true },
+      { id: "bar", label: "approx. 100 g", mrp: 95, offer: 85, default: true },
     ],
     sku: "SN-SC-BTS-100",
     image: "/surakshitam-product-images/beetroot-soap/beetroot-soap-01-listing-front-clean.webp",
@@ -394,7 +394,7 @@ export const products: Product[] = [
     keyIngredients: ["Vegetable glycerin", "Coconut oil"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     sizes: [
-      { id: "bar", label: "approx. 100 g", mrp: 95, default: true },
+      { id: "bar", label: "approx. 100 g", mrp: 95, offer: 85, default: true },
     ],
     sku: "SN-SC-GLS-100",
     image: "/surakshitam-product-images/glycerine-soap/glycerine-soap-01-listing-front-clean.webp",
@@ -481,7 +481,7 @@ export const products: Product[] = [
       "Perform a patch test before first use.",
     ],
     sizes: [
-      { id: "200ml", label: "200 ml", mrp: 299, default: true },
+      { id: "200ml", label: "200 ml", mrp: 299, offer: 279, default: true },
     ],
     sku: "SN-SC-LBW-250",
     image: "/surakshitam-product-images/lavender-body-wash/lavender-body-wash-01-listing-front-clean.webp",
@@ -510,7 +510,7 @@ export const products: Product[] = [
     ],
     sizes: [
       { id: "100ml", label: "100 ml", mrp: 149 },
-      { id: "200ml", label: "200 ml", mrp: 299, default: true },
+      { id: "200ml", label: "200 ml", mrp: 299, offer: 279, default: true },
     ],
     sku: "SN-SC-LOT-200",
     image: "/surakshitam-product-images/body-lotion/body-lotion-01-listing-front-clean.webp",
@@ -626,7 +626,7 @@ export const products: Product[] = [
       "Apply before going outdoors and reapply as needed.",
     ],
     sizes: [
-      { id: "box", label: "Round box", mrp: 125, default: true },
+      { id: "box", label: "Round box", mrp: 125, offer: 100, default: true },
     ],
     sku: "SN-SC-SLB-BOX",
     image: "/surakshitam-product-images/strawberry-lip-balm/strawberry-lip-balm-01-listing-front-clean.webp",
@@ -672,7 +672,7 @@ export const products: Product[] = [
     keyIngredients: ["Shea butter", "Beeswax", "Beetroot extract"],
     usage: "Apply a thin layer to the lips as often as needed.",
     sizes: [
-      { id: "box", label: "Round box", mrp: 125, default: true },
+      { id: "box", label: "Round box", mrp: 125, offer: 100, default: true },
     ],
     sku: "SN-SC-BLB-BOX",
     image: "/surakshitam-product-images/beetroot-lip-balm/beetroot-lip-balm-01-listing-front-clean.webp",
@@ -716,7 +716,7 @@ export const products: Product[] = [
     keyIngredients: ["Shea butter", "Beeswax", "Vanilla extract"],
     usage: "Apply a thin layer to the lips as often as needed.",
     sizes: [
-      { id: "box", label: "Round box", mrp: 125, default: true },
+      { id: "box", label: "Round box", mrp: 125, offer: 100, default: true },
     ],
     sku: "SN-SC-VLB-BOX",
     image: "/surakshitam-product-images/vanilla-lip-balm/vanilla-lip-balm-01-listing-front-clean.webp",
@@ -784,8 +784,8 @@ export const products: Product[] = [
     keyIngredients: ["Reetha (soapnut)", "Shikakai", "Amla"],
     usage: "Apply to wet hair, massage into the scalp, then rinse thoroughly.",
     sizes: [
-      { id: "225ml", label: "225 ml", mrp: 250 },
-      { id: "500ml", label: "500 ml", mrp: 550, default: true },
+      { id: "225ml", label: "225 ml", mrp: 250, offer: 225 },
+      { id: "500ml", label: "500 ml", mrp: 550, offer: 500, default: true },
     ],
     sku: "SN-HR-SHP-200",
     image: "/surakshitam-product-images/herbal-shampoo/herbal-shampoo-01-listing-front-clean.webp",
@@ -808,8 +808,8 @@ export const products: Product[] = [
     keyIngredients: ["Amla", "Shikakai", "Hibiscus"],
     usage: "Apply to damp hair, leave for 20–30 minutes, then rinse.",
     sizes: [
-      { id: "50g", label: "50 g", mrp: 90 },
-      { id: "100g", label: "100 g", mrp: 175, default: true },
+      { id: "50g", label: "50 g", mrp: 90, offer: 75 },
+      { id: "100g", label: "100 g", mrp: 175, offer: 150, default: true },
     ],
     sku: "SN-HR-HPK-100",
     image: "/surakshitam-product-images/herbal-hair-pack/herbal-hair-pack-01-listing-front-clean.webp",
@@ -835,8 +835,8 @@ export const products: Product[] = [
     ],
     usage: "Massage into the scalp and lengths; leave for a while before washing.",
     sizes: [
-      { id: "100ml", label: "100 ml", mrp: 279 },
-      { id: "200ml", label: "200 ml", mrp: 499, default: true },
+      { id: "100ml", label: "100 ml", mrp: 279, offer: 250 },
+      { id: "200ml", label: "200 ml", mrp: 499, offer: 450, default: true },
     ],
     sku: "SN-HR-OIL-100",
     image: "/surakshitam-product-images/hair-oil/hair-oil-01-listing-front-clean.webp",
@@ -858,7 +858,7 @@ export const products: Product[] = [
     keyIngredients: ["Rosemary water", "Essential oils"],
     usage: "Spray onto the scalp and hair; no need to rinse.",
     sizes: [
-      { id: "100ml", label: "100 ml", mrp: 100, default: true },
+      { id: "100ml", label: "100 ml", mrp: 100, offer: 80, default: true },
     ],
     sku: "SN-HR-RMS-100",
     image: "/surakshitam-product-images/rosemary-hair-spray/rosemary-hair-spray-01-listing-front-clean.webp",
@@ -886,7 +886,7 @@ export const products: Product[] = [
     keyIngredients: ["Aloe vera", "Coconut oil", "Glycerin"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     sizes: [
-      { id: "bar", label: "approx. 100 g", mrp: 95, default: true },
+      { id: "bar", label: "approx. 100 g", mrp: 95, offer: 85, default: true },
     ],
     sku: "SN-SC-ALS-100",
     image: "/surakshitam-product-images/aloe-vera-soap/aloe-vera-soap-01-listing-front-clean.webp",
@@ -908,7 +908,7 @@ export const products: Product[] = [
     keyIngredients: ["Activated charcoal", "Coconut oil", "Glycerin"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     sizes: [
-      { id: "bar", label: "approx. 100 g", mrp: 95, default: true },
+      { id: "bar", label: "approx. 100 g", mrp: 95, offer: 85, default: true },
     ],
     sku: "SN-SC-CHS-100",
     image: "/surakshitam-product-images/charcoal-soap/charcoal-soap-01-listing-front-clean.webp",
@@ -930,7 +930,7 @@ export const products: Product[] = [
     keyIngredients: ["Coffee grounds", "Coconut oil", "Glycerin"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     sizes: [
-      { id: "bar", label: "approx. 100 g", mrp: 95, default: true },
+      { id: "bar", label: "approx. 100 g", mrp: 95, offer: 85, default: true },
     ],
     sku: "SN-SC-COS-100",
     image: "/surakshitam-product-images/coffee-soap/coffee-soap-01-listing-front-clean.webp",
@@ -952,7 +952,7 @@ export const products: Product[] = [
     keyIngredients: ["Goat milk", "Shea butter", "Coconut oil"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     sizes: [
-      { id: "bar", label: "approx. 100 g", mrp: 95, default: true },
+      { id: "bar", label: "approx. 100 g", mrp: 95, offer: 85, default: true },
     ],
     sku: "SN-SC-GMS-100",
     image: "/surakshitam-product-images/goat-milk-soap/goat-milk-soap-01-listing-front-clean.webp",
@@ -974,7 +974,7 @@ export const products: Product[] = [
     keyIngredients: ["Honey", "Oats", "Coconut oil"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     sizes: [
-      { id: "bar", label: "approx. 100 g", mrp: 95, default: true },
+      { id: "bar", label: "approx. 100 g", mrp: 95, offer: 85, default: true },
     ],
     sku: "SN-SC-HNS-100",
     image: "/surakshitam-product-images/honey-soap/honey-soap-01-listing-front-clean.webp",
@@ -996,7 +996,7 @@ export const products: Product[] = [
     keyIngredients: ["Manjistha root", "Coconut oil", "Glycerin"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     sizes: [
-      { id: "bar", label: "approx. 100 g", mrp: 95, default: true },
+      { id: "bar", label: "approx. 100 g", mrp: 95, offer: 85, default: true },
     ],
     sku: "SN-SC-MJS-100",
     image: "/surakshitam-product-images/manjista-soap/manjista-soap-01-listing-front-clean.webp",
@@ -1018,7 +1018,7 @@ export const products: Product[] = [
     keyIngredients: ["Red wine extract", "Grape seed oil", "Coconut oil"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     sizes: [
-      { id: "bar", label: "approx. 100 g", mrp: 95, default: true },
+      { id: "bar", label: "approx. 100 g", mrp: 95, offer: 85, default: true },
     ],
     sku: "SN-SC-RWS-100",
     image: "/surakshitam-product-images/red-wine-soap/red-wine-soap-01-listing-front-clean.webp",
@@ -1040,7 +1040,7 @@ export const products: Product[] = [
     keyIngredients: ["Sandalwood", "Coconut oil", "Glycerin"],
     usage: "Work into a lather with water, cleanse, and rinse.",
     sizes: [
-      { id: "bar", label: "approx. 100 g", mrp: 95, default: true },
+      { id: "bar", label: "approx. 100 g", mrp: 95, offer: 85, default: true },
     ],
     sku: "SN-SC-SDS-100",
     image: "/surakshitam-product-images/sandal-soap/sandal-soap-01-listing-front-clean.webp",
@@ -1062,7 +1062,7 @@ export const products: Product[] = [
     keyIngredients: ["Henna (Lawsonia inermis)"],
     usage: "Mix with warm water into a paste, apply to hair, leave as preferred, then rinse thoroughly.",
     sizes: [
-      { id: "250g", label: "250 g", mrp: 175, default: true },
+      { id: "250g", label: "250 g", mrp: 175, offer: 150, default: true },
     ],
     sku: "SN-HR-HNP-250",
     image: "/surakshitam-product-images/henna-powder/henna-powder-01-listing-front-clean.webp",
@@ -1084,8 +1084,8 @@ export const products: Product[] = [
     keyIngredients: ["Herbal blend"],
     usage: "Mix with water into a paste, apply to the scalp, leave for 20–30 minutes, then rinse.",
     sizes: [
-      { id: "50g", label: "50 g", mrp: 90 },
-      { id: "100g", label: "100 g", mrp: 175, default: true },
+      { id: "50g", label: "50 g", mrp: 90, offer: 75 },
+      { id: "100g", label: "100 g", mrp: 175, offer: 150, default: true },
     ],
     sku: "SN-HR-ADP-100",
     image: "/surakshitam-product-images/anti-dandruff-pack/anti-dandruff-pack-01-listing-front-clean.webp",
@@ -1114,7 +1114,7 @@ export const products: Product[] = [
       "For a natural black shade (two steps): apply henna to the hair first, then wash and dry completely. Take the required indigo powder in a non-metal bowl, add warm water, mix into a smooth paste and apply immediately. Leave for 1–2 hours, then wash with plain water — no shampoo the same day. For a brown shade (single step): mix henna powder and indigo powder together with warm water, apply for 1–2 hours, then wash with plain water. Store in a cool, dry place.",
     sizes: [
       { id: "100g", label: "100 g", mrp: 125 },
-      { id: "200g", label: "200 g", mrp: 225, default: true },
+      { id: "200g", label: "200 g", mrp: 225, offer: 200, default: true },
     ],
     sku: "SN-HR-IND-200",
     image: "/surakshitam-product-images/indigo-powder/indigo-powder-01-listing-front-clean.webp",
@@ -1205,7 +1205,7 @@ export const products: Product[] = [
     keyIngredients: ["Amla (Phyllanthus emblica)"],
     usage: "Mix with water, curd or your hair oil into a paste, apply to the scalp and hair, leave for 20–30 minutes, then rinse.",
     sizes: [
-      { id: "100g", label: "100 g", mrp: 80, default: true },
+      { id: "100g", label: "100 g", mrp: 80, offer: 70, default: true },
     ],
     sku: "SN-HR-AML-100",
     image: "/surakshitam-product-images/amla-powder/amla-powder-01-listing-front-clean.webp",
@@ -1389,6 +1389,17 @@ export function defaultSize(product: Pick<Product, "sizes">): ProductSize {
 
 export function getSize(product: Pick<Product, "sizes">, sizeId: string): ProductSize | undefined {
   return product.sizes.find((s) => s.id === sizeId);
+}
+
+/** What the customer pays for a pack: the offer rate when it is below the MRP, else the MRP. Undefined = price on request. */
+export function payPrice(size: Pick<ProductSize, "mrp" | "offer">): number | undefined {
+  if (size.mrp == null) return size.offer;
+  return size.offer != null && size.offer < size.mrp ? size.offer : size.mrp;
+}
+
+/** True when the pack has an offer rate below its MRP, so the MRP is shown struck through. */
+export function hasOffer(size: Pick<ProductSize, "mrp" | "offer">): boolean {
+  return size.mrp != null && size.offer != null && size.offer < size.mrp;
 }
 
 /** "MRP ₹499", "Sold out" for an unavailable pack, or "Price on request" when there is no MRP yet. */

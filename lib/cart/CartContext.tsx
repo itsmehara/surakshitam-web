@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useState } from "react";
-import { getProductById, getSize } from "@/lib/catalog";
+import { getProductById, getSize, payPrice } from "@/lib/catalog";
 import type { Product, ProductSize } from "@/lib/types";
 
 /**
@@ -166,8 +166,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     () => ({
       lines,
       count: lines.length,
-      subtotal: lines.reduce((sum, l) => sum + (l.size.mrp ?? 0) * l.qty, 0),
-      hasPriceOnRequest: lines.some((l) => l.size.mrp == null),
+      subtotal: lines.reduce((sum, l) => sum + (payPrice(l.size) ?? 0) * l.qty, 0),
+      hasPriceOnRequest: lines.some((l) => payPrice(l.size) == null),
       ready,
       has: (id, sizeId) => items.some((i) => same(i, id, sizeId)),
       qtyOf: (id, sizeId) => items.find((i) => same(i, id, sizeId))?.qty ?? 0,

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { products, categories, sizeLabels, defaultSize } from "@/lib/catalog";
+import { products, categories, sizeLabels, defaultSize, payPrice } from "@/lib/catalog";
 import { concernsForCategory } from "@/lib/site";
 import type { Product } from "@/lib/types";
 import { ProductCard } from "@/components/ui/ProductCard";
@@ -19,7 +19,7 @@ const sortOptions = [
   { value: "a-z", label: "A–Z" },
 ];
 
-const mrpOf = (p: Product) => defaultSize(p).mrp ?? Number.POSITIVE_INFINITY;
+const mrpOf = (p: Product) => payPrice(defaultSize(p)) ?? Number.POSITIVE_INFINITY;
 
 function sortProducts(list: Product[], sort?: string): Product[] {
   const copy = [...list];

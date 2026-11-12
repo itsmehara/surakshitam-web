@@ -3,7 +3,7 @@
 import Image from "next/image";
 import type { CartLine } from "@/lib/cart/CartContext";
 import { lineKey } from "@/lib/cart/CartContext";
-import { productImage } from "@/lib/catalog";
+import { payPrice, productImage } from "@/lib/catalog";
 import { FREE_DELIVERY_OVER, formatWeight, type CourierBreakdown, type Delivery } from "@/lib/delivery";
 import { rupees, type OrderCharges } from "@/lib/order";
 
@@ -78,7 +78,7 @@ export function OrderSummary({ lines, charges }: { lines: CartLine[]; charges: O
               </span>
             </span>
             <span className="shrink-0 text-sm font-semibold tabular-nums text-forest">
-              {size.mrp == null ? <span className="text-xs font-normal text-forest/50">on request</span> : rupees(size.mrp * qty)}
+              {payPrice(size) == null ? <span className="text-xs font-normal text-forest/50">on request</span> : rupees(payPrice(size)! * qty)}
             </span>
           </li>
         ))}

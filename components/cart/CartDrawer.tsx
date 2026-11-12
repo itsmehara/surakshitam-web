@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { useCart, MAX_NOTE, lineKey } from "@/lib/cart/CartContext";
-import { productImage } from "@/lib/catalog";
+import { payPrice, productImage } from "@/lib/catalog";
 import { rupees } from "@/lib/order";
 import { CartIcon, CloseIcon, ArrowRight } from "@/components/icons";
 import { cn } from "@/lib/cn";
@@ -136,7 +136,7 @@ export function CartDrawer() {
                     <p className="text-[0.7rem] text-forest/50">
                       {size.label}
                       <span className="text-forest/30"> · </span>
-                      {size.mrp == null ? "price on request" : `${rupees(size.mrp)} × ${qty} = ${rupees(size.mrp * qty)}`}
+                      {payPrice(size) == null ? "price on request" : `${rupees(payPrice(size)!)} × ${qty} = ${rupees(payPrice(size)! * qty)}`}
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center rounded-full border border-forest/15 text-forest">

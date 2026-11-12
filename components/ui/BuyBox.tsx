@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Product } from "@/lib/types";
-import { defaultSize, formatMrp } from "@/lib/catalog";
+import { defaultSize, formatMrp, hasOffer, payPrice } from "@/lib/catalog";
 import { AddToCartButton } from "./AddToCartButton";
 import { cn } from "@/lib/cn";
 
@@ -20,6 +20,7 @@ import { cn } from "@/lib/cn";
 export function BuyBox({ product, variant = "card" }: { product: Product; variant?: "card" | "page" }) {
   const [sizeId, setSizeId] = useState(() => defaultSize(product).id);
   const size = product.sizes.find((s) => s.id === sizeId) ?? defaultSize(product);
+  const offered = hasOffer(size) && !size.soldOut;
   const page = variant === "page";
   const multi = product.sizes.length > 1;
 
@@ -46,7 +47,7 @@ export function BuyBox({ product, variant = "card" }: { product: Product; varian
                 )}
               >
                 {s.label}
-                {page && !s.soldOut && s.mrp != null && <span className={cn("ml-1.5", active ? "text-cream/70" : "text-forest/45")}>₹{s.mrp}</span>}
+                {page && !s.soldOut && payPrice(s) != null && <span className={cn("ml-1.5", active ? "text-cream/70" : "text-forest/45")}>₹{payPrice(s)}</span>}
               </button>
             );
           })}
@@ -56,7 +57,7 @@ export function BuyBox({ product, variant = "card" }: { product: Product; varian
       {page ? (
         <div>
           <p className={cn("font-serif text-2xl font-semibold", size.soldOut ? "text-forest/50" : "text-forest")}>
-            {formatMrp(size)}
+            {offered ? <>₹{size.offer!.toLocaleString("en-IN")}<span className="ml-2 text-sm font-normal text-forest/50 line-through">MRP ₹{size.mrp!.toLocaleString("en-IN")}</span></> : formatMrp(size)}
             <span className="ml-2 text-sm font-normal text-forest/55">· {size.label}</span>
           </p>
           {size.soldOut && (
@@ -67,7 +68,7 @@ export function BuyBox({ product, variant = "card" }: { product: Product; varian
           )}
           {!size.soldOut && size.mrp != null && (
             <p className="mt-1 text-xs text-forest/50">
-              MRP inclusive of all taxes. Delivery is added at checkout, by weight and state.
+              {offered ? "Offer price" : "MRP"} inclusive of all taxes. Delivery is added at checkout, by weight and state.
             </p>
           )}
         </div>
@@ -75,7 +76,7 @@ export function BuyBox({ product, variant = "card" }: { product: Product; varian
         <p className="flex items-baseline justify-between gap-2">
           <span className="text-[0.7rem] text-forest/50">{size.label}</span>
           <span className={cn("text-xs font-semibold tabular-nums", size.mrp == null || size.soldOut ? "text-forest/50" : "text-forest")}>
-            {formatMrp(size)}
+            {offered ? <><span className="mr-1.5 font-normal text-forest/45 line-through">₹{size.mrp!.toLocaleString("en-IN")}</span>₹{size.offer!.toLocaleString("en-IN")}</> : formatMrp(size)}
           </span>
         </p>
       )}

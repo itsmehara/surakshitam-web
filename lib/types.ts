@@ -23,6 +23,8 @@ export interface ProductSize {
   label: string;
   /** Maximum retail price in whole rupees, inclusive of taxes. */
   mrp?: number;
+  /** Offer rate in whole rupees: what the customer pays when it is below the MRP (the MRP then shows struck through). */
+  offer?: number;
   default?: boolean;
   /**
    * This pack is temporarily unavailable: it still shows on the card and the
