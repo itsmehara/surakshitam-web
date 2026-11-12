@@ -176,6 +176,52 @@ export function saveCustomer(c: Customer): void {
   }
 }
 
+const DRAFT_KEY = "sn-checkout-draft-v1";
+
+/**
+ * Checkout form in progress, kept for this tab only (sessionStorage). A UPI app
+ * can make the phone browser reload the page on return, which would empty the
+ * form (and hide the QR/Pay button until the State is chosen again) and change
+ * the order ID in the UPI note.
+ */
+export function saveDraft(customer: Customer, orderId: string): void {
+  try {
+    window.sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ customer, orderId }));
+  } catch {
+    /* private mode — fine */
+  }
+}
+
+export function loadDraft(): { customer: Customer; orderId: string } | null {
+  try {
+    const raw = window.sessionStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const d = JSON.parse(raw) as { customer?: Partial<Customer>; orderId?: unknown };
+    const c = d.customer ?? {};
+    const pick = (k: keyof Customer) => (typeof c[k] === "string" ? (c[k] as string) : "");
+    if (typeof d.orderId !== "string" || !d.orderId) return null;
+    return {
+      orderId: d.orderId,
+      customer: {
+        name: pick("name"), phone: pick("phone"), address: pick("address"), city: pick("city"),
+        state: pick("state"), pincode: pick("pincode"), email: pick("email"), postOffice: pick("postOffice"),
+        deliveryMethod: DELIVERY_METHODS.includes(c.deliveryMethod as DeliveryMethod) ? (c.deliveryMethod as DeliveryMethod) : "courier",
+        mapsLink: pick("mapsLink"),
+      },
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function clearDraft(): void {
+  try {
+    window.sessionStorage.removeItem(DRAFT_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function clearCustomer(): void {
   try {
     window.localStorage.removeItem(CUSTOMER_KEY);

@@ -18,6 +18,9 @@ import {
   rupees,
   rememberSentOrder,
   saveCustomer,
+  saveDraft,
+  loadDraft,
+  clearDraft,
   submitOrder,
   validateCustomer,
   whatsAppOrderHref,
@@ -66,17 +69,25 @@ export function CheckoutView() {
   const [lookup, setLookup] = useState<"idle" | "loading" | "ok" | "not-found" | "unavailable">("idle");
   // City and State the customer typed or picked for the current pincode. A lookup never overwrites them.
   const touched = useRef({ city: false, state: false });
+  const hydrated = useRef(false);
 
   useEffect(() => {
-    setCheckoutOrderId(newOrderId());
-    const saved = loadCustomer();
-    if (saved && (saved.name || saved.phone)) {
+    const draft = loadDraft();
+    setCheckoutOrderId(draft?.orderId ?? newOrderId());
+    const saved = draft?.customer ?? loadCustomer();
+    if (saved && (saved.name || saved.phone || saved.state)) {
       setCustomer(saved);
-      setRemembered(true);
+      setRemembered(!draft);
       // Remembered City and State count as the customer's, so this visit's lookup keeps them.
       touched.current = { city: !!saved.city, state: !!saved.state };
     }
+    hydrated.current = true;
   }, []);
+
+  // Keep the form in this tab so a UPI app reloading the page does not lose it.
+  useEffect(() => {
+    if (hydrated.current && checkoutOrderId) saveDraft(customer, checkoutOrderId);
+  }, [customer, checkoutOrderId]);
 
   // Pincode → City, State and post office (lib/pincode.ts). A failed or slow lookup changes nothing.
   const pinNow = customer.pincode.trim();
@@ -164,6 +175,7 @@ export function CheckoutView() {
 
     // 2. Remember details for next time; hand the message to /order-sent/.
     saveCustomer(customer);
+    clearDraft();
     rememberSentOrder({ orderId, message, href, sheet: "pending", at: Date.now(), paid: payment.paid });
 
     // 3. Save to the Orders tab — not awaited; the result lands in sessionStorage.
