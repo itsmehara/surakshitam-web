@@ -286,6 +286,7 @@ const allProducts: Product[] = [
     keyIngredients: ["Soapnut bio-enzyme", "Citrus bio-enzyme"],
     usage: "Pour around the bowl, leave for a few minutes, brush and flush.",
     sizes: [
+      { id: "500ml", label: "500 ml", mrp: 100, images: bioGallery("bio-enzyme-toilet-cleaner", "500ml") },
       { id: "1l", label: "1 L", mrp: 185, default: true, images: bioGallery("bio-enzyme-toilet-cleaner", "1000ml") },
     ],
     sku: "SN-HC-BTC-1000",
