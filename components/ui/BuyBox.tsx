@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Product } from "@/lib/types";
 import { defaultSize, formatMrp, hasOffer, payPrice } from "@/lib/catalog";
 import { AddToCartButton } from "./AddToCartButton";
+import { LaunchOfferBadge } from "./LaunchOfferBadge";
 import { cn } from "@/lib/cn";
 
 /**
@@ -25,6 +26,14 @@ export function BuyBox({ product, variant = "card" }: { product: Product; varian
   const multi = product.sizes.length > 1;
 
   return (
+    <>
+    {/* Card: the sticker sits on the photo's bottom-left corner. This box is laid over the
+        card's square photo (the <article> is the positioned parent) and follows the picked pack. */}
+    {!page && offered && (
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 aspect-square">
+        <LaunchOfferBadge className="absolute bottom-2 left-2 h-14 w-14 sm:h-16 sm:w-16" />
+      </div>
+    )}
     <div className={cn("relative z-10", page ? "space-y-4" : "space-y-2")}>
       {multi && (
         <div className={cn("flex flex-wrap", page ? "gap-2" : "gap-1.5")} role="group" aria-label="Pack size">
@@ -55,7 +64,8 @@ export function BuyBox({ product, variant = "card" }: { product: Product; varian
       )}
 
       {page ? (
-        <div>
+        <div className="flex items-center justify-between gap-3">
+          <div>
           <p className={cn("font-serif text-2xl font-semibold", size.soldOut ? "text-forest/50" : "text-forest")}>
             {offered ? <>₹{size.offer!.toLocaleString("en-IN")}<span className="ml-2 text-sm font-normal text-forest/50 line-through">MRP ₹{size.mrp!.toLocaleString("en-IN")}</span></> : formatMrp(size)}
             <span className="ml-2 text-sm font-normal text-forest/55">· {size.label}</span>
@@ -71,6 +81,8 @@ export function BuyBox({ product, variant = "card" }: { product: Product; varian
               {offered ? "Offer price" : "MRP"} inclusive of all taxes. Delivery is added at checkout, by weight and state.
             </p>
           )}
+          </div>
+          {offered && <LaunchOfferBadge className="h-[4.5rem] w-[4.5rem] shrink-0" />}
         </div>
       ) : (
         <p className="flex items-baseline justify-between gap-2">
@@ -103,5 +115,6 @@ export function BuyBox({ product, variant = "card" }: { product: Product; varian
         />
       )}
     </div>
+    </>
   );
 }
