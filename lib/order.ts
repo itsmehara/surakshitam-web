@@ -335,6 +335,8 @@ export type SentOrder = {
   /** Sheet save: pending while the POST is in flight. */
   sheet: "pending" | "ok" | "failed";
   at: number;
+  /** Customer ticked "already paid by UPI" at checkout. Optional, so an order stored before this field still reads. */
+  paid?: boolean;
 };
 
 const SENT_KEY = "sn-last-order";

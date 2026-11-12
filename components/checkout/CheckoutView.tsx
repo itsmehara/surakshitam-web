@@ -152,11 +152,11 @@ export function CheckoutView() {
 
     // 2. Remember details for next time; hand the message to /order-sent/.
     saveCustomer(customer);
-    rememberSentOrder({ orderId, message, href, sheet: "pending", at: Date.now() });
+    rememberSentOrder({ orderId, message, href, sheet: "pending", at: Date.now(), paid: payment.paid });
 
     // 3. Save to the Orders tab — not awaited; the result lands in sessionStorage.
     void submitOrder({ orderId, lines, customer, note, payment, website }).then((r) => {
-      rememberSentOrder({ orderId, message, href, sheet: r.ok ? "ok" : "failed", at: Date.now() });
+      rememberSentOrder({ orderId, message, href, sheet: r.ok ? "ok" : "failed", at: Date.now(), paid: payment.paid });
     });
 
     // 4. Cart is cleared only once WhatsApp has been opened.

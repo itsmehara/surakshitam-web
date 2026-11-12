@@ -48,7 +48,9 @@ export function OrderSent() {
         title={blocked ? "One more tap to send your order" : "Thank you — your order is on its way to us"}
         intro={
           id
-            ? `Order ${id}. We reply on WhatsApp to confirm availability and delivery; you pay there and send us the payment screenshot. Mon–Sat, ${site.hours}.`
+            ? mine?.paid
+              ? `Order ${id}. We reply on WhatsApp to confirm availability and delivery. Your UPI payment is noted: we check the transaction ID against our bank before we pack. Mon–Sat, ${site.hours}.`
+              : `Order ${id}. We reply on WhatsApp to confirm availability and delivery; you pay there and send us the payment screenshot. Mon–Sat, ${site.hours}.`
             : undefined
         }
       />
