@@ -12,6 +12,7 @@ import {
   NO_PAYMENT,
   validatePayment,
   type Payment,
+  type PayMethod,
   orderMessage,
   orderCharges,
   rupees,
@@ -212,6 +213,24 @@ export function CheckoutView() {
       value: "other",
       label: `Others (Contact: ${OTHER_DELIVERY_PHONE})`,
       hint: "Any other arrangement. We confirm the delivery with you on WhatsApp.",
+    },
+  ];
+
+  const payOptions: { value: PayMethod; label: string; hint: string }[] = [
+    {
+      value: "later",
+      label: "Pay on WhatsApp after confirmation",
+      hint: "We confirm availability and the total first, then you pay and send the screenshot.",
+    },
+    {
+      value: "upi",
+      label: "UPI — already paid",
+      hint: "Paid with the UPI QR above or another UPI app? Enter the transaction ID so we can match it.",
+    },
+    {
+      value: "cash",
+      label: "Cash",
+      hint: "Pay in cash when your order arrives. We confirm this on WhatsApp.",
     },
   ];
 
@@ -424,28 +443,35 @@ export function CheckoutView() {
             <UpiPayment charges={charges} orderId={checkoutOrderId} />
           </section>
 
-          {/* Already paid? Optional — the normal flow is pay after we confirm on WhatsApp. */}
-          <div className="rounded-lg border border-forest/10 bg-white/70 p-3">
-            <label className="flex cursor-pointer items-start gap-2.5 text-sm text-forest">
-              <input
-                type="checkbox"
-                name="paid"
-                checked={payment.paid}
-                onChange={(e) => {
-                  setPayment((p) => ({ ...p, paid: e.target.checked }));
-                  setPaymentError(undefined);
-                }}
-                className="mt-0.5 h-4 w-4 accent-moss"
-              />
-              <span>
-                <span className="font-medium">I&apos;ve already paid by UPI</span>
-                <span className="block text-xs text-forest/55">
-                  Paid with the UPI QR above, or another UPI payment? Paste the transaction ID so we can match it.
-                  Otherwise, pay on WhatsApp once we confirm.
+          {/* How will you pay? Default is pay on WhatsApp after we confirm; UPI needs a transaction ID. */}
+          <fieldset className="space-y-2.5">
+            <legend className="mb-2 font-serif text-xl font-semibold text-forest">How will you pay?</legend>
+            {payOptions.map((o) => (
+              <label
+                key={o.value}
+                className={cn(
+                  "flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm text-forest transition-colors",
+                  payment.method === o.value ? "border-moss bg-white" : "border-forest/10 bg-white/70 hover:border-forest/25",
+                )}
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value={o.value}
+                  checked={payment.method === o.value}
+                  onChange={() => {
+                    setPayment({ method: o.value, paid: o.value === "upi", ref: o.value === "upi" ? payment.ref : "" });
+                    setPaymentError(undefined);
+                  }}
+                  className="mt-1 h-4 w-4 accent-moss"
+                />
+                <span>
+                  <span className="font-medium">{o.label}</span>
+                  <span className="block text-xs leading-relaxed text-forest/60">{o.hint}</span>
                 </span>
-              </span>
-            </label>
-            {payment.paid && (
+              </label>
+            ))}
+            {payment.method === "upi" && (
               <div className="mt-3">
                 <Field
                   idPrefix="co"
@@ -466,7 +492,7 @@ export function CheckoutView() {
                 />
               </div>
             )}
-          </div>
+          </fieldset>
 
           {/* Honeypot — hidden from humans, filled by bots. */}
           <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">

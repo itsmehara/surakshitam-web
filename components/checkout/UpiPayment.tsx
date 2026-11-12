@@ -128,7 +128,7 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
               {delivery.status === "rapido" ? "The Rapido fare is not in this amount." : "The total includes delivery."} Order note: {orderId}.
             </p>
             <p className="text-xs leading-relaxed text-forest/55">
-              Paid? Tick &ldquo;I&apos;ve already paid by UPI&rdquo; below and enter the transaction ID.
+              Paid? Choose &ldquo;UPI — already paid&rdquo; under How will you pay and enter the transaction ID.
             </p>
           </div>
         </div>

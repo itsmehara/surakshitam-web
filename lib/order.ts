@@ -199,9 +199,10 @@ export function validateCustomer(c: Customer): CustomerErrors {
  * reference, so the founders can match it in the Sheet. Never auto-marks the
  * order Paid — the founders verify and change Status themselves.
  */
-export type Payment = { paid: boolean; ref: string };
-export const NO_PAYMENT: Payment = { paid: false, ref: "" };
-
+export type PayMethod = "later" | "upi" | "cash";
+/** `paid` is true only for "upi" (the one method that needs a transaction ID). */
+export type Payment = { method: PayMethod; paid: boolean; ref: string };
+export const NO_PAYMENT: Payment = { method: "later", paid: false, ref: "" };
 /** UPI transaction IDs / UTRs are 12–22 alphanumerics; allow a little slack either side. */
 export function validatePayment(p: Payment): string | undefined {
   if (!p.paid) return undefined;
@@ -211,6 +212,7 @@ export function validatePayment(p: Payment): string | undefined {
 }
 
 export function formatPayment(p: Payment): string {
+  if (p.method === "cash") return "Payment: cash";
   return p.paid ? `Payment: already paid by UPI — ref ${p.ref.trim()}` : "Payment: on WhatsApp once you confirm";
 }
 
@@ -316,6 +318,7 @@ export async function submitOrder(input: {
     priceOnRequest: charges.hasPriceOnRequest,
     note: input.note.trim(),
     paid: !!input.payment?.paid,
+    paymentMethod: input.payment?.method ?? "later",
     paymentRef: input.payment?.paid ? input.payment.ref.trim() : "",
     website: input.website ?? "",
     page: typeof window !== "undefined" ? window.location.href : "",
