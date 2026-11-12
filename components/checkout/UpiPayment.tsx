@@ -18,7 +18,7 @@ import { UPI_ID, UPI_PAYEE_NAME, upiPayLink } from "@/lib/upi";
  * so the founders can match the bank credit to the order.
  */
 export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderId: string }) {
-  const { subtotal, hasPriceOnRequest, delivery, total } = charges;
+  const { payable: subtotal, hasPriceOnRequest, delivery, total } = charges;
   // Items priced on request are not in the subtotal, and delivery is unknown until a State is chosen.
   const payable = !hasPriceOnRequest && total != null && total > 0;
   const amount = total ?? 0;

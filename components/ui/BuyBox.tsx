@@ -72,7 +72,7 @@ export function BuyBox({ product, variant = "card" }: { product: Product; varian
         <div className="flex items-center justify-between gap-3">
           <div>
           <p className={cn("font-serif text-2xl font-semibold", size.soldOut ? "text-forest/50" : "text-forest")}>
-            {offered ? <>₹{payPrice(size)!.toLocaleString("en-IN")}<span className="ml-2 text-sm font-normal text-forest/50 line-through">MRP ₹{size.mrp!.toLocaleString("en-IN")}</span></> : formatMrp(size)}
+            {offered ? <>₹{size.offer!.toLocaleString("en-IN")}<span className="ml-2 text-sm font-normal text-forest/50 line-through">MRP ₹{size.mrp!.toLocaleString("en-IN")}</span></> : formatMrp(size)}
             <span className="ml-2 text-sm font-normal text-forest/55">· {size.label}</span>
           </p>
           {size.soldOut && (
@@ -93,7 +93,7 @@ export function BuyBox({ product, variant = "card" }: { product: Product; varian
         <p className="flex items-baseline justify-between gap-2">
           <span className="text-[0.7rem] text-forest/50">{size.label}</span>
           <span className={cn("text-xs font-semibold tabular-nums", size.mrp == null || size.soldOut ? "text-forest/50" : "text-forest")}>
-            {offered ? <><span className="mr-1.5 font-normal text-forest/45 line-through">₹{size.mrp!.toLocaleString("en-IN")}</span>₹{payPrice(size)!.toLocaleString("en-IN")}</> : formatMrp(size)}
+            {offered ? <><span className="mr-1.5 font-normal text-forest/45 line-through">₹{size.mrp!.toLocaleString("en-IN")}</span>₹{size.offer!.toLocaleString("en-IN")}</> : formatMrp(size)}
           </span>
         </p>
       )}

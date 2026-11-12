@@ -1,5 +1,6 @@
 "use client";
 
+import { PROMO_WHEEL } from "@/lib/promo-wheel";
 import Image from "next/image";
 import type { CartLine } from "@/lib/cart/CartContext";
 import { lineKey } from "@/lib/cart/CartContext";
@@ -52,7 +53,7 @@ function DeliveryFigure({ delivery }: { delivery: Delivery }) {
 
 /** Read-only order lines, then subtotal, delivery and total, at the top of the checkout page. */
 export function OrderSummary({ lines, charges }: { lines: CartLine[]; charges: OrderCharges }) {
-  const { subtotal, hasPriceOnRequest, delivery, total } = charges;
+  const { subtotal, discount, payable, hasPriceOnRequest, delivery, total } = charges;
   // Free delivery is for a subtotal above FREE_DELIVERY_OVER, so this is what the cart still needs.
   const moreForFree = FREE_DELIVERY_OVER + 1 - subtotal;
   return (
@@ -90,6 +91,14 @@ export function OrderSummary({ lines, charges }: { lines: CartLine[]; charges: O
           {hasPriceOnRequest && <span className="ml-1 text-xs font-normal text-forest/50">+ on request</span>}
         </span>
       </div>
+      {discount > 0 && (
+        <div className="flex items-baseline justify-between gap-3 border-t border-forest/10 px-4 py-2.5">
+          <span className="text-sm text-moss">
+            Inaugural offer <span className="text-xs text-forest/50">(extra {PROMO_WHEEL.discountPct}% on your cart)</span>
+          </span>
+          <span className="text-sm font-medium tabular-nums text-moss">−{rupees(discount)}</span>
+        </div>
+      )}
       {delivery.status === "free" && delivery.waived ? (
         <>
           <div className="flex items-start justify-between gap-3 border-t border-forest/10 px-4 py-2.5">
@@ -123,7 +132,7 @@ export function OrderSummary({ lines, charges }: { lines: CartLine[]; charges: O
         <span className="font-serif text-xl font-semibold tabular-nums text-forest">
           {total == null ? (
             <>
-              {rupees(subtotal)}
+              {rupees(payable)}
               <span className="ml-1 text-xs font-normal text-forest/50">+ delivery</span>
             </>
           ) : (

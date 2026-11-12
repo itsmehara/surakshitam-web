@@ -10,6 +10,7 @@
 
 import type { CartLine } from "@/lib/cart/CartContext";
 import { payPrice } from "@/lib/catalog";
+import { PROMO_WHEEL } from "@/lib/promo-wheel";
 import { ENQUIRY_URL } from "@/lib/enquiry";
 import { gaEvent } from "@/lib/analytics";
 import { isIndianPincode, isIndianState } from "@/lib/india";
@@ -40,13 +41,36 @@ export function orderSubtotal(lines: CartLine[]): { subtotal: number; hasPriceOn
   };
 }
 
+/** Is the inaugural offer on today? (enabled, and not past `endsOn`, India time.) */
+export function launchOfferActive(now: Date = new Date()): boolean {
+  if (!PROMO_WHEEL.enabled || !(PROMO_WHEEL.discountPct > 0)) return false;
+  if (!PROMO_WHEEL.endsOn) return true;
+  const today = new Date(now.getTime() + 5.5 * 3600_000).toISOString().slice(0, 10);
+  return today <= PROMO_WHEEL.endsOn;
+}
+
+/** The inaugural discount on a cart value, whole rupees, on top of pack offer rates. 0 when the offer is off. */
+export function launchDiscount(cartValue: number): number {
+  return launchOfferActive() ? Math.round((cartValue * PROMO_WHEEL.discountPct) / 100) : 0;
+}
+
 export function formatSubtotal(lines: CartLine[]): string {
   const { subtotal, hasPriceOnRequest } = orderSubtotal(lines);
-  return `Subtotal: ${rupees(subtotal)} (MRP, incl. taxes)${hasPriceOnRequest ? " + items priced on request" : ""}`;
+  const d = launchDiscount(subtotal);
+  return (
+    `Subtotal: ${rupees(subtotal)} (incl. taxes)` +
+    (d > 0 ? `\nInaugural offer ${PROMO_WHEEL.discountPct}% extra: −${rupees(d)}` : "") +
+    (hasPriceOnRequest ? " + items priced on request" : "")
+  );
 }
 
 export type OrderCharges = {
+  /** Cart value before the inaugural discount. Delivery rules (free over ₹2,000) use this. */
   subtotal: number;
+  /** Inaugural discount in rupees (0 when off). */
+  discount: number;
+  /** Subtotal less the inaugural discount: what the items cost. */
+  payable: number;
   hasPriceOnRequest: boolean;
   /** How delivery is charged (lib/delivery.ts). The QR, the WhatsApp message and the payload all read this. */
   delivery: Delivery;
@@ -59,7 +83,9 @@ export function orderCharges(lines: CartLine[], c: Pick<Customer, "state" | "pin
   const { subtotal, hasPriceOnRequest } = orderSubtotal(lines);
   const delivery = checkoutDelivery(lines, { method: c.deliveryMethod, pincode: c.pincode, state: c.state }, subtotal);
   const added = deliveryAdded(delivery);
-  return { subtotal, hasPriceOnRequest, delivery, total: added == null ? null : subtotal + added };
+  const discount = launchDiscount(subtotal);
+  const payable = subtotal - discount;
+  return { subtotal, discount, payable, hasPriceOnRequest, delivery, total: added == null ? null : payable + added };
 }
 
 /** `Delivery: ₹170 by courier (3.4 kg)`, `Delivery: Rapido, fare paid to the rider`, or "to confirm on WhatsApp" while the courier charge is not known. */
@@ -88,7 +114,7 @@ function deliveryNoteOf(d: Delivery): string {
 
 /** `Total: ₹1,220`, `Total: ₹1,100 + Rapido fare`, or `Total: ₹1,100 + delivery` while the courier charge is still to confirm. */
 export function formatTotal(c: OrderCharges): string {
-  const amount = c.total == null ? `${rupees(c.subtotal)} + delivery` : rupees(c.total);
+  const amount = c.total == null ? `${rupees(c.payable)} + delivery` : rupees(c.total);
   const rider = c.delivery.status === "rapido" ? " + Rapido fare (paid to the rider)" : "";
   return `Total: ${amount}${rider}${c.hasPriceOnRequest ? " + items priced on request" : ""}`;
 }
@@ -291,7 +317,7 @@ export async function submitOrder(input: {
   // GA4: order count and value only — no customer details. Value is the total; the subtotal while delivery is still to confirm.
   gaEvent("whatsapp_order", {
     order_id: input.orderId,
-    value: charges.total ?? charges.subtotal,
+    value: charges.total ?? charges.payable,
     currency: "INR",
     items: input.lines.length,
     price_on_request: charges.hasPriceOnRequest,
@@ -310,7 +336,10 @@ export async function submitOrder(input: {
     pincode: c.pincode.trim(),
     postOffice: c.postOffice.trim(),
     items: formatOrderLines(input.lines),
-    subtotal: charges.subtotal,
+    // `subtotal` is what the items cost after the inaugural discount, so the Sheet's Subtotal + Delivery = Total still holds.
+    subtotal: charges.payable,
+    cartValue: charges.subtotal,
+    discount: charges.discount,
     delivery: deliveryAdded(charges.delivery),
     deliveryMethod: deliveryMethodOf(charges.delivery),
     deliveryNote: deliveryNoteOf(charges.delivery),

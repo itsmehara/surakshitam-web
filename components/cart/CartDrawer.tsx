@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { useCart, MAX_NOTE, lineKey } from "@/lib/cart/CartContext";
 import { payPrice, productImage } from "@/lib/catalog";
-import { rupees } from "@/lib/order";
+import { launchDiscount, rupees } from "@/lib/order";
+import { PROMO_WHEEL } from "@/lib/promo-wheel";
 import { CartIcon, CloseIcon, ArrowRight } from "@/components/icons";
 import { cn } from "@/lib/cn";
 
@@ -175,13 +176,25 @@ export function CartDrawer() {
               <div className="flex items-baseline justify-between">
                 <span className="text-sm text-forest/70">
                   Subtotal
-                  <span className="ml-1 text-[0.7rem] text-forest/45">MRP, incl. taxes</span>
+                  <span className="ml-1 text-[0.7rem] text-forest/45">incl. taxes</span>
                 </span>
                 <span className="font-serif text-lg font-semibold tabular-nums text-forest">
                   {rupees(subtotal)}
                   {hasPriceOnRequest && <span className="ml-1 text-xs font-normal text-forest/50">+ on request</span>}
                 </span>
               </div>
+              {launchDiscount(subtotal) > 0 && (
+                <>
+                  <div className="flex items-baseline justify-between text-sm text-moss">
+                    <span>Inaugural offer <span className="text-[0.7rem] text-forest/50">extra {PROMO_WHEEL.discountPct}% on your cart</span></span>
+                    <span className="tabular-nums">−{rupees(launchDiscount(subtotal))}</span>
+                  </div>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-sm text-forest/70">You pay <span className="text-[0.7rem] text-forest/45">before delivery</span></span>
+                    <span className="font-serif text-lg font-semibold tabular-nums text-forest">{rupees(subtotal - launchDiscount(subtotal))}</span>
+                  </div>
+                </>
+              )}
               <p className="text-[0.7rem] leading-snug text-forest/50">
                 Delivery: ₹120 for up to 2 kg + ₹50 for each additional kg in Telangana, ₹150 + ₹60 elsewhere in India.
               </p>
