@@ -1333,7 +1333,9 @@ const allProducts: Product[] = [
     keyIngredients: ["Whole wheat flour", "Edible salt"],
     usage: "Boil in salted water for 4–5 minutes, drain, then toss with your seasoning.",
     sizes: [
-      { id: "250g", label: "250 g", default: true },
+      // No stock for now. Shown as "Sold out" so nobody orders it by mistake.
+      // Remove `soldOut` once stock is back and a price is set.
+      { id: "250g", label: "250 g", soldOut: true, default: true },
     ],
     sku: "AK-PN-WNL-250",
     image: "/products/partners/wheat-noodles.webp",
