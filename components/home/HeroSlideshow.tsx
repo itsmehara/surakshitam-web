@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 import { LinkButton } from "@/components/ui/Button";
 import { FallingBotanicals } from "@/components/ui/FallingBotanicals";
 import { FallingFruitPhysics } from "@/components/ui/FallingFruitPhysics";
+import { PromoWheel } from "@/components/ui/PromoWheel";
 import { moveStyle } from "@/lib/hero-motion";
 import { ArrowRight, ChevronDown, LeafIcon, BeakerIcon, RecycleIcon } from "@/components/icons";
 
@@ -298,6 +299,8 @@ export function HeroSlideshow() {
               Our Story
             </LinkButton>
           </div>
+          {/* inaugural offer gear (copy in lib/promo-wheel.ts) — kept in the copy column, off the product photo */}
+          <PromoWheel variant="hero" />
           <ul className="mt-5 hidden flex-wrap gap-x-6 gap-y-2 sm:flex lg:mt-6">
             {trust.map(({ icon: Icon, label }) => (
               <li key={label} className="flex items-center gap-2 text-sm text-forest/70">

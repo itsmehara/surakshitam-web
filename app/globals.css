@@ -132,3 +132,11 @@
   -webkit-overflow-scrolling: touch;
 }
 .sn-scroll-x::-webkit-scrollbar { display: none; }
+
+/* Inaugural offer gear: one slow, steady turn, repeated (see components/ui/PromoWheel.tsx). */
+@keyframes sn-gear-turn {
+  to { transform: rotate(360deg); }
+}
+.sn-gear-turn {
+  animation: sn-gear-turn var(--gear-spin, 40s) linear infinite;
+}
