@@ -16,9 +16,10 @@
  *   packaging allowance. Telangana: ₹120 up to 2 kg, then +₹50 for each started
  *   kg above 2 kg. Elsewhere: ₹150 up to 2 kg, then +₹60 for each started kg.
  *   Part of a kg counts as a full kg. Added to the total.
- * - Rapido (Hyderabad and Secunderabad only, 500xxx): the customer pays the
- *   Rapido fare to the rider, so nothing is added to the total. Rapido can only
- *   be picked for a 500xxx pincode; any other pincode falls back to courier.
+ * - Rapido (Hyderabad and Secunderabad only, 500xxx; checked at checkout): the
+ *   customer pays the Rapido fare to the rider, so nothing is added to the total.
+ * - Others: arranged by phone or WhatsApp (OTHER_DELIVERY_PHONE). Nothing is
+ *   worked out here; the total is confirmed on WhatsApp.
  *
  * One-line changes once the founders decide:
  * - Free-delivery threshold: FREE_DELIVERY_OVER.
@@ -31,7 +32,11 @@ import { deliveryZone } from "@/lib/india";
 /** Subtotal (₹) above which the courier charge is discounted to ₹0 (special delivery discount). Rapido is not discounted. */
 export const FREE_DELIVERY_OVER = 2000;
 
-export type DeliveryMethod = "courier" | "rapido";
+/** Courier (across India), Rapido (Hyderabad and Secunderabad only) or Others (arranged by hand). */
+export type DeliveryMethod = "courier" | "rapido" | "other";
+
+/** The founders' number for the "Others" delivery option. Shown on checkout. */
+export const OTHER_DELIVERY_PHONE = "7416394594";
 
 const TELANGANA_STATE = "Telangana";
 const BASE_UP_TO_G = 2000;
@@ -102,6 +107,8 @@ export type Delivery =
   | { status: "free"; method: DeliveryMethod; waived: { weightG: number; breakdown: CourierBreakdown } | null; stateToSee: boolean }
   /** Rapido: the rider is paid the fare directly, so nothing is added to the total. */
   | { status: "rapido" }
+  /** Others: arranged by phone or WhatsApp, so no charge is worked out here. */
+  | { status: "other" }
   /** Courier, but no State chosen yet, so the charge cannot be worked out. */
   | { status: "pick-state" }
   /** Courier, and a pack has no readable weight, so the charge is confirmed on WhatsApp. */
@@ -110,18 +117,20 @@ export type Delivery =
   | { status: "courier"; weightG: number; charge: number; breakdown: CourierBreakdown };
 
 export function checkoutDelivery(lines: WeighedLine[], choice: DeliveryChoice, subtotal: number): Delivery {
-  const rapido = choice.method === "rapido" && rapidoAvailable(choice.pincode);
-  // Courier only: Rapido is never discounted, so the customer pays the Rapido fare at any cart value.
-  if (subtotal > FREE_DELIVERY_OVER && !rapido) {
+  // Others: arranged by hand, so nothing is worked out here.
+  if (choice.method === "other") return { status: "other" };
+  // Rapido is never discounted, so the customer pays the Rapido fare at any cart value.
+  // The Hyderabad-only rule is checked at checkout (CheckoutView), not here.
+  if (choice.method === "rapido") return { status: "rapido" };
+  if (subtotal > FREE_DELIVERY_OVER) {
     // The courier charge the rule waives, so the summary can show it struck out.
     const weighed = orderWeightG(lines);
-    const weightG = rapido || !choice.state ? null : weighed;
+    const weightG = !choice.state ? null : weighed;
     const waived = weightG == null ? null : { weightG, breakdown: courierBreakdown(weightG, choice.state) };
     // No State yet, so the waived charge is not known: the summary says how to see it.
-    const stateToSee = !rapido && !choice.state && weighed != null;
-    return { status: "free", method: rapido ? "rapido" : "courier", waived, stateToSee };
+    const stateToSee = !choice.state && weighed != null;
+    return { status: "free", method: "courier", waived, stateToSee };
   }
-  if (rapido) return { status: "rapido" };
   if (!choice.state) return { status: "pick-state" };
   const weightG = orderWeightG(lines);
   if (weightG == null) return { status: "to-confirm" };
@@ -139,6 +148,7 @@ export function deliveryAdded(d: Delivery): number | null {
 /** The method the order goes by, for the WhatsApp message and the Orders tab. */
 export function deliveryMethodOf(d: Delivery): DeliveryMethod {
   if (d.status === "rapido") return "rapido";
+  if (d.status === "other") return "other";
   if (d.status === "free") return d.method;
   return "courier";
 }

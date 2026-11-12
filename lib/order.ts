@@ -13,7 +13,7 @@ import { payPrice } from "@/lib/catalog";
 import { ENQUIRY_URL } from "@/lib/enquiry";
 import { gaEvent } from "@/lib/analytics";
 import { isIndianPincode, isIndianState } from "@/lib/india";
-import { FREE_DELIVERY_OVER, checkoutDelivery, deliveryAdded, deliveryMethodOf, formatWeight, type Delivery, type DeliveryMethod } from "@/lib/delivery";
+import { FREE_DELIVERY_OVER, OTHER_DELIVERY_PHONE, checkoutDelivery, deliveryAdded, deliveryMethodOf, formatWeight, type Delivery, type DeliveryMethod } from "@/lib/delivery";
 
 const WA_NUMBER = "917416394594";
 const waLink = (text: string) => `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`;
@@ -69,6 +69,8 @@ export function formatDelivery(d: Delivery): string {
       return `Delivery: special delivery discount (order over ${rupees(FREE_DELIVERY_OVER)}, courier)`;
     case "rapido":
       return "Delivery: Rapido, fare paid to the rider";
+    case "other":
+      return `Delivery: Others, arranged on WhatsApp (${OTHER_DELIVERY_PHONE})`;
     case "courier":
       return `Delivery: ${rupees(d.charge)} by courier (${formatWeight(d.weightG)})`;
     default:
@@ -79,6 +81,7 @@ export function formatDelivery(d: Delivery): string {
 /** Short reason for the Orders tab when the delivery amount is 0 or unknown. */
 function deliveryNoteOf(d: Delivery): string {
   if (d.status === "rapido") return "Rapido: customer pays the rider";
+  if (d.status === "other") return "Others: arranged on WhatsApp";
   if (d.status === "free") return `Special discount: order over ${rupees(FREE_DELIVERY_OVER)}`;
   return "";
 }
@@ -103,11 +106,15 @@ export type Customer = {
   email: string;
   /** Post office picked from the pincode lookup (lib/pincode.ts). Optional; sent with the order. */
   postOffice: string;
-  /** Courier, or Rapido for Hyderabad pincodes (lib/delivery.ts). Falls back to courier outside 500xxx. */
+  /** Courier, Rapido (Hyderabad pincodes only, checked at checkout) or Others (lib/delivery.ts). */
   deliveryMethod: DeliveryMethod;
+  /** Google Maps link for the Rapido rider: shared location or pasted. Sent only with Rapido. */
+  mapsLink: string;
 };
 
-export const EMPTY_CUSTOMER: Customer = { name: "", phone: "", address: "", city: "", state: "", pincode: "", email: "", postOffice: "", deliveryMethod: "courier" };
+const DELIVERY_METHODS: DeliveryMethod[] = ["courier", "rapido", "other"];
+
+export const EMPTY_CUSTOMER: Customer = { name: "", phone: "", address: "", city: "", state: "", pincode: "", email: "", postOffice: "", deliveryMethod: "courier", mapsLink: "" };
 
 const CUSTOMER_KEY = "sn-customer-v1";
 
@@ -127,7 +134,8 @@ export function loadCustomer(): Customer | null {
       pincode: pick("pincode"),
       email: pick("email"),
       postOffice: pick("postOffice"),
-      deliveryMethod: c.deliveryMethod === "rapido" ? "rapido" : "courier",
+      deliveryMethod: DELIVERY_METHODS.includes(c.deliveryMethod as DeliveryMethod) ? (c.deliveryMethod as DeliveryMethod) : "courier",
+      mapsLink: pick("mapsLink"),
     };
   } catch {
     return null;
@@ -160,6 +168,9 @@ export function normalisePhone(raw: string): string | null {
 
 export type CustomerErrors = Partial<Record<keyof Customer, string>>;
 
+/** A Google Maps link: google.com/maps…, maps.google.…, maps.app.goo.gl or goo.gl/maps. */
+export const MAPS_LINK = /^https?:\/\/(?:www\.)?(?:google\.[a-z.]+\/maps|maps\.google\.[a-z.]+|maps\.app\.goo\.gl|goo\.gl\/maps)/i;
+
 /** Field rules from the spec (§7.3). Empty object = valid. */
 export function validateCustomer(c: Customer): CustomerErrors {
   const e: CustomerErrors = {};
@@ -173,6 +184,8 @@ export function validateCustomer(c: Customer): CustomerErrors {
   if (c.city.trim().length < 2) e.city = "Please enter your city or town.";
   if (!isIndianState(c.state)) e.state = "Please pick your state.";
   if (!isIndianPincode(c.pincode)) e.pincode = "Enter a valid 6-digit Indian pincode.";
+  const maps = c.mapsLink.trim();
+  if (c.deliveryMethod === "rapido" && maps && !MAPS_LINK.test(maps)) e.mapsLink = "Paste a Google Maps link (use Share in Google Maps).";
   const email = c.email.trim();
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = "That email doesn't look right.";
   return e;
@@ -225,6 +238,7 @@ export function formatDeliverTo(c: Customer): string {
     c.address.trim(),
     `${c.city.trim()}, ${c.state.trim()} — ${c.pincode.trim()}`,
     c.postOffice.trim() ? `Post office: ${c.postOffice.trim()}` : "",
+    c.deliveryMethod === "rapido" && c.mapsLink.trim() ? `Map: ${c.mapsLink.trim()}` : "",
     c.email.trim(),
   ]
     .filter(Boolean)

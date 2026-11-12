@@ -24,9 +24,10 @@ import {
   type CustomerErrors,
 } from "@/lib/order";
 import { trackWhatsAppClick } from "@/lib/enquiry";
-import { FREE_DELIVERY_OVER, rapidoAvailable, type DeliveryMethod } from "@/lib/delivery";
+import { FREE_DELIVERY_OVER, OTHER_DELIVERY_PHONE, rapidoAvailable, type DeliveryMethod } from "@/lib/delivery";
 import { OrderSummary } from "./OrderSummary";
 import { UpiPayment } from "./UpiPayment";
+import { MapsLocation } from "./MapsLocation";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { Field, inputClass } from "@/components/ui/FormField";
 import { INDIAN_STATES, deliveryHint, isIndianPincode, stateFromPincode } from "@/lib/india";
@@ -35,9 +36,11 @@ import { WhatsAppIcon, CartIcon, ArrowRight } from "@/components/icons";
 import { cn } from "@/lib/cn";
 
 /**
- * /checkout/ — order summary, delivery details, one button ("Order on WhatsApp")
- * (PRODUCT-CATALOG-NOTES-2026-09-19 §7.3). A page rather than the drawer: an
- * address needs room on a phone.
+ * /checkout/ — one column, in this order: how to deliver (Rapido, Courier, Others),
+ * the details that option needs, the order, the UPI QR under the address, then
+ * one button ("Order on WhatsApp") (PRODUCT-CATALOG-NOTES-2026-09-19 §7.3).
+ * Feedback from Srikanth & Supriya: no long intro, delivery options first, QR
+ * below the address, minimum scrolling on a phone.
  *
  * On submit: order ID is made here (never depends on the server); WhatsApp is
  * opened *synchronously* inside the submit handler so popup blockers let it
@@ -131,7 +134,11 @@ export function CheckoutView() {
     e.preventDefault();
     if (sending || lines.length === 0) return;
     const website = String(new FormData(e.currentTarget).get("website") ?? "");
-    const errs = validateCustomer(customer);
+    const errs: CustomerErrors = validateCustomer(customer);
+    // Rapido is only for Hyderabad and Secunderabad pincodes (500xxx), checked here as the customer submits.
+    if (customer.deliveryMethod === "rapido" && !errs.pincode && !rapidoAvailable(customer.pincode)) {
+      errs.pincode = "Rapido is only for Hyderabad and Secunderabad pincodes. Choose Courier or Others.";
+    }
     const payErr = validatePayment(payment);
     if (Object.keys(errs).length || payErr) {
       setErrors(errs);
@@ -180,212 +187,238 @@ export function CheckoutView() {
     );
   }
 
-  // Delivery by courier or Rapido (lib/delivery.ts); the QR and the summary read the same numbers.
-  // Rapido is offered only for a Hyderabad pincode. Anywhere else the choice is courier.
+  // The delivery option drives what else is shown: Rapido adds the Google Maps location, Others shows the contact.
+  const method = customer.deliveryMethod;
   const rapidoOk = rapidoAvailable(pinNow);
-  const method: DeliveryMethod = rapidoOk ? customer.deliveryMethod : "courier";
   const freeOver = rupees(FREE_DELIVERY_OVER);
   const charges = orderCharges(lines, customer);
 
+  const deliveryOptions: { value: DeliveryMethod; label: string; hint: string }[] = [
+    {
+      value: "rapido",
+      label: "Rapido (Hyderabad Local)",
+      hint: "Hyderabad and Secunderabad only. You pay the rider the Rapido fare, so nothing is added to your total.",
+    },
+    {
+      value: "courier",
+      label: "Courier",
+      hint: `Across India. Charged by weight and state, and added to your total. Special delivery discount on orders over ${freeOver}.`,
+    },
+    {
+      value: "other",
+      label: `Others (Contact: ${OTHER_DELIVERY_PHONE})`,
+      hint: "Any other arrangement. We confirm the delivery with you on WhatsApp.",
+    },
+  ];
+
   return (
     <>
-      <PageIntro
-        eyebrow="Checkout"
-        title="Where should we deliver?"
-        intro={`We deliver across India by courier, and in Hyderabad and Secunderabad you can choose Rapido. Courier is charged by weight and state. Courier orders over ${freeOver} get a special delivery discount. Your order goes to us on WhatsApp with these details. We confirm availability on WhatsApp, and you pay by UPI here or on WhatsApp, then we pack and send.`}
-      />
-      <div className="container grid gap-8 py-8 sm:py-12 lg:grid-cols-[1fr_1.2fr] lg:gap-12">
-        <div className="lg:order-2">
-          <h2 className="font-serif text-xl font-semibold text-forest">Your order</h2>
-          <div className="mt-3">
-            <OrderSummary lines={lines} charges={charges} />
-          </div>
-          <Link href="/shop" className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-moss hover:text-forest">
-            Add more products <ArrowRight width={14} />
-          </Link>
-          <UpiPayment charges={charges} orderId={checkoutOrderId} />
-        </div>
-
-        <form onSubmit={onSubmit} noValidate className="space-y-4 lg:order-1" aria-busy={sending}>
-          <div className="flex items-baseline justify-between gap-3">
-            <h2 className="font-serif text-xl font-semibold text-forest">Delivery details</h2>
-            {remembered && (
-              <button type="button" onClick={forget} className="text-xs text-forest/55 underline underline-offset-2 hover:text-clay">
-                Not you? Clear
-              </button>
-            )}
-          </div>
-
-          <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
-            <Field idPrefix="co" label="Name" name="name" required autoComplete="name" value={customer.name} onChange={set("name")} error={errors.name} maxLength={60} />
-            <Field
-              idPrefix="co"
-              label="Mobile / WhatsApp"
-              name="phone"
-              type="tel"
-              required
-              autoComplete="tel"
-              inputMode="tel"
-              placeholder="10-digit mobile"
-              value={customer.phone}
-              onChange={set("phone")}
-              error={errors.phone}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="co-address" className="mb-1 block text-sm font-medium text-forest">
-              Delivery address <span className="text-clay">*</span>
-            </label>
-            <textarea
-              id="co-address"
-              name="address"
-              rows={3}
-              required
-              autoComplete="street-address"
-              maxLength={200}
-              placeholder={"House / flat, street, area\nLandmark (optional)"}
-              value={customer.address}
-              onChange={set("address")}
-              aria-invalid={errors.address ? true : undefined}
-              className={cn(inputClass, errors.address && "border-clay focus:border-clay")}
-            />
-            {errors.address && <p className="mt-1 text-xs text-clay">{errors.address}</p>}
-          </div>
-
-          <div className="grid gap-x-3 gap-y-3 sm:grid-cols-3">
-            <Field
-              idPrefix="co"
-              label="Pincode"
-              name="pincode"
-              required
-              inputMode="numeric"
-              autoComplete="postal-code"
-              maxLength={6}
-              value={customer.pincode}
-              onChange={set("pincode")}
-              error={errors.pincode}
-            />
-            <Field idPrefix="co" label="City / town" name="city" required autoComplete="address-level2" value={customer.city} onChange={set("city")} error={errors.city} />
-            <div>
-              <label htmlFor="co-state" className="mb-1 block text-sm font-medium text-forest">
-                State <span className="text-clay">*</span>
-              </label>
-              <select
-                id="co-state"
-                name="state"
-                required
-                autoComplete="address-level1"
-                value={customer.state}
-                onChange={set("state")}
-                aria-invalid={errors.state ? true : undefined}
-                className={cn(inputClass, "h-10", errors.state && "border-clay focus:border-clay")}
+      <PageIntro eyebrow="Checkout" title="Where should we deliver?" />
+      <div className="container max-w-2xl py-8 sm:py-10">
+        <form onSubmit={onSubmit} noValidate className="space-y-6" aria-busy={sending}>
+          {/* 1. Delivery options come first. */}
+          <fieldset className="space-y-2.5">
+            <legend className="mb-2 font-serif text-xl font-semibold text-forest">How should we deliver?</legend>
+            {deliveryOptions.map((o) => (
+              <label
+                key={o.value}
+                className={cn(
+                  "flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm text-forest transition-colors",
+                  method === o.value ? "border-moss bg-white" : "border-forest/10 bg-white/70 hover:border-forest/25",
+                )}
               >
-                <option value="">Select state</option>
-                {INDIAN_STATES.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-              {errors.state && <p className="mt-1 text-xs text-clay">{errors.state}</p>}
-            </div>
-            <p className="text-xs text-forest/55 sm:col-span-3">{deliveryHint(customer.pincode)}</p>
-            {lookup === "loading" && <p role="status" className="text-xs text-forest/55 sm:col-span-3">Looking up your pincode…</p>}
-            {lookup === "not-found" && (
-              <p role="status" className="text-xs text-clay sm:col-span-3">
-                We couldn&apos;t find this pincode. Check it, or enter city and state by hand.
-              </p>
-            )}
-            {lookup === "unavailable" && (
-              <p role="status" className="text-xs text-forest/55 sm:col-span-3">
-                Pincode lookup is unavailable right now. Enter city and state by hand.
-              </p>
-            )}
-            {lookup === "ok" && offices.length > 0 && (
-              <div className="sm:col-span-3">
-                <label htmlFor="co-postoffice" className="mb-1 block text-sm font-medium text-forest">
-                  Post office
-                </label>
-                <select
-                  id="co-postoffice"
-                  name="postOffice"
-                  value={customer.postOffice}
-                  onChange={(e) => {
-                    const office = offices.find((o) => o.name === e.target.value);
-                    if (office) setCustomer((c) => fillFromOffice(c, office, touched.current));
-                  }}
-                  className={cn(inputClass, "h-10")}
-                >
-                  {offices.map((o) => (
-                    <option key={o.name} value={o.name}>
-                      {o.district ? `${o.name} (${o.district})` : o.name}
-                    </option>
-                  ))}
-                </select>
-                <p className="mt-1 text-xs text-forest/55">Filled from your pincode. Pick another post office if it is nearer.</p>
-              </div>
-            )}
-          </div>
-
-          {/* Courier, or Rapido for Hyderabad and Secunderabad pincodes (500xxx) only. */}
-          <fieldset className="rounded-lg border border-forest/10 bg-white/70 p-3">
-            <legend className="px-1 text-sm font-medium text-forest">How should we deliver?</legend>
-            <label className="flex cursor-pointer items-start gap-2.5 py-1.5 text-sm text-forest">
-              <input
-                type="radio"
-                name="deliveryMethod"
-                value="courier"
-                checked={method === "courier"}
-                onChange={() => setMethod("courier")}
-                className="mt-1 h-4 w-4 accent-moss"
-              />
-              <span>
-                <span className="font-medium">Courier</span>
-                <span className="block text-xs text-forest/55">
-                  Charged by weight and state, added to your total. Special delivery discount on orders over {freeOver}.
-                </span>
-              </span>
-            </label>
-            {rapidoOk ? (
-              <label className="flex cursor-pointer items-start gap-2.5 py-1.5 text-sm text-forest">
                 <input
                   type="radio"
                   name="deliveryMethod"
-                  value="rapido"
-                  checked={method === "rapido"}
-                  onChange={() => setMethod("rapido")}
+                  value={o.value}
+                  checked={method === o.value}
+                  onChange={() => setMethod(o.value)}
                   className="mt-1 h-4 w-4 accent-moss"
                 />
                 <span>
-                  <span className="font-medium">Rapido, Hyderabad and Secunderabad</span>
-                  <span className="block text-xs text-forest/55">
-                    You pay the Rapido fare to the rider, so it is not in your total.
-                  </span>
+                  <span className="font-medium">{o.label}</span>
+                  <span className="block text-xs leading-relaxed text-forest/60">{o.hint}</span>
                 </span>
               </label>
-            ) : (
-              pinNow.length === 6 && (
-                <p className="px-1 py-1.5 text-xs text-forest/55">Rapido is for Hyderabad and Secunderabad pincodes only.</p>
-              )
+            ))}
+            {method === "rapido" && pinNow.length === 6 && !rapidoOk && (
+              <p role="status" className="text-xs text-clay">
+                Rapido is only for Hyderabad and Secunderabad pincodes (500xxx). Choose Courier or Others, or check your pincode.
+              </p>
+            )}
+            {method === "other" && (
+              <p className="rounded-lg bg-cream/70 p-3 text-sm leading-relaxed text-forest/80">
+                For this delivery, call or message us on{" "}
+                <a href={`tel:+91${OTHER_DELIVERY_PHONE}`} className="font-medium text-forest underline underline-offset-2">
+                  {OTHER_DELIVERY_PHONE}
+                </a>
+                . Fill in your details below and we confirm the charge on WhatsApp.
+              </p>
             )}
           </fieldset>
 
-          <Field idPrefix="co" label="Email (optional)" name="email" type="email" autoComplete="email" value={customer.email} onChange={set("email")} error={errors.email} />
+          {/* 2. The details that option needs. */}
+          <div className="space-y-4">
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 className="font-serif text-xl font-semibold text-forest">Delivery details</h2>
+              {remembered && (
+                <button type="button" onClick={forget} className="text-xs text-forest/55 underline underline-offset-2 hover:text-clay">
+                  Not you? Clear
+                </button>
+              )}
+            </div>
 
-          <div>
-            <label htmlFor="co-note" className="mb-1 block text-sm font-medium text-forest">
-              Note (optional)
-            </label>
-            <textarea
-              id="co-note"
-              name="note"
-              rows={2}
-              maxLength={MAX_NOTE}
-              placeholder="Gift wrap, a question, a preferred delivery time…"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className={inputClass}
-            />
+            <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
+              <Field idPrefix="co" label="Name" name="name" required autoComplete="name" value={customer.name} onChange={set("name")} error={errors.name} maxLength={60} />
+              <Field
+                idPrefix="co"
+                label="Mobile / WhatsApp"
+                name="phone"
+                type="tel"
+                required
+                autoComplete="tel"
+                inputMode="tel"
+                placeholder="10-digit mobile"
+                value={customer.phone}
+                onChange={set("phone")}
+                error={errors.phone}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="co-address" className="mb-1 block text-sm font-medium text-forest">
+                Delivery address <span className="text-clay">*</span>
+              </label>
+              <textarea
+                id="co-address"
+                name="address"
+                rows={3}
+                required
+                autoComplete="street-address"
+                maxLength={200}
+                placeholder={"House / flat, street, area\nLandmark (optional)"}
+                value={customer.address}
+                onChange={set("address")}
+                aria-invalid={errors.address ? true : undefined}
+                className={cn(inputClass, errors.address && "border-clay focus:border-clay")}
+              />
+              {errors.address && <p className="mt-1 text-xs text-clay">{errors.address}</p>}
+            </div>
+
+            {method === "rapido" && (
+              <MapsLocation
+                value={customer.mapsLink}
+                error={errors.mapsLink}
+                onChange={(v) => {
+                  setCustomer((c) => ({ ...c, mapsLink: v }));
+                  if (errors.mapsLink) setErrors((er) => ({ ...er, mapsLink: undefined }));
+                }}
+              />
+            )}
+
+            <div className="grid gap-x-3 gap-y-3 sm:grid-cols-3">
+              <Field
+                idPrefix="co"
+                label="Pincode"
+                name="pincode"
+                required
+                inputMode="numeric"
+                autoComplete="postal-code"
+                maxLength={6}
+                value={customer.pincode}
+                onChange={set("pincode")}
+                error={errors.pincode}
+              />
+              <Field idPrefix="co" label="City / town" name="city" required autoComplete="address-level2" value={customer.city} onChange={set("city")} error={errors.city} />
+              <div>
+                <label htmlFor="co-state" className="mb-1 block text-sm font-medium text-forest">
+                  State <span className="text-clay">*</span>
+                </label>
+                <select
+                  id="co-state"
+                  name="state"
+                  required
+                  autoComplete="address-level1"
+                  value={customer.state}
+                  onChange={set("state")}
+                  aria-invalid={errors.state ? true : undefined}
+                  className={cn(inputClass, "h-10", errors.state && "border-clay focus:border-clay")}
+                >
+                  <option value="">Select state</option>
+                  {INDIAN_STATES.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+                {errors.state && <p className="mt-1 text-xs text-clay">{errors.state}</p>}
+              </div>
+              <p className="text-xs text-forest/55 sm:col-span-3">{deliveryHint(customer.pincode)}</p>
+              {lookup === "loading" && <p role="status" className="text-xs text-forest/55 sm:col-span-3">Looking up your pincode…</p>}
+              {lookup === "not-found" && (
+                <p role="status" className="text-xs text-clay sm:col-span-3">
+                  We couldn&apos;t find this pincode. Check it, or enter city and state by hand.
+                </p>
+              )}
+              {lookup === "unavailable" && (
+                <p role="status" className="text-xs text-forest/55 sm:col-span-3">
+                  Pincode lookup is unavailable right now. Enter city and state by hand.
+                </p>
+              )}
+              {lookup === "ok" && offices.length > 0 && (
+                <div className="sm:col-span-3">
+                  <label htmlFor="co-postoffice" className="mb-1 block text-sm font-medium text-forest">
+                    Post office
+                  </label>
+                  <select
+                    id="co-postoffice"
+                    name="postOffice"
+                    value={customer.postOffice}
+                    onChange={(e) => {
+                      const office = offices.find((o) => o.name === e.target.value);
+                      if (office) setCustomer((c) => fillFromOffice(c, office, touched.current));
+                    }}
+                    className={cn(inputClass, "h-10")}
+                  >
+                    {offices.map((o) => (
+                      <option key={o.name} value={o.name}>
+                        {o.district ? `${o.name} (${o.district})` : o.name}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-xs text-forest/55">Filled from your pincode. Pick another post office if it is nearer.</p>
+                </div>
+              )}
+            </div>
+
+            <Field idPrefix="co" label="Email (optional)" name="email" type="email" autoComplete="email" value={customer.email} onChange={set("email")} error={errors.email} />
+
+            <div>
+              <label htmlFor="co-note" className="mb-1 block text-sm font-medium text-forest">
+                Note (optional)
+              </label>
+              <textarea
+                id="co-note"
+                name="note"
+                rows={2}
+                maxLength={MAX_NOTE}
+                placeholder="Gift wrap, a question, a preferred delivery time…"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                className={inputClass}
+              />
+            </div>
           </div>
+
+          {/* 3. The order, then the UPI QR below the address details. */}
+          <section aria-labelledby="co-order-heading" className="space-y-3">
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 id="co-order-heading" className="font-serif text-xl font-semibold text-forest">Your order</h2>
+              <Link href="/shop" className="inline-flex items-center gap-1 text-sm font-medium text-moss hover:text-forest">
+                Add more products <ArrowRight width={14} />
+              </Link>
+            </div>
+            <OrderSummary lines={lines} charges={charges} />
+            <UpiPayment charges={charges} orderId={checkoutOrderId} />
+          </section>
 
           {/* Already paid? Optional — the normal flow is pay after we confirm on WhatsApp. */}
           <div className="rounded-lg border border-forest/10 bg-white/70 p-3">
