@@ -72,6 +72,12 @@ export interface Product {
   /** Pack sizes with MRP; see ProductSize. */
   sizes: ProductSize[];
   sku: string;
+  /**
+   * Unpublished: the record is kept, but the product is left out of `products`
+   * (lib/catalog.ts), so it has no page and cannot be found or ordered. For a
+   * product that is unavailable as a whole; use `soldOut` for a single pack.
+   */
+  hidden?: boolean;
   image: string;
   /** Optional gallery of additional images (Amazon-style). Falls back to [image]. */
   images?: string[];

@@ -47,7 +47,8 @@ export const categories: Category[] = [
   },
 ];
 
-export const products: Product[] = [
+/** Every product record, including hidden ones. Use `products` everywhere else. */
+const allProducts: Product[] = [
   /* ------------------------------ HOME CARE ------------------------------ */
   {
     id: "p-dishwash-liquid",
@@ -260,6 +261,8 @@ export const products: Product[] = [
       { id: "1l", label: "1 L", mrp: 185, default: true },
     ],
     sku: "SN-HC-BLD-1000",
+    // Not available now (Supriya, 12 Nov 2026). Remove this line to list it again.
+    hidden: true,
     image: "/surakshitam-product-images/bio-enzyme-laundry-detergent/bio-enzyme-laundry-detergent-01-listing-front-clean.webp",
     images: ["/surakshitam-product-images/bio-enzyme-laundry-detergent/bio-enzyme-laundry-detergent-01-listing-front-clean.webp"],
     isNew: true,
@@ -284,6 +287,30 @@ export const products: Product[] = [
       "/surakshitam-product-images/bio-enzyme-toilet-cleaner/bio-enzyme-toilet-cleaner-1000ml-01-listing-front.webp",
       "/surakshitam-product-images/bio-enzyme-toilet-cleaner/bio-enzyme-toilet-cleaner-1000ml-02-ingredient-lifestyle.webp",
       "/surakshitam-product-images/bio-enzyme-toilet-cleaner/bio-enzyme-toilet-cleaner-1000ml-03-use-context.webp",
+    ],
+    isNew: true,
+  },
+  {
+    id: "p-bio-enzyme-multi-purpose-cleaner",
+    slug: "bio-enzyme-multi-purpose-cleaner",
+    name: "Citrus Bio-enzyme Multi-purpose Cleaner",
+    category: "home-care",
+    shortDescription: "Soapnut and citrus enzyme for everyday cleaning",
+    description:
+      "A multi-purpose cleaner made from soapnut and fermented citrus enzyme — plant-based and biodegradable.",
+    benefits: ["Soapnut & citrus enzyme", "Plant-based", "Biodegradable"],
+    keyIngredients: ["Soapnut", "Citrus bio-enzyme"],
+    // Usage steps not yet given by Supriya; the product page hides the section while this is empty.
+    usage: "",
+    sizes: [
+      { id: "500ml", label: "500 ml", mrp: 100, default: true },
+    ],
+    sku: "SN-HC-BMC-500",
+    image: "/surakshitam-product-images/bio-enzyme-multi-purpose-cleaner/bio-enzyme-multi-purpose-cleaner-01-listing-front.webp",
+    images: [
+      "/surakshitam-product-images/bio-enzyme-multi-purpose-cleaner/bio-enzyme-multi-purpose-cleaner-01-listing-front.webp",
+      "/surakshitam-product-images/bio-enzyme-multi-purpose-cleaner/bio-enzyme-multi-purpose-cleaner-02-ingredient-lifestyle.webp",
+      "/surakshitam-product-images/bio-enzyme-multi-purpose-cleaner/bio-enzyme-multi-purpose-cleaner-03-use-context.webp",
     ],
     isNew: true,
   },
@@ -1315,6 +1342,13 @@ export const products: Product[] = [
 ];
 
 /**
+ * The catalogue the site sells from: every record not marked `hidden`. Shop,
+ * search, home lists, sitemap, product pages and the cart all read this, so a
+ * hidden product has no page, cannot be found and drops out of a saved cart.
+ */
+export const products: Product[] = allProducts.filter((p) => !p.hidden);
+
+/**
  * "Shop by concern" tags, applied here rather than inline on every product object above
  * to keep the catalog literal easy to scan. See lib/site.ts `concerns` for the tag list.
  */
@@ -1355,6 +1389,7 @@ const CONCERN_TAGS: Record<string, string[]> = {
   "p-bio-enzyme-floor-cleaner": ["floors-surfaces", "daily-freshness"],
   "p-bio-enzyme-laundry-detergent": ["laundry", "daily-freshness"],
   "p-bio-enzyme-toilet-cleaner": ["floors-surfaces", "deep-clean"],
+  "p-bio-enzyme-multi-purpose-cleaner": ["floors-surfaces", "daily-freshness"],
   "p-strawberry-lip-balm-stick": ["dry-skin"],
   "p-beetroot-lip-balm": ["dry-skin"],
   "p-beetroot-lip-balm-stick": ["dry-skin"],

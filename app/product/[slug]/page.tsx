@@ -83,18 +83,22 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
       ),
     },
     { title: "Ingredients", body: <p>{product.keyIngredients.join(", ")}.</p> },
-    {
-      title: "How to use",
-      body: Array.isArray(product.usage) ? (
-        <ol className="list-decimal space-y-1.5 pl-5">
-          {product.usage.map((step) => (
-            <li key={step}>{step}</li>
-          ))}
-        </ol>
-      ) : (
-        <p>{product.usage}</p>
-      ),
-    },
+    ...(product.usage.length
+      ? [
+          {
+            title: "How to use",
+            body: Array.isArray(product.usage) ? (
+              <ol className="list-decimal space-y-1.5 pl-5">
+                {product.usage.map((step) => (
+                  <li key={step}>{step}</li>
+                ))}
+              </ol>
+            ) : (
+              <p>{product.usage}</p>
+            ),
+          },
+        ]
+      : []),
     ...(product.suitableFor ? [{ title: "Suitable for", body: <p>{product.suitableFor}</p> }] : []),
     ...(product.precautions?.length
       ? [
