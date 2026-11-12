@@ -154,12 +154,14 @@ export function ShopView() {
       </div>
 
       {/* Sticky category + sort bar — sits directly under the header (h-16 / lg:h-[4.5rem]).
-          The chip row scrolls sideways on phones with the scrollbar hidden; sort is a
-          native select so it never competes with the chips for width. */}
+          Phones: two stacked rows — the category chips get the full width and scroll
+          sideways (scrollbar hidden, no chip ever shrinks or clips its label), and the
+          sort select sits on its own row below so it never competes for width.
+          sm+: one row, chips then sort, as before. */}
       <div className="sticky top-16 z-30 border-b border-forest/8 bg-cream/95 backdrop-blur-md lg:top-[4.5rem]">
-        <div className="container flex items-center gap-3 py-2.5">
+        <div className="container flex flex-col gap-2 py-2.5 sm:flex-row sm:items-center sm:gap-3">
           <div
-            className="sn-scroll-x flex min-w-0 flex-1 gap-2"
+            className="sn-scroll-x flex min-w-0 gap-2 sm:flex-1"
             role="group"
             aria-label="Filter by category"
           >
@@ -170,11 +172,12 @@ export function ShopView() {
                 <Link
                   key={c.name}
                   href={href({ category: c.slug ?? "" })}
+                  aria-current={active ? "page" : undefined}
                   className={cn(
-                    "whitespace-nowrap rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
+                    "shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
                     active
                       ? "border-forest bg-forest text-cream"
-                      : "border-forest/15 text-forest hover:border-forest/40",
+                      : "border-forest/15 bg-cream text-forest hover:border-forest/40",
                   )}
                 >
                   {c.name}
@@ -183,8 +186,8 @@ export function ShopView() {
             })}
           </div>
 
-          <label className="ml-auto flex shrink-0 items-center gap-1.5 text-xs text-forest/50">
-            <span className="hidden sm:inline">Sort</span>
+          <label className="flex shrink-0 items-center gap-1.5 self-end text-xs text-forest/60 sm:ml-auto sm:self-auto sm:text-forest/50">
+            <span>Sort</span>
             <select
               aria-label="Sort products"
               value={activeSort}
