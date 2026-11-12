@@ -154,7 +154,11 @@ export function CheckoutView() {
     const href = whatsAppOrderHref(message);
 
     // 1. WhatsApp first, inside the user gesture.
-    const opened = window.open(href, "_blank", "noopener");
+    // No "noopener" feature here: with it, window.open always returns null, so the cart was never cleared.
+    // The opener is cut by hand instead.
+    const win = window.open(href, "_blank");
+    const opened = win !== null;
+    if (win) win.opener = null;
     trackWhatsAppClick({ cta: "order", product: orderId });
 
     // 2. Remember details for next time; hand the message to /order-sent/.
