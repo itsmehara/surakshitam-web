@@ -58,10 +58,10 @@ export function PromoWheel({ variant }: { variant: "hero" | "floating" }) {
       </svg>
       {/* the words stay upright: they sit on a layer above the turning gear */}
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-cream">
-        <span className="font-serif text-[1.35em] font-semibold leading-none" style={{ fontSize: "clamp(0.95rem, 4.5vw, 1.6rem)" }}>
+        <span className="font-serif text-[1.35em] font-semibold leading-none" style={{ fontSize: "clamp(1.3rem, 6vw, 2.1rem)" }}>
           10%
         </span>
-        <span className="mt-[0.2em] font-sans font-bold uppercase tracking-[0.12em]" style={{ fontSize: "clamp(0.4rem, 1.6vw, 0.6rem)" }}>
+        <span className="mt-[0.2em] font-sans font-bold uppercase tracking-[0.12em]" style={{ fontSize: "clamp(0.5rem, 2vw, 0.75rem)" }}>
           Off
         </span>
       </div>
@@ -87,7 +87,7 @@ export function PromoWheel({ variant }: { variant: "hero" | "floating" }) {
   }
 
   return (
-    <div className="fixed left-4 top-20 z-40 w-16 sm:left-6 sm:w-20 lg:top-24">
+    <div className="fixed left-4 top-20 z-40 w-24 sm:left-6 sm:w-32 lg:top-24">
       <button
         type="button"
         onClick={() => setHidden(true)}
@@ -102,6 +102,9 @@ export function PromoWheel({ variant }: { variant: "hero" | "floating" }) {
         className={cn("block rounded-full transition-transform duration-200 ease-smooth hover:scale-[1.04]")}
       >
         {gear}
+        <span className="mx-auto -mt-1 block w-fit rounded-full bg-forest px-2.5 py-0.5 text-center text-[0.6rem] font-semibold uppercase leading-tight tracking-wider text-cream shadow-soft sm:text-[0.65rem]">
+          {PROMO_WHEEL.caption}
+        </span>
       </Link>
     </div>
   );

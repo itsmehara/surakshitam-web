@@ -1,3 +1,4 @@
+import { PROMO_WHEEL } from "@/lib/promo-wheel";
 import type { Category, Product, ProductSize } from "./types";
 
 /**
@@ -1437,15 +1438,28 @@ export function getSize(product: Pick<Product, "sizes">, sizeId: string): Produc
   return product.sizes.find((s) => s.id === sizeId);
 }
 
-/** What the customer pays for a pack: the offer rate when it is below the MRP, else the MRP. Undefined = price on request. */
-export function payPrice(size: Pick<ProductSize, "mrp" | "offer">): number | undefined {
+/**
+ * The inaugural rate for a pack: the lower of its own offer rate and MRP less the inaugural
+ * percentage (lib/promo-wheel.ts). Never stacked: an offer already below that is kept as is.
+ */
+function launchRate(size: Pick<ProductSize, "mrp" | "offer">): number | undefined {
   if (size.mrp == null) return size.offer;
-  return size.offer != null && size.offer < size.mrp ? size.offer : size.mrp;
+  const pct = PROMO_WHEEL.enabled ? PROMO_WHEEL.discountPct : 0;
+  const floor = Math.round(size.mrp * (1 - pct / 100));
+  return size.offer != null ? Math.min(size.offer, floor) : floor;
 }
 
-/** True when the pack has an offer rate below its MRP, so the MRP is shown struck through. */
+/** What the customer pays for a pack: the inaugural rate when it is below the MRP, else the MRP. Undefined = price on request. */
+export function payPrice(size: Pick<ProductSize, "mrp" | "offer">): number | undefined {
+  const r = launchRate(size);
+  if (size.mrp == null) return r;
+  return r != null && r < size.mrp ? r : size.mrp;
+}
+
+/** True when the pack sells below its MRP, so the MRP is shown struck through. */
 export function hasOffer(size: Pick<ProductSize, "mrp" | "offer">): boolean {
-  return size.mrp != null && size.offer != null && size.offer < size.mrp;
+  const r = launchRate(size);
+  return size.mrp != null && r != null && r < size.mrp;
 }
 
 /** "MRP ₹499", "Sold out" for an unavailable pack, or "Price on request" when there is no MRP yet. */

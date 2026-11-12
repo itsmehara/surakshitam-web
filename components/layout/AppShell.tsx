@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense } from "react";
-import { usePathname } from "next/navigation";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { FloatingContact } from "@/components/ui/FloatingContact";
@@ -17,9 +16,6 @@ import { PromoWheel } from "@/components/ui/PromoWheel";
  * a Suspense boundary for the export.
  */
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  // The home page has the full wheel in its hero; every other page gets the floating one.
-  const onHome = pathname === "/";
   return (
     <>
       <Suspense fallback={<div className="h-16 bg-cream lg:h-[4.5rem]" />}>
@@ -30,7 +26,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <FloatingContact />
       <CartDrawer />
       <SplashBillboard />
-      {!onHome && <PromoWheel variant="floating" />}
+      <PromoWheel variant="floating" />
     </>
   );
 }
