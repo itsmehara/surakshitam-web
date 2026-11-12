@@ -5,6 +5,7 @@ import type { Product } from "@/lib/types";
 import { defaultSize, formatMrp, hasOffer, payPrice } from "@/lib/catalog";
 import { AddToCartButton } from "./AddToCartButton";
 import { LaunchOfferBadge } from "./LaunchOfferBadge";
+import { usePack } from "./PackContext";
 import { cn } from "@/lib/cn";
 
 /**
@@ -19,10 +20,14 @@ import { cn } from "@/lib/cn";
  * "Sold out" one, so nothing unavailable can reach the cart.
  */
 export function BuyBox({ product, variant = "card" }: { product: Product; variant?: "card" | "page" }) {
-  const [sizeId, setSizeId] = useState(() => defaultSize(product).id);
+  const page = variant === "page";
+  const [localSizeId, setLocalSizeId] = useState(() => defaultSize(product).id);
+  // On a product page the pills also drive the gallery, so the picked pack lives in PackProvider.
+  const pack = usePack();
+  const sizeId = page && pack ? pack.sizeId : localSizeId;
+  const setSizeId = page && pack ? pack.setSizeId : setLocalSizeId;
   const size = product.sizes.find((s) => s.id === sizeId) ?? defaultSize(product);
   const offered = hasOffer(size) && !size.soldOut;
-  const page = variant === "page";
   const multi = product.sizes.length > 1;
 
   return (

@@ -32,6 +32,11 @@ export interface ProductSize {
    * cart. Set per size — a product is never sold out as a whole.
    */
   soldOut?: boolean;
+  /**
+   * Gallery for this pack (01 is the main photo, then 02, 03…). When set, the product
+   * page shows it while this pack is picked; when absent, the product's own `images` show.
+   */
+  images?: string[];
 }
 
 export interface Category {

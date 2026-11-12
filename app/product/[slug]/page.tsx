@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { products, getProductBySlug, getProductsByCategory, productImage, defaultSize, payPrice } from "@/lib/catalog";
-import { ProductGallery } from "@/components/ui/ProductGallery";
+import { PackGallery, PackProvider } from "@/components/ui/PackContext";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { BuyBox } from "@/components/ui/BuyBox";
 import { OrderingNote } from "@/components/ui/OrderingNote";
@@ -150,12 +150,10 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
       </div>
 
       <div className="container py-8 sm:py-12">
+        <PackProvider product={product}>
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-14">
-          {/* Gallery */}
-          <ProductGallery
-            images={product.images?.length ? product.images : [cover]}
-            name={product.name}
-          />
+          {/* Gallery: shows the photos of the pack picked in the pills */}
+          <PackGallery product={product} />
 
           {/* Details */}
           <div>
@@ -216,6 +214,8 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
             </div>
           </div>
         </div>
+
+        </PackProvider>
 
         {/* Related */}
         {related.length > 0 && (

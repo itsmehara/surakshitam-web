@@ -47,6 +47,13 @@ export const categories: Category[] = [
   },
 ];
 
+/** Shot names shared by every bio-enzyme pack: 01 is the main photo, then 02, 03 in order. */
+const BIO_SHOTS = ["01-listing-front", "02-ingredient-lifestyle", "03-use-context"];
+
+/** Gallery for one bio-enzyme pack, e.g. bio-enzyme-floor-cleaner + "500ml" → …-500ml-01-listing-front.webp */
+const bioGallery = (slug: string, pack: "500ml" | "1000ml") =>
+  BIO_SHOTS.map((shot) => `/surakshitam-product-images/${slug}/${slug}-${pack}-${shot}.webp`);
+
 /** Every product record, including hidden ones. Use `products` everywhere else. */
 const allProducts: Product[] = [
   /* ------------------------------ HOME CARE ------------------------------ */
@@ -234,8 +241,8 @@ const allProducts: Product[] = [
     keyIngredients: ["Citrus bio-enzyme", "Lemongrass essential oil"],
     usage: "Dilute one capful in a bucket of water and mop as usual.",
     sizes: [
-      { id: "500ml", label: "500 ml", mrp: 110, offer: 100 },
-      { id: "1l", label: "1 L", mrp: 220, offer: 190, default: true },
+      { id: "500ml", label: "500 ml", mrp: 110, offer: 100, images: bioGallery("bio-enzyme-floor-cleaner", "500ml") },
+      { id: "1l", label: "1 L", mrp: 220, offer: 190, default: true, images: bioGallery("bio-enzyme-floor-cleaner", "1000ml") },
     ],
     sku: "SN-HC-BFC-1000",
     image: "/surakshitam-product-images/bio-enzyme-floor-cleaner/bio-enzyme-floor-cleaner-1000ml-01-listing-front.webp",
@@ -279,7 +286,7 @@ const allProducts: Product[] = [
     keyIngredients: ["Soapnut bio-enzyme", "Citrus bio-enzyme"],
     usage: "Pour around the bowl, leave for a few minutes, brush and flush.",
     sizes: [
-      { id: "1l", label: "1 L", mrp: 185, default: true },
+      { id: "1l", label: "1 L", mrp: 185, default: true, images: bioGallery("bio-enzyme-toilet-cleaner", "1000ml") },
     ],
     sku: "SN-HC-BTC-1000",
     image: "/surakshitam-product-images/bio-enzyme-toilet-cleaner/bio-enzyme-toilet-cleaner-1000ml-01-listing-front.webp",
@@ -303,14 +310,14 @@ const allProducts: Product[] = [
     // Usage steps not yet given by Supriya; the product page hides the section while this is empty.
     usage: "",
     sizes: [
-      { id: "500ml", label: "500 ml", mrp: 100, default: true },
+      { id: "500ml", label: "500 ml", mrp: 100, default: true, images: bioGallery("bio-enzyme-multi-purpose-cleaner", "500ml") },
     ],
     sku: "SN-HC-BMC-500",
-    image: "/surakshitam-product-images/bio-enzyme-multi-purpose-cleaner/bio-enzyme-multi-purpose-cleaner-01-listing-front.webp",
+    image: "/surakshitam-product-images/bio-enzyme-multi-purpose-cleaner/bio-enzyme-multi-purpose-cleaner-500ml-01-listing-front.webp",
     images: [
-      "/surakshitam-product-images/bio-enzyme-multi-purpose-cleaner/bio-enzyme-multi-purpose-cleaner-01-listing-front.webp",
-      "/surakshitam-product-images/bio-enzyme-multi-purpose-cleaner/bio-enzyme-multi-purpose-cleaner-02-ingredient-lifestyle.webp",
-      "/surakshitam-product-images/bio-enzyme-multi-purpose-cleaner/bio-enzyme-multi-purpose-cleaner-03-use-context.webp",
+      "/surakshitam-product-images/bio-enzyme-multi-purpose-cleaner/bio-enzyme-multi-purpose-cleaner-500ml-01-listing-front.webp",
+      "/surakshitam-product-images/bio-enzyme-multi-purpose-cleaner/bio-enzyme-multi-purpose-cleaner-500ml-02-ingredient-lifestyle.webp",
+      "/surakshitam-product-images/bio-enzyme-multi-purpose-cleaner/bio-enzyme-multi-purpose-cleaner-500ml-03-use-context.webp",
     ],
     isNew: true,
   },
