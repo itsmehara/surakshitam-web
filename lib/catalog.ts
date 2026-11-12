@@ -311,6 +311,7 @@ const allProducts: Product[] = [
     usage: "",
     sizes: [
       { id: "500ml", label: "500 ml", mrp: 100, default: true, images: bioGallery("bio-enzyme-multi-purpose-cleaner", "500ml") },
+      { id: "1l", label: "1 L", mrp: 185, images: bioGallery("bio-enzyme-multi-purpose-cleaner", "1000ml") },
     ],
     sku: "SN-HC-BMC-500",
     image: "/surakshitam-product-images/bio-enzyme-multi-purpose-cleaner/bio-enzyme-multi-purpose-cleaner-500ml-01-listing-front.webp",
