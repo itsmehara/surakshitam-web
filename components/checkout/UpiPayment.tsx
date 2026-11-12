@@ -9,7 +9,7 @@ import { UPI_ID, UPI_PAYEE_NAME, upiPayLink } from "@/lib/upi";
 
 /**
  * "Pay by UPI" on /checkout/: the order total as a QR code, drawn in the browser
- * (no QR service is called), plus a button that opens the UPI app on a phone.
+ * (no QR service is called). There is no "open UPI app" button: PhonePe rejected the upi:// link for this payee ID (12 Nov 2026), so customers scan the QR or copy the ID.
  * The total is the cart subtotal plus the courier charge (lib/delivery.ts). Free
  * delivery and Rapido add nothing, since the rider is paid the Rapido fare directly.
  * The QR waits until a courier State is chosen and every pack has a weight, so the amount is never short.
@@ -116,14 +116,8 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
               </button>
             </div>
             <p className="text-xs leading-relaxed text-forest/55">
-              Payee: {UPI_PAYEE_NAME}. Scan with GPay, PhonePe, Paytm or any UPI app. The amount and order note fill in for you.
+              Payee: {UPI_PAYEE_NAME}. On a computer, scan the QR with any UPI app. On a phone, take a screenshot, open your UPI app, choose Scan, and pick the screenshot from your gallery. Or copy the UPI ID and pay in your app. Enter the amount shown above.
             </p>
-            <a
-              href={link}
-              className="inline-flex h-10 items-center justify-center rounded-full bg-forest px-5 text-sm font-medium text-cream hover:bg-ink sm:hidden"
-            >
-              Pay with a UPI app
-            </a>
             <p className="text-xs leading-relaxed text-forest/55">
               {delivery.status === "rapido" ? "The Rapido fare is not in this amount." : "The total includes delivery."} Order note: {orderId}.
             </p>
