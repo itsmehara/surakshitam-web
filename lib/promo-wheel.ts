@@ -10,14 +10,14 @@
  */
 export const PROMO_WHEEL = {
   enabled: true,
-  eyebrow: "Website inauguration offer",
+  eyebrow: "Website launch offer",
   /** Percent off the whole cart, on top of any pack offer rates (they stack). Delivery is not discounted. */
   discountPct: 10,
   /** Last day of the offer, "YYYY-MM-DD" (inclusive, India time). Not fixed yet: leave undefined and set enabled false to end it. */
   endsOn: undefined as string | undefined,
   headline: "Extra 10% off your cart",
-  detail: "Celebrate our launch: an extra 10% off your whole cart, on top of our launch prices. For a few days only."
-  ,caption: "Extra on your cart",
+  detail: "Celebrate our launch: an extra 10% off your whole cart, on top of our launch prices. For a few days only.",
+  caption: "Website launch offer",
   code: undefined as string | undefined,
   cta: { label: "Shop now", href: "/shop" },
   /** Number of teeth on the gear. */

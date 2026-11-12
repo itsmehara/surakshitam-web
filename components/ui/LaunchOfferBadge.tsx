@@ -10,7 +10,7 @@ const BURST = Array.from({ length: TEETH * 2 }, (_, i) => {
 }).join(" ");
 
 /**
- * Round toothed "Launch offer" sticker, shown wherever a pack's offer price is
+ * Round toothed "Special offer" sticker, shown wherever a pack's offer price is
  * below its MRP (the caller decides — see hasOffer in lib/catalog). The words
  * are drawn inside the SVG so they scale with it; size it with h-/w- classes.
  */
@@ -19,7 +19,7 @@ export function LaunchOfferBadge({ className }: { className?: string }) {
     <svg
       viewBox="0 0 100 100"
       role="img"
-      aria-label="Launch offer"
+      aria-label="Special offer"
       className={cn("-rotate-12 drop-shadow-sm", className)}
     >
       <polygon points={BURST} className="fill-clayDark" />
@@ -27,11 +27,11 @@ export function LaunchOfferBadge({ className }: { className?: string }) {
       <text
         textAnchor="middle"
         className="fill-cream font-sans font-bold uppercase"
-        fontSize="16.5"
+        fontSize="14"
         letterSpacing="0.6"
       >
-        <tspan x="50" y="47">Launch</tspan>
-        <tspan x="50" y="65">offer</tspan>
+        <tspan x="50" y="46">Special</tspan>
+        <tspan x="50" y="62">offer</tspan>
       </text>
     </svg>
   );

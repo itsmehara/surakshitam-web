@@ -59,10 +59,10 @@ export function PromoWheel({ variant }: { variant: "hero" | "floating" }) {
       {/* the words stay upright: they sit on a layer above the turning gear */}
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-cream">
         <span className="font-serif text-[1.35em] font-semibold leading-none" style={{ fontSize: "clamp(1.3rem, 6vw, 2.1rem)" }}>
-          10%
+          +{PROMO_WHEEL.discountPct}%
         </span>
-        <span className="mt-[0.2em] font-sans font-bold uppercase tracking-[0.12em]" style={{ fontSize: "clamp(0.5rem, 2vw, 0.75rem)" }}>
-          Off
+        <span className="mt-[0.2em] font-sans font-bold uppercase tracking-[0.12em]" style={{ fontSize: "clamp(0.45rem, 1.8vw, 0.65rem)" }}>
+          Extra off
         </span>
       </div>
     </div>
