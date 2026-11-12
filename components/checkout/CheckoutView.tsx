@@ -481,7 +481,7 @@ export function CheckoutView() {
                   autoComplete="off"
                   inputMode="text"
                   placeholder="e.g. 412345678901"
-                  maxLength={40}
+                  maxLength={100}
                   value={payment.ref}
                   onChange={(e) => {
                     setPayment((p) => ({ ...p, ref: e.target.value }));

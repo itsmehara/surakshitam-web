@@ -229,11 +229,11 @@ export type PayMethod = "later" | "upi" | "cash";
 /** `paid` is true only for "upi" (the one method that needs a transaction ID). */
 export type Payment = { method: PayMethod; paid: boolean; ref: string };
 export const NO_PAYMENT: Payment = { method: "later", paid: false, ref: "" };
-/** UPI transaction IDs / UTRs are 12–22 alphanumerics; allow a little slack either side. */
+/** Kept loose on purpose: UPI apps format IDs differently, so any note of 10+ characters is accepted. */
 export function validatePayment(p: Payment): string | undefined {
   if (!p.paid) return undefined;
   const ref = p.ref.trim();
-  if (ref.length < 6 || ref.length > 40 || !/^[A-Za-z0-9 -]+$/.test(ref)) return "Paste the UPI transaction ID / UTR (6–40 letters or digits).";
+  if (ref.length < 10) return "Enter the UPI transaction ID / UTR, or a note (at least 10 characters).";
   return undefined;
 }
 
