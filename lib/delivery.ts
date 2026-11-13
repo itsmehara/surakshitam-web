@@ -40,8 +40,10 @@ export const OTHER_DELIVERY_PHONE = "7416394594";
 
 const TELANGANA_STATE = "Telangana";
 const BASE_UP_TO_G = 2000;
-const TELANGANA_RATE = { base: 120, perKg: 50 };
-const OUTSIDE_RATE = { base: 150, perKg: 60 };
+/** Exported for the /shipping policy page, so it always shows the rates the checkout charges. */
+export const COURIER_BASE_UP_TO_G = BASE_UP_TO_G;
+export const TELANGANA_RATE = { base: 120, perKg: 50 };
+export const OUTSIDE_RATE = { base: 150, perKg: 60 };
 
 /** Rapido runs in Hyderabad and Secunderabad only: the 500xxx pincodes (lib/india.ts). */
 export function rapidoAvailable(pincode: string): boolean {

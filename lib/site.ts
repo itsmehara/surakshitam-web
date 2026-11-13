@@ -163,4 +163,13 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
       { label: "YouTube", href: "https://www.youtube.com/@SurakshitamNaturals" },
     ],
   },
+  {
+    title: "Policies",
+    items: [
+      { label: "Shipping & Delivery", href: "/shipping" },
+      { label: "Refund & Cancellation", href: "/refunds" },
+      { label: "Terms & Conditions", href: "/terms" },
+      { label: "Privacy", href: "/privacy" },
+    ],
+  },
 ];
