@@ -74,7 +74,7 @@ const SLIDES: Slide[] = [
     alt: "Handmade botanical soaps — papaya, shea butter, neem tulasi and triple butter",
     eyebrow: "Skin care",
     title: ["Botanical care,", "made by hand."],
-    body: "Cold-process soaps with shea, papaya, neem and tulasi — gentle enough for every day, with nothing you'd rather not have on your skin.",
+    body: "Natural soaps with shea, papaya, neem and tulasi — gentle enough for every day, with nothing you'd rather not have on your skin.",
     cta: { label: "Shop skin care", href: "/shop?category=skin-care" },
   },
   {
