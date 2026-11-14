@@ -17,7 +17,13 @@ import { isIndianPincode, isIndianState } from "@/lib/india";
 import { FREE_DELIVERY_OVER, OTHER_DELIVERY_PHONE, checkoutDelivery, deliveryAdded, deliveryMethodOf, formatWeight, type Delivery, type DeliveryMethod } from "@/lib/delivery";
 
 const WA_NUMBER = "917416394594";
-const waLink = (text: string) => `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`;
+/**
+ * WhatsApp turns "₹95" into a tappable pay link, which the founders did not want in the order
+ * message (14 Nov 2026). An invisible zero-width character between ₹ and the digits stops it
+ * being recognised; the text looks the same. Only the WhatsApp text gets this, never the Sheet.
+ */
+const plainAmounts = (text: string) => text.replace(/₹(?=\d)/g, "₹‌");
+const waLink = (text: string) => `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(plainAmounts(text))}`;
 
 export const rupees = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 
