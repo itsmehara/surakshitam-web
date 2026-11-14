@@ -148,9 +148,9 @@
 .sn-cart-scroll {
   scrollbar-width: none;
   background:
-    linear-gradient(#FAF6EF 30%, rgba(250, 246, 239, 0)) top / 100% 36px no-repeat local,
-    linear-gradient(rgba(250, 246, 239, 0), #FAF6EF 70%) bottom / 100% 36px no-repeat local,
-    radial-gradient(farthest-side at 50% 0, rgba(31, 51, 40, 0.28), rgba(31, 51, 40, 0)) top / 100% 12px no-repeat scroll,
-    radial-gradient(farthest-side at 50% 100%, rgba(31, 51, 40, 0.28), rgba(31, 51, 40, 0)) bottom / 100% 12px no-repeat scroll;
+    linear-gradient(#FAF6EF 30%, rgba(250, 246, 239, 0)) top / 100% 48px no-repeat local,
+    linear-gradient(rgba(250, 246, 239, 0), #FAF6EF 70%) bottom / 100% 48px no-repeat local,
+    radial-gradient(farthest-side at 50% 0, rgba(31, 51, 40, 0.45), rgba(31, 51, 40, 0)) top / 100% 20px no-repeat scroll,
+    radial-gradient(farthest-side at 50% 100%, rgba(31, 51, 40, 0.45), rgba(31, 51, 40, 0)) bottom / 100% 20px no-repeat scroll;
 }
 .sn-cart-scroll::-webkit-scrollbar { display: none; }
