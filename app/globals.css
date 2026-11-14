@@ -140,3 +140,17 @@
 .sn-gear-turn {
   animation: sn-gear-turn var(--gear-spin, 40s) linear infinite;
 }
+
+/* Cart drawer item list (components/cart/ScrollList.tsx). Phones hide the built-in
+   scrollbar, so it is hidden everywhere and ScrollList draws its own, always visible.
+   Plus a soft shadow at the top or bottom edge whenever more rows lie that way (pure
+   CSS: the cream covers scroll with the content and hide the shadow at the ends). */
+.sn-cart-scroll {
+  scrollbar-width: none;
+  background:
+    linear-gradient(#FAF6EF 30%, rgba(250, 246, 239, 0)) top / 100% 36px no-repeat local,
+    linear-gradient(rgba(250, 246, 239, 0), #FAF6EF 70%) bottom / 100% 36px no-repeat local,
+    radial-gradient(farthest-side at 50% 0, rgba(31, 51, 40, 0.28), rgba(31, 51, 40, 0)) top / 100% 12px no-repeat scroll,
+    radial-gradient(farthest-side at 50% 100%, rgba(31, 51, 40, 0.28), rgba(31, 51, 40, 0)) bottom / 100% 12px no-repeat scroll;
+}
+.sn-cart-scroll::-webkit-scrollbar { display: none; }

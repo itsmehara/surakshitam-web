@@ -1,5 +1,6 @@
 "use client";
 
+import { ScrollList } from "@/components/cart/ScrollList";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
@@ -110,7 +111,7 @@ export function CartDrawer() {
         ) : (
           <>
             {/* ---- items: compact rows ---- */}
-            <ul className="divide-y divide-forest/8 overflow-y-auto px-4">
+            <ScrollList watch={lines.length} className="divide-y divide-forest/8 px-4">
               {lines.map(({ product, size, qty }) => (
                 <li key={lineKey(product.id, size.id)} className="flex items-center gap-2.5 py-1.5">
                   <Link
@@ -169,10 +170,10 @@ export function CartDrawer() {
                   </button>
                 </li>
               ))}
-            </ul>
+            </ScrollList>
 
             {/* ---- subtotal + note + preview + actions ---- */}
-            <div className="mt-auto space-y-2 border-t border-forest/10 px-4 pb-3 pt-2.5">
+            <div className="mt-auto shrink-0 space-y-2 border-t border-forest/10 px-4 pb-3 pt-2.5">
               <div className="flex items-baseline justify-between">
                 <span className="text-sm text-forest/70">
                   Subtotal
