@@ -49,7 +49,7 @@ export function PromoWheel({ variant }: { variant: "hero" | "floating" }) {
       {/* Shadow on a still layer: on the turning svg it would turn with the gear. A light halo first, so the gear stands out on photos too. */}
       <div
         className="h-full w-full"
-        style={{ filter: "drop-shadow(0 0 1.5px rgba(255,255,255,0.95)) drop-shadow(0 5px 9px rgba(34,48,39,0.45))" }}
+        style={{ filter: "drop-shadow(0 0 1.5px rgba(255,255,255,0.95)) drop-shadow(0 6px 10px rgba(34,48,39,0.5)) drop-shadow(0 0 30px rgba(34,48,39,0.55)) drop-shadow(0 0 46px rgba(34,48,39,0.45))" }}
       >
       <svg
         viewBox="0 0 100 100"
