@@ -176,11 +176,11 @@ export function CheckoutView() {
     // 2. Remember details for next time; hand the message to /order-sent/.
     saveCustomer(customer);
     clearDraft();
-    rememberSentOrder({ orderId, message, href, sheet: "pending", at: Date.now(), paid: payment.paid, talk: payment.method === "talk" });
+    rememberSentOrder({ orderId, message, href, sheet: "pending", at: Date.now(), paid: payment.paid });
 
     // 3. Save to the Orders tab — not awaited; the result lands in sessionStorage.
     void submitOrder({ orderId, lines, customer, note, payment, website }).then((r) => {
-      rememberSentOrder({ orderId, message, href, sheet: r.ok ? "ok" : "failed", at: Date.now(), paid: payment.paid, talk: payment.method === "talk" });
+      rememberSentOrder({ orderId, message, href, sheet: r.ok ? "ok" : "failed", at: Date.now(), paid: payment.paid });
     });
 
     // 4. Cart is cleared only once WhatsApp has been opened.
@@ -228,7 +228,7 @@ export function CheckoutView() {
     },
   ];
 
-  const payOptions: { value: PayMethod; label: string; hint: string }[] = [
+  const payOptions: { value: PayMethod; label: string; hint: string; suggested?: boolean }[] = [
     {
       value: "upi",
       label: "Pay Now by UPI",
@@ -236,13 +236,9 @@ export function CheckoutView() {
     },
     {
       value: "later",
-      label: "Place Order First, Then Pay",
-      hint: "We confirm your total on WhatsApp. Then you pay and send the screenshot.",
-    },
-    {
-      value: "talk",
-      label: "Talk to Us on WhatsApp",
-      hint: "Not sure how to pay, or want another arrangement? Send the order and we will help you on WhatsApp.",
+      suggested: true,
+      label: "Place Order First, and Talk to Us on WhatsApp",
+      hint: "We confirm your total on WhatsApp. Then you pay and send the screenshot. Not sure how to pay, or want another arrangement? We will help you there.",
     },
   ];
 
@@ -455,7 +451,7 @@ export function CheckoutView() {
             <UpiPayment charges={charges} orderId={checkoutOrderId} />
           </section>
 
-          {/* How will you pay? UPI is listed first; pay after we confirm stays pre-selected. The UPI transaction ID is optional. */}
+          {/* How will you pay? UPI is listed first and pre-selected. The UPI transaction ID is optional. */}
           <fieldset className="space-y-2.5">
             <legend className="mb-2 font-serif text-xl font-semibold text-forest">How will you pay?</legend>
             {payOptions.map((o) => (
@@ -479,6 +475,9 @@ export function CheckoutView() {
                 />
                 <span>
                   <span className="font-medium">{o.label}</span>
+                  {o.suggested && (
+                    <span className="ml-2 rounded-full bg-moss/10 px-2 py-0.5 align-middle text-[11px] font-semibold text-moss">Suggested</span>
+                  )}
                   <span className="block text-xs leading-relaxed text-forest/60">{o.hint}</span>
                 </span>
               </label>
@@ -514,9 +513,9 @@ export function CheckoutView() {
           <button
             type="submit"
             disabled={sending}
-            className="flex h-14 w-full items-center justify-center gap-2.5 rounded-full bg-[#25D366] text-2xl font-bold text-white shadow-soft transition-transform duration-200 hover:scale-[1.02] disabled:opacity-60 disabled:hover:scale-100"
+            className="flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-[#25D366] text-3xl font-bold text-white shadow-soft transition-transform duration-200 hover:scale-[1.02] disabled:opacity-60 disabled:hover:scale-100"
           >
-            <WhatsAppIcon width={26} height={26} /> {sending ? "Opening WhatsApp…" : "Place Order"}
+            <WhatsAppIcon width={30} height={30} /> {sending ? "Opening WhatsApp…" : "Place Order"}
           </button>
           <p className="text-center text-xs leading-relaxed text-forest/55">
             {payment.method === "upi" && (

@@ -277,17 +277,16 @@ export function validateCustomer(c: Customer): CustomerErrors {
  * reference, so the founders can match it in the Sheet. Never auto-marks the
  * order Paid — the founders verify and change Status themselves.
  */
-export type PayMethod = "upi" | "later" | "talk";
+export type PayMethod = "upi" | "later";
 /** `paid` is true only for "upi". The transaction ID is optional: the customer shares the payment screenshot on WhatsApp. */
 export type Payment = { method: PayMethod; paid: boolean; ref: string };
-export const NO_PAYMENT: Payment = { method: "later", paid: false, ref: "" };
+export const NO_PAYMENT: Payment = { method: "upi", paid: true, ref: "" };
 /** Nothing is required since the transaction ID became optional (founders, 15 Nov 2026). Kept so checkout has one place to add a rule. */
 export function validatePayment(_p: Payment): string | undefined {
   return undefined;
 }
 
 export function formatPayment(p: Payment): string {
-  if (p.method === "talk") return "Payment: to discuss on WhatsApp";
   if (!p.paid) return "Payment: on WhatsApp once you confirm";
   const ref = p.ref.trim();
   return ref ? `Payment: paid by UPI — ref ${ref}. Screenshot to follow here.` : "Payment: paid by UPI. Screenshot to follow here.";
@@ -436,8 +435,6 @@ export type SentOrder = {
   at: number;
   /** Customer ticked "already paid by UPI" at checkout. Optional, so an order stored before this field still reads. */
   paid?: boolean;
-  /** Customer chose "Talk to us on WhatsApp" at checkout. Optional for the same reason. */
-  talk?: boolean;
 };
 
 const SENT_KEY = "sn-last-order";

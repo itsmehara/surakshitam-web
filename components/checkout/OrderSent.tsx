@@ -50,9 +50,7 @@ export function OrderSent() {
           id
             ? mine?.paid
               ? `Order ${id}. We reply on WhatsApp to confirm availability and delivery. Please share your payment screenshot in the WhatsApp chat. We check it against our bank before we pack. Mon–Sat, ${site.hours}.`
-              : mine?.talk
-                ? `Order ${id}. We reply on WhatsApp to help you with payment and to confirm availability and delivery. Mon–Sat, ${site.hours}.`
-                : `Order ${id}. We reply on WhatsApp to confirm availability and delivery; you pay there and send us the payment screenshot. Mon–Sat, ${site.hours}.`
+              : `Order ${id}. We reply on WhatsApp to confirm availability and delivery, and to help you with payment. You pay there and send us the payment screenshot. Mon–Sat, ${site.hours}.`
             : undefined
         }
       />
