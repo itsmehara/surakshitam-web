@@ -143,19 +143,31 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
 
           <div className="min-w-0 flex-1 space-y-2.5 text-sm text-forest/80">
             <p>
-              Pay <span className="font-serif text-lg font-semibold tabular-nums text-forest">{rupees(amount)}</span> to
+              Pay <span className="font-serif text-lg font-semibold tabular-nums text-forest">{rupees(amount)}</span> to {UPI_PAYEE_NAME}
             </p>
             {breakdown && <p className="text-xs leading-relaxed text-forest/60">{breakdown}</p>}
             {idRow}
-            <p className="text-xs leading-relaxed text-forest/55">
-              Payee: {UPI_PAYEE_NAME}. On a computer, scan the QR with any UPI app. On a phone, take a screenshot, open your UPI app, choose Scan, and pick the screenshot from your gallery. Or copy the UPI ID and pay in your app. Enter the amount shown above.
+            <p className="text-xs leading-relaxed text-forest/70">Scan the QR with any UPI app, or copy the UPI ID.</p>
+            <p className="text-xs leading-relaxed text-forest/70">
+              {delivery.status === "rapido" ? "The Rapido fare is not in this amount." : "The total includes delivery."}
             </p>
-            <p className="text-xs leading-relaxed text-forest/55">
-              {delivery.status === "rapido" ? "The Rapido fare is not in this amount." : "The total includes delivery."} Order note: {orderId}.
-            </p>
-            <p className="text-xs leading-relaxed text-forest/55">
-              Paid? Choose &ldquo;Pay Now by UPI&rdquo; under How will you pay, send the order, and share the payment screenshot on WhatsApp.
-            </p>
+            {/* The step-by-step help is folded away so the box stays short (founders, 15 Nov 2026). Tap to open: works on phones, unlike a hover tooltip. */}
+            <details className="text-xs leading-relaxed text-forest/70">
+              <summary className="cursor-pointer select-none font-semibold text-forest underline decoration-forest/30 underline-offset-2">
+                <span aria-hidden="true">ⓘ</span> How to pay
+              </summary>
+              <ul className="mt-2 list-disc space-y-1.5 pl-4">
+                <li>
+                  <strong>On a computer:</strong> scan the QR with your phone&apos;s UPI app.
+                </li>
+                <li>
+                  <strong>On this phone:</strong> take a screenshot of the QR, open your UPI app, choose Scan, and pick the screenshot. Or copy the UPI ID and pay.
+                </li>
+                <li>Enter the amount shown above.</li>
+                <li>After paying, choose &ldquo;Pay Now by UPI&rdquo; below, place the order, and share the payment screenshot on WhatsApp.</li>
+                <li>Order note: {orderId}.</li>
+              </ul>
+            </details>
           </div>
         </div>
       )}

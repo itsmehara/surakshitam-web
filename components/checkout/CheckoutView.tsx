@@ -523,7 +523,7 @@ export function CheckoutView() {
               ? "Send your order and we will help you with payment on WhatsApp."
               : payment.method === "upi"
                 ? "Share your payment screenshot on WhatsApp after you send the order. We check it, then pack and deliver."
-                : "No payment here. Pay on WhatsApp once we confirm, and send us the payment screenshot — we pack and deliver."}
+                : "Place your order now. We confirm on WhatsApp, you pay, and we pack and deliver."}
             <br />
             We use these details only to deliver your order.
           </p>
