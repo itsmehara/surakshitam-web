@@ -154,7 +154,7 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
               {delivery.status === "rapido" ? "The Rapido fare is not in this amount." : "The total includes delivery."} Order note: {orderId}.
             </p>
             <p className="text-xs leading-relaxed text-forest/55">
-              Paid? Choose &ldquo;Pay now by UPI&rdquo; under How will you pay, send the order, and share the payment screenshot on WhatsApp.
+              Paid? Choose &ldquo;Pay Now by UPI&rdquo; under How will you pay, send the order, and share the payment screenshot on WhatsApp.
             </p>
           </div>
         </div>
