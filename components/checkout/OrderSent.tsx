@@ -49,9 +49,9 @@ export function OrderSent() {
         intro={
           id
             ? mine?.paid
-              ? `Order ${id}. We reply on WhatsApp to confirm availability and delivery. Your UPI payment is noted: we check the transaction ID against our bank before we pack. Mon–Sat, ${site.hours}.`
-              : mine?.cash
-                ? `Order ${id}. We reply on WhatsApp to confirm availability and delivery. You pay in cash when your order arrives. Mon–Sat, ${site.hours}.`
+              ? `Order ${id}. We reply on WhatsApp to confirm availability and delivery. Please share your payment screenshot in the WhatsApp chat. We check it against our bank before we pack. Mon–Sat, ${site.hours}.`
+              : mine?.talk
+                ? `Order ${id}. We reply on WhatsApp to help you with payment and to confirm availability and delivery. Mon–Sat, ${site.hours}.`
                 : `Order ${id}. We reply on WhatsApp to confirm availability and delivery; you pay there and send us the payment screenshot. Mon–Sat, ${site.hours}.`
             : undefined
         }

@@ -176,11 +176,11 @@ export function CheckoutView() {
     // 2. Remember details for next time; hand the message to /order-sent/.
     saveCustomer(customer);
     clearDraft();
-    rememberSentOrder({ orderId, message, href, sheet: "pending", at: Date.now(), paid: payment.paid, cash: payment.method === "cash" });
+    rememberSentOrder({ orderId, message, href, sheet: "pending", at: Date.now(), paid: payment.paid, talk: payment.method === "talk" });
 
     // 3. Save to the Orders tab — not awaited; the result lands in sessionStorage.
     void submitOrder({ orderId, lines, customer, note, payment, website }).then((r) => {
-      rememberSentOrder({ orderId, message, href, sheet: r.ok ? "ok" : "failed", at: Date.now(), paid: payment.paid, cash: payment.method === "cash" });
+      rememberSentOrder({ orderId, message, href, sheet: r.ok ? "ok" : "failed", at: Date.now(), paid: payment.paid, talk: payment.method === "talk" });
     });
 
     // 4. Cart is cleared only once WhatsApp has been opened.
@@ -230,19 +230,19 @@ export function CheckoutView() {
 
   const payOptions: { value: PayMethod; label: string; hint: string }[] = [
     {
-      value: "later",
-      label: "Pay on WhatsApp after confirmation",
-      hint: "We confirm availability and the total first, then you pay and send the screenshot.",
-    },
-    {
       value: "upi",
-      label: "UPI — already paid",
-      hint: "Paid with the UPI QR above or another UPI app? Enter the transaction ID so we can match it.",
+      label: "Pay now by UPI",
+      hint: "Pay with PhonePe, GPay, Paytm or any UPI app using the QR above. After you send the order, share the payment screenshot with us on WhatsApp.",
     },
     {
-      value: "cash",
-      label: "Cash",
-      hint: "Pay in cash when your order arrives. We confirm this on WhatsApp.",
+      value: "later",
+      label: "Pay after we confirm on WhatsApp",
+      hint: "We confirm availability and your total first. Then you pay and send the screenshot.",
+    },
+    {
+      value: "talk",
+      label: "Talk to us on WhatsApp",
+      hint: "Not sure how to pay, or want another arrangement? Send the order and we will help you on WhatsApp.",
     },
   ];
 
@@ -455,7 +455,7 @@ export function CheckoutView() {
             <UpiPayment charges={charges} orderId={checkoutOrderId} />
           </section>
 
-          {/* How will you pay? Default is pay on WhatsApp after we confirm; UPI needs a transaction ID. */}
+          {/* How will you pay? UPI is listed first; pay after we confirm stays pre-selected. The UPI transaction ID is optional. */}
           <fieldset className="space-y-2.5">
             <legend className="mb-2 font-serif text-xl font-semibold text-forest">How will you pay?</legend>
             {payOptions.map((o) => (
@@ -487,9 +487,8 @@ export function CheckoutView() {
               <div className="mt-3">
                 <Field
                   idPrefix="co"
-                  label="UPI transaction ID / UTR"
+                  label="UPI transaction ID / UTR (optional)"
                   name="paymentRef"
-                  required
                   autoComplete="off"
                   inputMode="text"
                   placeholder="e.g. 412345678901"
@@ -500,7 +499,7 @@ export function CheckoutView() {
                     setPaymentError(undefined);
                   }}
                   error={paymentError}
-                  hint="From your UPI app's payment details. We confirm it on WhatsApp before packing."
+                  hint="From your UPI app's payment details. It helps us match your payment faster."
                 />
               </div>
             )}
@@ -520,10 +519,10 @@ export function CheckoutView() {
             <WhatsAppIcon width={20} height={20} /> {sending ? "Opening WhatsApp…" : "Order on WhatsApp"}
           </button>
           <p className="text-center text-xs leading-relaxed text-forest/55">
-            {payment.method === "cash"
-              ? "We confirm your order on WhatsApp, then pack and deliver. You pay in cash when it arrives."
+            {payment.method === "talk"
+              ? "Send your order and we will help you with payment on WhatsApp."
               : payment.method === "upi"
-                ? "We check your UPI payment and confirm on WhatsApp, then pack and deliver."
+                ? "Share your payment screenshot on WhatsApp after you send the order. We check it, then pack and deliver."
                 : "No payment here. Pay on WhatsApp once we confirm, and send us the payment screenshot — we pack and deliver."}
             <br />
             We use these details only to deliver your order.

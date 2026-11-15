@@ -277,21 +277,20 @@ export function validateCustomer(c: Customer): CustomerErrors {
  * reference, so the founders can match it in the Sheet. Never auto-marks the
  * order Paid — the founders verify and change Status themselves.
  */
-export type PayMethod = "later" | "upi" | "cash";
-/** `paid` is true only for "upi" (the one method that needs a transaction ID). */
+export type PayMethod = "upi" | "later" | "talk";
+/** `paid` is true only for "upi". The transaction ID is optional: the customer shares the payment screenshot on WhatsApp. */
 export type Payment = { method: PayMethod; paid: boolean; ref: string };
 export const NO_PAYMENT: Payment = { method: "later", paid: false, ref: "" };
-/** Kept loose on purpose: UPI apps format IDs differently, so any note of 10+ characters is accepted. */
-export function validatePayment(p: Payment): string | undefined {
-  if (!p.paid) return undefined;
-  const ref = p.ref.trim();
-  if (ref.length < 10) return "Enter the UPI transaction ID / UTR, or a note (at least 10 characters).";
+/** Nothing is required since the transaction ID became optional (founders, 15 Nov 2026). Kept so checkout has one place to add a rule. */
+export function validatePayment(_p: Payment): string | undefined {
   return undefined;
 }
 
 export function formatPayment(p: Payment): string {
-  if (p.method === "cash") return "Payment: cash";
-  return p.paid ? `Payment: already paid by UPI — ref ${p.ref.trim()}` : "Payment: on WhatsApp once you confirm";
+  if (p.method === "talk") return "Payment: to discuss on WhatsApp";
+  if (!p.paid) return "Payment: on WhatsApp once you confirm";
+  const ref = p.ref.trim();
+  return ref ? `Payment: paid by UPI — ref ${ref}. Screenshot to follow here.` : "Payment: paid by UPI. Screenshot to follow here.";
 }
 
 // ---------- order ----------
@@ -437,8 +436,8 @@ export type SentOrder = {
   at: number;
   /** Customer ticked "already paid by UPI" at checkout. Optional, so an order stored before this field still reads. */
   paid?: boolean;
-  /** Customer chose Cash at checkout, so the order-sent page does not ask for a payment screenshot. Optional for the same reason. */
-  cash?: boolean;
+  /** Customer chose "Talk to us on WhatsApp" at checkout. Optional for the same reason. */
+  talk?: boolean;
 };
 
 const SENT_KEY = "sn-last-order";
