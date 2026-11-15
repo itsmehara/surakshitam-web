@@ -68,9 +68,9 @@ export function PromoWheel({ variant }: { variant: "hero" | "floating" }) {
           on cart
         </span>
       </div>
-      {/* a small tilted gold tag on the top edge, in a different style from the gear so it is noticed */}
+      {/* a small tilted gold tag laid over the top of the gear, in a different style from the gear so it is noticed */}
       {PROMO_WHEEL.tag && (
-        <span className="pointer-events-none absolute -top-1 left-[46%] z-20 -translate-x-1/2 -rotate-6 whitespace-nowrap rounded-sm bg-[#FBE3A6] px-1.5 py-0.5 font-sans text-[0.55rem] font-bold uppercase leading-none tracking-wider text-forest shadow-soft ring-1 ring-forest/15 sm:text-[0.62rem]">
+        <span className="pointer-events-none absolute left-[46%] top-[12%] z-20 sm:left-1/2 sm:top-[7%] -translate-x-1/2 -rotate-6 whitespace-nowrap rounded-sm bg-[#FBE3A6] px-1.5 py-1 font-sans text-[0.52rem] sm:px-2 font-bold uppercase leading-none tracking-wider text-forest shadow-md ring-1 ring-forest/20 sm:text-[0.7rem]">
           {PROMO_WHEEL.tag}
         </span>
       )}
