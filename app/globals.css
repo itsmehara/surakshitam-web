@@ -154,3 +154,10 @@
     radial-gradient(farthest-side at 50% 100%, rgba(31, 51, 40, 0.45), rgba(31, 51, 40, 0)) bottom / 100% 20px no-repeat scroll;
 }
 .sn-cart-scroll::-webkit-scrollbar { display: none; }
+
+/* Checkout "Pay by UPI": the highlighted prompt shown while the QR is hidden, pulsing gently so it is noticed. */
+@keyframes sn-nudge {
+  0%, 100% { background-color: #FBE3A6; box-shadow: 0 0 0 0 rgba(217, 164, 40, 0.55); }
+  50% { background-color: #F6C955; box-shadow: 0 0 0 6px rgba(217, 164, 40, 0); }
+}
+.sn-nudge { background-color: #FBE3A6; animation: sn-nudge 1.6s ease-in-out infinite; }

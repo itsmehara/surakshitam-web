@@ -59,11 +59,20 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
   // The order ID is made after the first render, so wait for it.
   if (!orderId) return null;
 
+  // Why the QR is hidden, said loudly so the customer knows what to do next (founders, 15 Nov 2026).
+  const needsState = !hasPriceOnRequest && delivery.status === "pick-state";
   const waiting = hasPriceOnRequest
-    ? "Some items are priced on request, so we confirm the total on WhatsApp first. You can pay by UPI once we send it."
-    : delivery.status === "pick-state"
-      ? "Choose your state under Delivery details to see the total with delivery. The UPI QR appears then."
-      : "Delivery for part of your order is confirmed on WhatsApp, so we send the total there first. You can pay by UPI once we send it.";
+    ? "Do not pay yet. Some items are priced on request, so we send the total on WhatsApp first."
+    : needsState
+      ? "Choose your state to see the amount and the UPI QR"
+      : "Do not pay yet. We confirm delivery and send the total on WhatsApp first.";
+
+  function goToState() {
+    const el = document.getElementById("co-state");
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    el.focus({ preventScroll: true });
+  }
 
   // Shown only when payable, so the delivery status is settled here.
   const breakdown =
@@ -75,6 +84,20 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
           ? `${rupees(subtotal)} for the cart. The Rapido fare is paid to the rider.`
           : null;
 
+  // The UPI ID never changes, so it and its Copy button show even before the amount is known.
+  const idRow = (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="break-all font-medium text-forest">{UPI_ID}</span>
+      <button
+        type="button"
+        onClick={copyId}
+        className="rounded-full bg-forest px-4 py-1.5 text-sm font-semibold text-cream shadow-sm transition-colors hover:bg-moss"
+      >
+        {copied ? "Copied" : "Copy UPI ID"}
+      </button>
+    </div>
+  );
+
   return (
     <section aria-labelledby="upi-pay-heading" className="mt-6 rounded-lg border border-forest/10 bg-white/70 p-4">
       <h2 id="upi-pay-heading" className="font-serif text-xl font-semibold text-forest">
@@ -82,7 +105,25 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
       </h2>
 
       {!payable ? (
-        <p className="mt-2 text-sm leading-relaxed text-forest/65">{waiting}</p>
+        <div className="mt-3 space-y-3 text-sm text-forest/80">
+          {needsState ? (
+            <button
+              type="button"
+              onClick={goToState}
+              className="sn-nudge block w-full rounded-md px-3 py-2.5 text-left text-sm font-semibold text-forest"
+            >
+              {waiting} <span aria-hidden="true">↑</span>
+            </button>
+          ) : (
+            <p role="status" className="rounded-md bg-[#FBE3A6] px-3 py-2.5 text-sm font-semibold text-forest">
+              {waiting}
+            </p>
+          )}
+          {idRow}
+          <p className="text-xs leading-relaxed text-forest/55">
+            Payee: {UPI_PAYEE_NAME}. {needsState ? "The amount to pay shows here once your state is chosen." : "Please pay only after we send the amount."}
+          </p>
+        </div>
       ) : (
         <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start">
           <div className="flex shrink-0 justify-center sm:justify-start">
@@ -105,16 +146,7 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
               Pay <span className="font-serif text-lg font-semibold tabular-nums text-forest">{rupees(amount)}</span> to
             </p>
             {breakdown && <p className="text-xs leading-relaxed text-forest/60">{breakdown}</p>}
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="break-all font-medium text-forest">{UPI_ID}</span>
-              <button
-                type="button"
-                onClick={copyId}
-                className="rounded-full bg-forest px-4 py-1.5 text-sm font-semibold text-cream shadow-sm transition-colors hover:bg-moss"
-              >
-                {copied ? "Copied" : "Copy UPI ID"}
-              </button>
-            </div>
+            {idRow}
             <p className="text-xs leading-relaxed text-forest/55">
               Payee: {UPI_PAYEE_NAME}. On a computer, scan the QR with any UPI app. On a phone, take a screenshot, open your UPI app, choose Scan, and pick the screenshot from your gallery. Or copy the UPI ID and pay in your app. Enter the amount shown above.
             </p>
