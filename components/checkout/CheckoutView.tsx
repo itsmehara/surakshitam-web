@@ -231,12 +231,12 @@ export function CheckoutView() {
   const payOptions: { value: PayMethod; label: string; hint: string; suggested?: boolean }[] = [
     {
       value: "upi",
+      suggested: true,
       label: "Pay Now by UPI",
       hint: "Pay with PhonePe, GPay, Paytm or any UPI app using the QR above. After you send the order, share the payment screenshot with us on WhatsApp.",
     },
     {
       value: "later",
-      suggested: true,
       label: "Place Order First, and Talk to Us on WhatsApp",
       hint: "We confirm your total on WhatsApp. Then you pay and send the screenshot. Not sure how to pay, or want another arrangement? We will help you there.",
     },
