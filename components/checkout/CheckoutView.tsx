@@ -42,7 +42,7 @@ import { cn } from "@/lib/cn";
 /**
  * /checkout/ — one column, in this order: how to deliver (Rapido, Courier, Others),
  * the details that option needs, the order, the UPI QR under the address, then
- * one button ("Place Order on WhatsApp") (PRODUCT-CATALOG-NOTES-2026-09-19 §7.3).
+ * one button ("Place Order") (PRODUCT-CATALOG-NOTES-2026-09-19 §7.3).
  * Feedback from Srikanth & Supriya: no long intro, delivery options first, QR
  * below the address, minimum scrolling on a phone.
  *
@@ -237,7 +237,7 @@ export function CheckoutView() {
     {
       value: "later",
       label: "Place Order First, Then Pay",
-      hint: "We confirm availability and your total on WhatsApp. Then you pay and send the screenshot.",
+      hint: "We confirm your total on WhatsApp. Then you pay and send the screenshot.",
     },
     {
       value: "talk",
@@ -516,16 +516,22 @@ export function CheckoutView() {
             disabled={sending}
             className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] text-sm font-semibold text-white shadow-soft transition-transform duration-200 hover:scale-[1.02] disabled:opacity-60 disabled:hover:scale-100"
           >
-            <WhatsAppIcon width={20} height={20} /> {sending ? "Opening WhatsApp…" : "Place Order on WhatsApp"}
+            <WhatsAppIcon width={20} height={20} /> {sending ? "Opening WhatsApp…" : "Place Order"}
           </button>
           <p className="text-center text-xs leading-relaxed text-forest/55">
-            {payment.method === "talk"
-              ? "Send your order and we will help you with payment on WhatsApp."
-              : payment.method === "upi"
-                ? "Share your payment screenshot on WhatsApp after you send the order. We check it, then pack and deliver."
-                : "Place your order now. We confirm on WhatsApp, you pay, and we pack and deliver."}
-            <br />
-            We use these details only to deliver your order.
+            {payment.method === "upi" && (
+              <>
+                Share your payment screenshot on WhatsApp after you send the order. We check it, then pack and deliver.
+                <br />
+              </>
+            )}
+            {payment.method === "later" && (
+              <>
+                Place your order now. We confirm on WhatsApp, you pay, and we pack and deliver.
+                <br />
+              </>
+            )}
+            Couriered orders will reach in 5 to 7 working days.
           </p>
         </form>
       </div>
