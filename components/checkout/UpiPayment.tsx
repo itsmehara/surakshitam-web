@@ -62,10 +62,10 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
   // Why the QR is hidden, said loudly so the customer knows what to do next (founders, 15 Nov 2026).
   const needsState = !hasPriceOnRequest && delivery.status === "pick-state";
   const waiting = hasPriceOnRequest
-    ? "Do not pay yet. Some items are priced on request, so we send the total on WhatsApp first."
+    ? "We will send your total on WhatsApp. Some items are priced on request, so you can pay after that."
     : needsState
       ? "Choose your state to see the amount and the UPI QR"
-      : "Do not pay yet. We confirm delivery and send the total on WhatsApp first.";
+      : "We will confirm delivery and send your total on WhatsApp. You can pay after that.";
 
   function goToState() {
     const el = document.getElementById("co-state");
@@ -121,7 +121,7 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
           )}
           {idRow}
           <p className="text-xs leading-relaxed text-forest/55">
-            Payee: {UPI_PAYEE_NAME}. {needsState ? "The amount to pay shows here once your state is chosen." : "Please pay only after we send the amount."}
+            Payee: {UPI_PAYEE_NAME}. {needsState ? "The amount to pay shows here once your state is chosen." : "You can pay as soon as we send the amount."}
           </p>
         </div>
       ) : (
