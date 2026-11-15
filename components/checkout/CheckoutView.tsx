@@ -42,7 +42,7 @@ import { cn } from "@/lib/cn";
 /**
  * /checkout/ — one column, in this order: how to deliver (Rapido, Courier, Others),
  * the details that option needs, the order, the UPI QR under the address, then
- * one button ("Order on WhatsApp") (PRODUCT-CATALOG-NOTES-2026-09-19 §7.3).
+ * one button ("Place order on WhatsApp") (PRODUCT-CATALOG-NOTES-2026-09-19 §7.3).
  * Feedback from Srikanth & Supriya: no long intro, delivery options first, QR
  * below the address, minimum scrolling on a phone.
  *
@@ -516,7 +516,7 @@ export function CheckoutView() {
             disabled={sending}
             className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] text-sm font-semibold text-white shadow-soft transition-transform duration-200 hover:scale-[1.02] disabled:opacity-60 disabled:hover:scale-100"
           >
-            <WhatsAppIcon width={20} height={20} /> {sending ? "Opening WhatsApp…" : "Order on WhatsApp"}
+            <WhatsAppIcon width={20} height={20} /> {sending ? "Opening WhatsApp…" : "Place order on WhatsApp"}
           </button>
           <p className="text-center text-xs leading-relaxed text-forest/55">
             {payment.method === "talk"
