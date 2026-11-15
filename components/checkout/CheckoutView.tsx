@@ -236,8 +236,8 @@ export function CheckoutView() {
     },
     {
       value: "later",
-      label: "Pay after we confirm on WhatsApp",
-      hint: "We confirm availability and your total first. Then you pay and send the screenshot.",
+      label: "Place order first and pay",
+      hint: "We confirm availability and your total on WhatsApp. Then you pay and send the screenshot.",
     },
     {
       value: "talk",
