@@ -46,25 +46,31 @@ export function PromoWheel({ variant }: { variant: "hero" | "floating" }) {
 
   const gear = (
     <div className="relative aspect-square w-full">
+      {/* Shadow on a still layer: on the turning svg it would turn with the gear. A light halo first, so the gear stands out on photos too. */}
+      <div
+        className="h-full w-full"
+        style={{ filter: "drop-shadow(0 0 1.5px rgba(255,255,255,0.95)) drop-shadow(0 5px 9px rgba(34,48,39,0.45))" }}
+      >
       <svg
         viewBox="0 0 100 100"
         aria-hidden="true"
-        className="sn-gear-turn h-full w-full drop-shadow-sm will-change-transform"
+        className="sn-gear-turn h-full w-full will-change-transform"
         style={{ "--gear-spin": `${PROMO_WHEEL.secondsPerTurn}s` } as React.CSSProperties}
       >
-        <path d={gearPath(PROMO_WHEEL.teeth)} className="fill-clay" />
-        <circle cx={CX} cy={CX} r="33" className="fill-forest" />
-        <circle cx={CX} cy={CX} r="29" className="fill-none stroke-cream/35" strokeWidth="0.8" strokeDasharray="1.5 2" />
+        <path d={gearPath(PROMO_WHEEL.teeth)} className="fill-[#E9A93A]" />
+        <circle cx={CX} cy={CX} r="33" className="fill-[#4F8A3C]" />
+        <circle cx={CX} cy={CX} r="29" className="fill-none stroke-white/45" strokeWidth="0.8" strokeDasharray="1.5 2" />
       </svg>
+      </div>
       {/* the words stay upright: they sit on a layer above the turning gear */}
-      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-cream">
+      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-white [text-shadow:0_1px_2px_rgba(34,48,39,0.45)]">
         <span className="font-serif text-[1.35em] font-semibold leading-none" style={{ fontSize: "clamp(1.2rem, 5.4vw, 1.9rem)" }}>
           +{PROMO_WHEEL.discountPct}%
         </span>
         <span className="mt-[0.2em] font-sans font-bold uppercase tracking-[0.12em]" style={{ fontSize: "clamp(0.45rem, 1.8vw, 0.65rem)" }}>
           Extra off
         </span>
-        <span className="mt-[0.15em] font-sans font-semibold uppercase tracking-[0.12em] text-cream/85" style={{ fontSize: "clamp(0.4rem, 1.6vw, 0.58rem)" }}>
+        <span className="mt-[0.15em] font-sans font-semibold uppercase tracking-[0.12em] text-white/90" style={{ fontSize: "clamp(0.4rem, 1.6vw, 0.58rem)" }}>
           on cart
         </span>
       </div>
