@@ -514,9 +514,9 @@ export function CheckoutView() {
           <button
             type="submit"
             disabled={sending}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] text-sm font-semibold text-white shadow-soft transition-transform duration-200 hover:scale-[1.02] disabled:opacity-60 disabled:hover:scale-100"
+            className="flex h-14 w-full items-center justify-center gap-2.5 rounded-full bg-[#25D366] text-2xl font-bold text-white shadow-soft transition-transform duration-200 hover:scale-[1.02] disabled:opacity-60 disabled:hover:scale-100"
           >
-            <WhatsAppIcon width={20} height={20} /> {sending ? "Opening WhatsApp…" : "Place Order"}
+            <WhatsAppIcon width={26} height={26} /> {sending ? "Opening WhatsApp…" : "Place Order"}
           </button>
           <p className="text-center text-xs leading-relaxed text-forest/55">
             {payment.method === "upi" && (
