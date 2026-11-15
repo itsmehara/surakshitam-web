@@ -58,13 +58,22 @@ export function PromoWheel({ variant }: { variant: "hero" | "floating" }) {
       </svg>
       {/* the words stay upright: they sit on a layer above the turning gear */}
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-cream">
-        <span className="font-serif text-[1.35em] font-semibold leading-none" style={{ fontSize: "clamp(1.3rem, 6vw, 2.1rem)" }}>
+        <span className="font-serif text-[1.35em] font-semibold leading-none" style={{ fontSize: "clamp(1.2rem, 5.4vw, 1.9rem)" }}>
           +{PROMO_WHEEL.discountPct}%
         </span>
         <span className="mt-[0.2em] font-sans font-bold uppercase tracking-[0.12em]" style={{ fontSize: "clamp(0.45rem, 1.8vw, 0.65rem)" }}>
           Extra off
         </span>
+        <span className="mt-[0.15em] font-sans font-semibold uppercase tracking-[0.12em] text-cream/85" style={{ fontSize: "clamp(0.4rem, 1.6vw, 0.58rem)" }}>
+          on cart
+        </span>
       </div>
+      {/* a small tilted gold tag on the top edge, in a different style from the gear so it is noticed */}
+      {PROMO_WHEEL.tag && (
+        <span className="pointer-events-none absolute -top-1 left-[46%] z-20 -translate-x-1/2 -rotate-6 whitespace-nowrap rounded-sm bg-[#FBE3A6] px-1.5 py-0.5 font-sans text-[0.55rem] font-bold uppercase leading-none tracking-wider text-forest shadow-soft ring-1 ring-forest/15 sm:text-[0.62rem]">
+          {PROMO_WHEEL.tag}
+        </span>
+      )}
     </div>
   );
 

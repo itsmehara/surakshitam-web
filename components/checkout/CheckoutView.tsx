@@ -176,11 +176,11 @@ export function CheckoutView() {
     // 2. Remember details for next time; hand the message to /order-sent/.
     saveCustomer(customer);
     clearDraft();
-    rememberSentOrder({ orderId, message, href, sheet: "pending", at: Date.now(), paid: payment.paid });
+    rememberSentOrder({ orderId, message, href, sheet: "pending", at: Date.now(), paid: payment.paid, cash: payment.method === "cash" });
 
     // 3. Save to the Orders tab — not awaited; the result lands in sessionStorage.
     void submitOrder({ orderId, lines, customer, note, payment, website }).then((r) => {
-      rememberSentOrder({ orderId, message, href, sheet: r.ok ? "ok" : "failed", at: Date.now(), paid: payment.paid });
+      rememberSentOrder({ orderId, message, href, sheet: r.ok ? "ok" : "failed", at: Date.now(), paid: payment.paid, cash: payment.method === "cash" });
     });
 
     // 4. Cart is cleared only once WhatsApp has been opened.
@@ -520,7 +520,11 @@ export function CheckoutView() {
             <WhatsAppIcon width={20} height={20} /> {sending ? "Opening WhatsApp…" : "Order on WhatsApp"}
           </button>
           <p className="text-center text-xs leading-relaxed text-forest/55">
-            No payment here. Pay on WhatsApp once we confirm, and send us the payment screenshot — we pack and deliver.
+            {payment.method === "cash"
+              ? "We confirm your order on WhatsApp, then pack and deliver. You pay in cash when it arrives."
+              : payment.method === "upi"
+                ? "We check your UPI payment and confirm on WhatsApp, then pack and deliver."
+                : "No payment here. Pay on WhatsApp once we confirm, and send us the payment screenshot — we pack and deliver."}
             <br />
             We use these details only to deliver your order.
           </p>

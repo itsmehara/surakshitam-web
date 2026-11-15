@@ -18,6 +18,8 @@ export const PROMO_WHEEL = {
   headline: "Extra 10% off your cart",
   detail: "Celebrate our launch: an extra 10% off your whole cart, on top of our launch prices. For a few days only.",
   caption: "Website launch offer",
+  /** Small gold tag on the top edge of the gear. Empty string hides it. */
+  tag: "Limited period",
   code: undefined as string | undefined,
   cta: { label: "Shop now", href: "/shop" },
   /** Number of teeth on the gear. */

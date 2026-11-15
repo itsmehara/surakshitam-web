@@ -437,6 +437,8 @@ export type SentOrder = {
   at: number;
   /** Customer ticked "already paid by UPI" at checkout. Optional, so an order stored before this field still reads. */
   paid?: boolean;
+  /** Customer chose Cash at checkout, so the order-sent page does not ask for a payment screenshot. Optional for the same reason. */
+  cash?: boolean;
 };
 
 const SENT_KEY = "sn-last-order";
