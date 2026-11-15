@@ -9,7 +9,7 @@ import type { CategorySlug } from "./types";
 export const site = {
   name: "Surakshitam Naturals",
   shortName: "Surakshitam",
-  tagline: "Homemade, plant-based care",
+  tagline: "Homemade, Plant-based care",
   description:
     "Homemade, plant-based home care, skin care and hair care from Hyderabad — herbal soaps, natural cleaners and hair care made with natural essential oils for everyday, sustainable living.",
   url: "https://www.surakshitamnaturals.com",

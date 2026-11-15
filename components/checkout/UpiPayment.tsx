@@ -110,7 +110,7 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
               <button
                 type="button"
                 onClick={copyId}
-                className="rounded-full border border-forest/20 px-3 py-0.5 text-xs font-medium text-forest hover:border-forest/40"
+                className="rounded-full bg-forest px-4 py-1.5 text-sm font-semibold text-cream shadow-sm transition-colors hover:bg-moss"
               >
                 {copied ? "Copied" : "Copy UPI ID"}
               </button>
