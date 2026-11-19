@@ -56,6 +56,58 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
     }
   }
 
+  /**
+   * "Save QR Code": draws a clean card (payee, amount, QR, UPI ID) to a canvas and saves it as a PNG.
+   * Phones with a share sheet get it (Save Image / Save to Photos, so the QR can be scanned from the gallery);
+   * everything else downloads the file. The amount is the cart total at this moment.
+   */
+  async function saveQr() {
+    try {
+      const qrUrl = await toDataURL(link, { errorCorrectionLevel: "M", margin: 1, width: 480, color: { dark: "#223027", light: "#FFFFFF" } });
+      const img = new window.Image();
+      img.src = qrUrl;
+      await img.decode();
+      const W = 560;
+      const H = 690;
+      const canvas = document.createElement("canvas");
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "#223027";
+      ctx.textAlign = "center";
+      ctx.font = "600 30px system-ui, -apple-system, Segoe UI, sans-serif";
+      ctx.fillText(UPI_PAYEE_NAME, W / 2, 52);
+      ctx.font = "700 44px system-ui, -apple-system, Segoe UI, sans-serif";
+      ctx.fillText(rupees(amount), W / 2, 112);
+      ctx.drawImage(img, 40, 140, 480, 480);
+      ctx.font = "500 24px system-ui, -apple-system, Segoe UI, sans-serif";
+      ctx.fillText(`UPI ID: ${UPI_ID}`, W / 2, 655);
+      const blob: Blob | null = await new Promise((res) => canvas.toBlob(res, "image/png"));
+      if (!blob) return;
+      const file = new File([blob], `Surakshitam-UPI-QR-Rs${amount}.png`, { type: "image/png" });
+      if (navigator.canShare?.({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: "Surakshitam Naturals UPI QR" });
+          return;
+        } catch (e) {
+          if (e instanceof DOMException && e.name === "AbortError") return; // customer closed the share sheet
+        }
+      }
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = file.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    } catch {
+      // Saving is a convenience: the QR and the UPI ID stay on the page.
+    }
+  }
+
   // The order ID is made after the first render, so wait for it.
   if (!orderId) return null;
 
@@ -147,7 +199,16 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
             </p>
             {breakdown && <p className="text-xs leading-relaxed text-forest/60">{breakdown}</p>}
             {idRow}
-            <p className="text-xs leading-relaxed text-forest/70">Scan the QR with any UPI app, or copy the UPI ID.</p>
+            {qr && (
+              <button
+                type="button"
+                onClick={saveQr}
+                className="rounded-full border border-forest/25 bg-white px-4 py-1.5 text-sm font-semibold text-forest transition-colors hover:border-forest/50"
+              >
+                Save QR Code
+              </button>
+            )}
+            <p className="text-xs leading-relaxed text-forest/70">Scan the QR with any UPI app, save it, or copy the UPI ID.</p>
             <p className="text-xs leading-relaxed text-forest/70">
               {delivery.status === "rapido" ? "The Rapido fare is not in this amount." : "The total includes delivery."}
             </p>
