@@ -25,6 +25,22 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
   const link = useMemo(() => upiPayLink(amount, `Order ${orderId}`), [amount, orderId]);
   const [qr, setQr] = useState("");
   const [copied, setCopied] = useState(false);
+  const [preview, setPreview] = useState("");
+  const [inApp, setInApp] = useState(false);
+  // True only on touch phones and tablets that have a share sheet that accepts image files.
+  const [canShareFiles, setCanShareFiles] = useState(false);
+
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    setInApp(/FBAN|FBAV|FB_IAB|Instagram|WhatsApp|Line\/|Snapchat|MicroMessenger|Twitter|; wv\)/i.test(ua));
+    try {
+      const touch = window.matchMedia("(pointer: coarse)").matches;
+      const probe = new File([""], "q.png", { type: "image/png" });
+      setCanShareFiles(touch && !!navigator.canShare?.({ files: [probe] }));
+    } catch {
+      setCanShareFiles(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!payable || !orderId) return;
@@ -57,52 +73,81 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
   }
 
   /**
-   * "Save QR Code": draws a clean card (payee, amount, QR, UPI ID) to a canvas and saves it as a PNG.
-   * Phones with a share sheet get it (Save Image / Save to Photos, so the QR can be scanned from the gallery);
-   * everything else downloads the file. The amount is the cart total at this moment.
+   * Saving the QR as a PNG. What each device can do (checked 19 Nov 2026):
+   * - Laptops and desktops: a normal download goes straight to the Downloads folder (share sheets there do not).
+   * - Android Chrome: a download goes to Downloads (and shows in Gallery); the share sheet can also save to Photos.
+   * - iPhone Safari: a download goes to Files > Downloads; the share sheet has Save Image (Photos).
+   * - In-app browsers (Instagram, Facebook, WhatsApp and similar): downloads are often blocked, so the image
+   *   is shown on the page and the customer presses and holds it to save it.
+   * Phones therefore get two buttons: "Save QR Code" (share sheet, Photos) and "Download Image" (Downloads).
    */
-  async function saveQr() {
+  async function makeQrFile(): Promise<File | null> {
+    const qrUrl = await toDataURL(link, { errorCorrectionLevel: "M", margin: 1, width: 480, color: { dark: "#223027", light: "#FFFFFF" } });
+    const img = new window.Image();
+    img.src = qrUrl;
+    await img.decode();
+    const W = 560;
+    const H = 690;
+    const canvas = document.createElement("canvas");
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#223027";
+    ctx.textAlign = "center";
+    ctx.font = "600 30px system-ui, -apple-system, Segoe UI, sans-serif";
+    ctx.fillText(UPI_PAYEE_NAME, W / 2, 52);
+    ctx.font = "700 44px system-ui, -apple-system, Segoe UI, sans-serif";
+    ctx.fillText(rupees(amount), W / 2, 112);
+    ctx.drawImage(img, 40, 140, 480, 480);
+    ctx.font = "500 24px system-ui, -apple-system, Segoe UI, sans-serif";
+    ctx.fillText(`UPI ID: ${UPI_ID}`, W / 2, 655);
+    const blob: Blob | null = await new Promise((res) => canvas.toBlob(res, "image/png"));
+    return blob ? new File([blob], `Surakshitam-UPI-QR-Rs${amount}.png`, { type: "image/png" }) : null;
+  }
+
+  function showPreview(file: File) {
+    setPreview((old) => {
+      if (old) URL.revokeObjectURL(old);
+      return URL.createObjectURL(file);
+    });
+  }
+
+  async function downloadQr() {
     try {
-      const qrUrl = await toDataURL(link, { errorCorrectionLevel: "M", margin: 1, width: 480, color: { dark: "#223027", light: "#FFFFFF" } });
-      const img = new window.Image();
-      img.src = qrUrl;
-      await img.decode();
-      const W = 560;
-      const H = 690;
-      const canvas = document.createElement("canvas");
-      canvas.width = W;
-      canvas.height = H;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      ctx.fillStyle = "#FFFFFF";
-      ctx.fillRect(0, 0, W, H);
-      ctx.fillStyle = "#223027";
-      ctx.textAlign = "center";
-      ctx.font = "600 30px system-ui, -apple-system, Segoe UI, sans-serif";
-      ctx.fillText(UPI_PAYEE_NAME, W / 2, 52);
-      ctx.font = "700 44px system-ui, -apple-system, Segoe UI, sans-serif";
-      ctx.fillText(rupees(amount), W / 2, 112);
-      ctx.drawImage(img, 40, 140, 480, 480);
-      ctx.font = "500 24px system-ui, -apple-system, Segoe UI, sans-serif";
-      ctx.fillText(`UPI ID: ${UPI_ID}`, W / 2, 655);
-      const blob: Blob | null = await new Promise((res) => canvas.toBlob(res, "image/png"));
-      if (!blob) return;
-      const file = new File([blob], `Surakshitam-UPI-QR-Rs${amount}.png`, { type: "image/png" });
-      if (navigator.canShare?.({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], title: "Surakshitam Naturals UPI QR" });
-          return;
-        } catch (e) {
-          if (e instanceof DOMException && e.name === "AbortError") return; // customer closed the share sheet
-        }
+      const file = await makeQrFile();
+      if (!file) return;
+      // In-app browsers and very old iPhones ignore downloads, so show the image to press and hold.
+      if (inApp || !("download" in HTMLAnchorElement.prototype)) {
+        showPreview(file);
+        return;
       }
       const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
+      a.href = URL.createObjectURL(file);
       a.download = file.name;
       document.body.appendChild(a);
       a.click();
       a.remove();
       window.setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    } catch {
+      // Saving is a convenience: the QR and the UPI ID stay on the page.
+    }
+  }
+
+  async function saveQr() {
+    // Laptops, desktops, and phones with no share sheet: a plain download.
+    if (!canShareFiles) return downloadQr();
+    try {
+      const file = await makeQrFile();
+      if (!file) return;
+      try {
+        await navigator.share({ files: [file], title: "Surakshitam Naturals UPI QR" });
+      } catch (e) {
+        if (e instanceof DOMException && e.name === "AbortError") return; // customer closed the share sheet
+        showPreview(file); // the share sheet failed: show the image to press and hold
+      }
     } catch {
       // Saving is a convenience: the QR and the UPI ID stay on the page.
     }
@@ -200,13 +245,31 @@ export function UpiPayment({ charges, orderId }: { charges: OrderCharges; orderI
             {breakdown && <p className="text-xs leading-relaxed text-forest/60">{breakdown}</p>}
             {idRow}
             {qr && (
-              <button
-                type="button"
-                onClick={saveQr}
-                className="rounded-full border border-forest/25 bg-white px-4 py-1.5 text-sm font-semibold text-forest transition-colors hover:border-forest/50"
-              >
-                Save QR Code
-              </button>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={saveQr}
+                  className="rounded-full border border-forest/25 bg-white px-4 py-1.5 text-sm font-semibold text-forest transition-colors hover:border-forest/50"
+                >
+                  Save QR Code
+                </button>
+                {canShareFiles && (
+                  <button
+                    type="button"
+                    onClick={downloadQr}
+                    className="rounded-full border border-forest/25 bg-white px-4 py-1.5 text-sm font-semibold text-forest transition-colors hover:border-forest/50"
+                  >
+                    Download Image
+                  </button>
+                )}
+              </div>
+            )}
+            {preview && (
+              <div className="rounded-lg border border-forest/15 bg-white p-2 text-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={preview} alt="UPI QR code with the amount" className="mx-auto h-auto w-full max-w-[220px]" />
+                <p className="mt-1 text-xs leading-relaxed text-forest/70">Press and hold the image, then choose Save Image. Or copy the UPI ID.</p>
+              </div>
             )}
             <p className="text-xs leading-relaxed text-forest/70">Scan the QR with any UPI app, save it, or copy the UPI ID.</p>
             <p className="text-xs leading-relaxed text-forest/70">
