@@ -13,6 +13,7 @@ import { payPrice } from "@/lib/catalog";
 import { PROMO_WHEEL } from "@/lib/promo-wheel";
 import { ENQUIRY_URL } from "@/lib/enquiry";
 import { gaEvent } from "@/lib/analytics";
+import { UPI_ID } from "@/lib/upi";
 import { isIndianPincode, isIndianState } from "@/lib/india";
 import { FREE_DELIVERY_OVER, OTHER_DELIVERY_PHONE, checkoutDelivery, deliveryAdded, deliveryMethodOf, formatWeight, type Delivery, type DeliveryMethod } from "@/lib/delivery";
 
@@ -123,6 +124,13 @@ export function formatTotal(c: OrderCharges): string {
   const amount = c.total == null ? `${rupees(c.payable)} + delivery` : rupees(c.total);
   const rider = c.delivery.status === "rapido" ? " + Rapido fare (paid to the rider)" : "";
   return `Total: ${amount}${rider}${c.hasPriceOnRequest ? " + items priced on request" : ""}`;
+}
+
+/** A separate block in the WhatsApp message: the amount to pay and our UPI ID, for both payment options. */
+export function formatPaymentDetails(c: OrderCharges): string {
+  const amount = c.total == null ? `${rupees(c.payable)} + delivery` : rupees(c.total);
+  const extra = c.hasPriceOnRequest ? " + items priced on request" : "";
+  return `Payment details:\nAmount to pay: ${amount}${extra}\nUPI ID: ${UPI_ID}`;
 }
 
 // ---------- customer details ----------
@@ -340,6 +348,7 @@ export function orderMessage(
     `\n${formatDelivery(charges.delivery)}` +
     `\n${formatTotal(charges)}` +
     `\n${formatPayment(payment)}` +
+    `\n\n${formatPaymentDetails(charges)}` +
     (trimmed ? `\n\nNote: ${trimmed}` : "") +
     `\n\nDeliver to:\n${formatDeliverTo(customer)}`
   );
