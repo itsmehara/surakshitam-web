@@ -1,5 +1,13 @@
 # Surakshitam Naturals — Project Handoff & State
 
+## 16 November 2026 — V4 publicity baseline
+
+V4 WhatsApp ordering has been live since 2 October 2026. Supriya and Srikanth plan to start publicising it on 16 November 2026 (IST). Source reviewed at `96b4d80`. Checkout has **Pay Now by UPI** (default and Suggested) and **Place Order First, and Talk to Us on WhatsApp**, followed by **Place Order**. UTR is optional, and bank verification is manual. The live launch offer takes another 10% off pack selling prices; the courier waiver uses the cart value before that discount and applies strictly above ₹2,000. The live Terms, Refunds and Shipping pages are published. Earlier dated snapshots below record the sequence of changes.
+
+**19 Nov 2026, payment details and Save QR (tag `payment-details-and-save-qr`):** the order message has a separate "Payment details" block (amount and UPI ID, both choices; `formatPaymentDetails` in `lib/order.ts`), and the Pay by UPI box has a "Save QR Code" button (`saveQr` in `components/checkout/UpiPayment.tsx`: PNG with payee, amount, QR and UPI ID; share sheet where available, else download). The "Suggested" tag is on Pay Now by UPI. `PayMethod` is `"upi" | "later"`; the old `"talk"` value and flag are gone. No tap-to-pay link (see 12 Nov). UPI caps a QR scanned from the gallery at ₹2,000. Open: real phone check of the message block, share sheet and in-app browsers.
+
+See the private workspace launch record for the live check, Sheet verification, checkout risks and the small catalog follow-up.
+
 Single source of truth for continuing this project in a fresh chat. Read this first; you rarely
 need to re-read the whole codebase. Complements `../surakshitam-docs/docs/`
 (`ARCHITECTURE.md`, `ADMIN_WORKFLOWS.md`, `ROADMAP.md`, `COMPLIANCE.md`).
