@@ -1,5 +1,7 @@
 # Surakshitam Naturals
 
+> **Live V4 baseline.** The `v4-whatsapp-orders` branch builds to static files on GitHub Pages. The storefront has a cart and guest checkout with WhatsApp order handoff, an Apps Script order copy and manual UPI reconciliation. It has been live since 2 October 2026. Founders plan to begin publicity on 16 November 2026. See [the handoff](HANDOFF.md). The prototype overview further down applies to the earlier storefront.
+
 A premium, natural home-care and personal-care e-commerce storefront for **Surakshitam Naturals**,
 founded by Srikanth and Supriya (Hyderabad). This is a **high-fidelity, fully clickable
 prototype**: every customer and admin flow works end-to-end, but persistence is browser
